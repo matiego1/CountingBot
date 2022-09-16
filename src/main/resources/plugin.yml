@@ -1,0 +1,5 @@
+name: Counting
+version: '${project.version}'
+main: me.matiego.counting.counting.Main
+api-version: 1.19
+author: Matiego
