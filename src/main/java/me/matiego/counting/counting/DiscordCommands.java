@@ -89,10 +89,6 @@ public class DiscordCommands extends ListenerAdapter {
         } else if (event.getName().equals("dictionary")) {
             event.deferReply(true).queue();
             InteractionHook hook = event.getHook();
-            if (!event.getOption("admin-key", "null", OptionMapping::getAsString).equalsIgnoreCase(plugin.getConfig().getString("admin-key"))) {
-                hook.sendMessage("Incorrect administrator key!").queue();
-                return;
-            }
             String typeString = event.getOption("language", "null", OptionMapping::getAsString).toUpperCase();
             Dictionary.Type type = Arrays.stream(Dictionary.Type.values())
                     .filter(value -> value.toString().equals(typeString))
@@ -118,12 +114,18 @@ public class DiscordCommands extends ListenerAdapter {
                             hook.sendMessage("An error occurred. Try again.").queue();
                         }
                     }
-                    case "load" -> hook.sendMessage(
-                            switch (plugin.getDictionary().loadDictionaryFromFile(new File(plugin.getDataFolder() + File.separator + event.getOption("file", "null", OptionMapping::getAsString)), type)) {
-                                case SUCCESS -> "Success!";
-                                case NO_CHANGES -> "This file does not exist.";
-                                case FAILURE -> "An error occurred.";
-                            }).queue();
+                    case "load" -> {
+                        if (!event.getOption("admin-key", "null", OptionMapping::getAsString).equalsIgnoreCase(plugin.getConfig().getString("admin-key"))) {
+                            hook.sendMessage("Incorrect administrator key!").queue();
+                            return;
+                        }
+                        hook.sendMessage(
+                                switch (plugin.getDictionary().loadDictionaryFromFile(new File(plugin.getDataFolder() + File.separator + event.getOption("file", "null", OptionMapping::getAsString)), type)) {
+                                    case SUCCESS -> "Success!";
+                                    case NO_CHANGES -> "This file does not exist.";
+                                    case FAILURE -> "An error occurred.";
+                                }).queue();
+                    }
                 }
             });
         }

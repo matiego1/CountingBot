@@ -126,11 +126,9 @@ public final class Main extends JavaPlugin {
                             .addSubcommands(
                                     new SubcommandData("add", "Adds a word to the dictionary")
                                             .addOption(OptionType.STRING, "language", "The dictionary's type", true)
-                                            .addOption(OptionType.STRING, "admin-key", "The secret administrator key", true)
                                             .addOption(OptionType.STRING, "word", "A word to add", true),
                                     new SubcommandData("remove", "Removes a word from the dictionary")
                                             .addOption(OptionType.STRING, "language", "The dictionary's type", true)
-                                            .addOption(OptionType.STRING, "admin-key", "The secret administrator key", true)
                                             .addOption(OptionType.STRING, "word", "A word to remove", true),
                                     new SubcommandData("load", "Loads a file into the dictionary")
                                             .addOption(OptionType.STRING, "language", "The dictionary type", true)
