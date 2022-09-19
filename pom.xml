@@ -6,13 +6,13 @@
 
     <groupId>me.matiego.counting</groupId>
     <artifactId>counting</artifactId>
-    <version>1.0.0-alpha</version>
+    <version>1.0.0</version>
     <packaging>jar</packaging>
 
     <name>Counting</name>
 
     <properties>
-        <java.version>1.8</java.version>
+        <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -53,22 +53,57 @@
     </build>
 
     <repositories>
+        <!--PaperMC API-->
         <repository>
             <id>papermc-repo</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
+        <!--JDA-->
         <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
+            <id>dv8tion</id>
+            <name>m2-dv8tion</name>
+            <url>https://m2.dv8tion.net/releases</url>
         </repository>
     </repositories>
 
     <dependencies>
+        <!--PaperMC API-->
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
             <version>1.19.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <!--JDA-->
+        <dependency>
+            <groupId>net.dv8tion</groupId>
+            <artifactId>JDA</artifactId>
+            <version>5.0.0-alpha.18</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>club.minnced</groupId>
+                    <artifactId>opus-java</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!--Discord's webhooks-->
+        <dependency>
+            <groupId>club.minnced</groupId>
+            <artifactId>discord-webhooks</artifactId>
+            <version>0.8.2</version>
+            <scope>compile</scope>
+        </dependency>
+        <!--DNS for JdaBuilderUtils class-->
+        <dependency>
+            <groupId>org.minidns</groupId>
+            <artifactId>minidns-hla</artifactId>
+            <version>1.0.4</version>
+        </dependency>
+        <!--MySQL-->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>5.0.1</version>
         </dependency>
     </dependencies>
 </project>
