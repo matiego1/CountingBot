@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class DiscordCommands extends ListenerAdapter {
-    //TODO: permissions
     public DiscordCommands(@NotNull Main plugin) {
         this.plugin = plugin;
     }

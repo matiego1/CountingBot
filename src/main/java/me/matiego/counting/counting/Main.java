@@ -27,6 +27,11 @@ import java.util.concurrent.*;
 
 public final class Main extends JavaPlugin {
 
+    //TODO: permissions
+    //TODO: slow mode
+    //TODO: removing nonexistent channels
+    //TODO: auto-complete for dictionary language
+
     public Main() {
         instance = this;
     }
