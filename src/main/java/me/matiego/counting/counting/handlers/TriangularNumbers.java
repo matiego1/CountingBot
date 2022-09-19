@@ -31,7 +31,7 @@ public class TriangularNumbers implements IChannelHandler {
     }
 
     private int getNext(int a) {
-        int n = (int) ((-1 - Math.sqrt(8 * a + 1)) / 2) + 1;
+        int n = (int) ((-1 + Math.sqrt(8 * a + 1)) / 2) + 1;
         return n * (n + 1) / 2;
     }
 }
