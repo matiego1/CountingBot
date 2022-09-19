@@ -38,11 +38,11 @@ public class LucasNumbers implements IChannelHandler {
         try {
             b = new BigInteger(history.get(1).getContentDisplay());
         } catch (NumberFormatException ignored) {}
-        if (a == null) {
-            return message.getContentDisplay().equals("2") ? "2" : null;
-        }
         if (b == null) {
             return message.getContentDisplay().equals("2") ? "2" : null;
+        }
+        if (a == null) {
+            return message.getContentDisplay().equals("1") ? "1" : null;
         }
         try {
             c = new BigInteger(message.getContentDisplay());
