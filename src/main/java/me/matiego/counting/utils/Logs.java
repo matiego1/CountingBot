@@ -1,6 +1,6 @@
-package me.matiego.counting.counting.utils;
+package me.matiego.counting.utils;
 
-import me.matiego.counting.counting.Main;
+import me.matiego.counting.Main;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;

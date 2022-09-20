@@ -1,9 +1,9 @@
-package me.matiego.counting.counting.handlers;
+package me.matiego.counting.handlers;
 
-import me.matiego.counting.counting.Dictionary;
-import me.matiego.counting.counting.Main;
-import me.matiego.counting.counting.utils.IChannelHandler;
-import me.matiego.counting.counting.utils.Utils;
+import me.matiego.counting.Dictionary;
+import me.matiego.counting.Main;
+import me.matiego.counting.utils.IChannelHandler;
+import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
@@ -11,10 +11,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class SpanishLastLetter implements IChannelHandler {
+public class PolishLastLetter implements IChannelHandler {
 
-    private final List<String> ALPHABET = List.of("a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,é,ü,ú,í,ó,á,ç,ñ".split(","));
-    private final List<String> NOT_AT_END = List.of("é,ü,ú,í,ó,á,ç,ñ".split(","));
+    private final List<String> ALPHABET = List.of("a,ą,b,c,ć,d,e,ę,f,g,h,i,j,k,l,ł,m,n,ń,o,ó,p,q,r,s,ś,t,u,v,w,x,y,z,ź,ż".split(","));
 
     /**
      * Checks if the sent message is correct.
@@ -39,8 +38,9 @@ public class SpanishLastLetter implements IChannelHandler {
             Utils.sendPrivateMessage(user, "**Oops!** Your message is too short.");
             return null;
         }
-        if (NOT_AT_END.contains(String.valueOf(msgContent.charAt(msgContent.length() - 1)))) {
-            Utils.sendPrivateMessage(user, "**Oops!** Your message cannot end with one of the following characters: " + String.join(", ", NOT_AT_END));
+        char lastChar = msgContent.charAt(msgContent.length() - 1);
+        if (lastChar == 'ą' || lastChar == 'ę' || lastChar == 'ń') {
+            Utils.sendPrivateMessage(user, "**Oops!** Your message cannot end with one of the following characters: ą, ę, ń");
             return null;
         }
         for (int i = 0; i < msgContent.length(); i++) {
@@ -51,7 +51,7 @@ public class SpanishLastLetter implements IChannelHandler {
         }
 
         boolean success = false;
-        switch (Main.getInstance().getDictionary().useWord(Dictionary.Type.SPANISH, msgContent)) {
+        switch (Main.getInstance().getDictionary().useWord(Dictionary.Type.POLISH, msgContent)) {
             case SUCCESS -> success = true;
             case NO_CHANGES -> Utils.sendPrivateMessage(user, "**Oops!** This word does not exists in the dictionary or has already been used!");
             case FAILURE -> Utils.sendPrivateMessage(user, "**Oops!** An error occurred while loading dictionary. Try again.");

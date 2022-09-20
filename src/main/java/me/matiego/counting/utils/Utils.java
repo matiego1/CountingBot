@@ -1,10 +1,10 @@
-package me.matiego.counting.counting.utils;
+package me.matiego.counting.utils;
 
 import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
-import me.matiego.counting.counting.Main;
+import me.matiego.counting.Main;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;

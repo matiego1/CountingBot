@@ -1,8 +1,8 @@
-package me.matiego.counting.counting;
+package me.matiego.counting;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import me.matiego.counting.counting.utils.Logs;
+import me.matiego.counting.utils.Logs;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;

@@ -1,9 +1,9 @@
-package me.matiego.counting.counting.handlers;
+package me.matiego.counting.handlers;
 
-import me.matiego.counting.counting.Dictionary;
-import me.matiego.counting.counting.Main;
-import me.matiego.counting.counting.utils.IChannelHandler;
-import me.matiego.counting.counting.utils.Utils;
+import me.matiego.counting.Dictionary;
+import me.matiego.counting.Main;
+import me.matiego.counting.utils.IChannelHandler;
+import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +11,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class EnglishLastLetter implements IChannelHandler {
+public class SpanishLastLetter implements IChannelHandler {
+
+    private final List<String> ALPHABET = List.of("a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z,é,ü,ú,í,ó,á,ç,ñ".split(","));
+    private final List<String> NOT_AT_END = List.of("é,ü,ú,í,ó,á,ç,ñ".split(","));
+
     /**
      * Checks if the sent message is correct.
      *
@@ -35,15 +39,19 @@ public class EnglishLastLetter implements IChannelHandler {
             Utils.sendPrivateMessage(user, "**Oops!** Your message is too short.");
             return null;
         }
+        if (NOT_AT_END.contains(String.valueOf(msgContent.charAt(msgContent.length() - 1)))) {
+            Utils.sendPrivateMessage(user, "**Oops!** Your message cannot end with one of the following characters: " + String.join(", ", NOT_AT_END));
+            return null;
+        }
         for (int i = 0; i < msgContent.length(); i++) {
-            if ((int) 'a' > msgContent.charAt(i) || (int) 'z' < msgContent.charAt(i)) {
+            if (!ALPHABET.contains(String.valueOf(msgContent.charAt(i)))) {
                 Utils.sendPrivateMessage(user, "**Oops!** Your message contains illegal character: `" + msgContent.charAt(i) + "`");
                 return null;
             }
         }
 
         boolean success = false;
-        switch (Main.getInstance().getDictionary().useWord(Dictionary.Type.ENGLISH, msgContent)) {
+        switch (Main.getInstance().getDictionary().useWord(Dictionary.Type.SPANISH, msgContent)) {
             case SUCCESS -> success = true;
             case NO_CHANGES -> Utils.sendPrivateMessage(user, "**Oops!** This word does not exists in the dictionary or has already been used!");
             case FAILURE -> Utils.sendPrivateMessage(user, "**Oops!** An error occurred while loading dictionary. Try again.");

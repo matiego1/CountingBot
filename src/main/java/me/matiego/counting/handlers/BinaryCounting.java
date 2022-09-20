@@ -1,13 +1,13 @@
-package me.matiego.counting.counting.handlers;
+package me.matiego.counting.handlers;
 
-import me.matiego.counting.counting.utils.IChannelHandler;
+import me.matiego.counting.utils.IChannelHandler;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class TriangularNumbers implements IChannelHandler {
+public class BinaryCounting implements IChannelHandler {
     /**
      * Checks if the sent message is correct.
      *
@@ -20,18 +20,13 @@ public class TriangularNumbers implements IChannelHandler {
         if (history.isEmpty()) return message.getContentDisplay().equals("1") ? "1" : null;
         int a, b = -1;
         try {
-            a = Integer.parseInt(history.get(0).getContentDisplay());
+            a = Integer.parseInt(history.get(0).getContentDisplay(), 2);
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }
         try {
-            b = Integer.parseInt(message.getContentDisplay());
+            b = Integer.parseInt(message.getContentDisplay(), 2);
         } catch (NumberFormatException ignored) {}
-        return getNext(a) == b ? String.valueOf(b) : null;
-    }
-
-    private int getNext(int a) {
-        int n = (int) ((-1 + Math.sqrt(8 * a + 1)) / 2) + 1;
-        return n * (n + 1) / 2;
+        return a + 1 == b ? Integer.toBinaryString(b) : null;
     }
 }

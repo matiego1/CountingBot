@@ -1,11 +1,11 @@
-package me.matiego.counting.counting;
+package me.matiego.counting;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
-import me.matiego.counting.counting.utils.Logs;
-import me.matiego.counting.counting.utils.Primes;
-import me.matiego.counting.counting.utils.Utils;
+import me.matiego.counting.utils.Logs;
+import me.matiego.counting.utils.Primes;
+import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;

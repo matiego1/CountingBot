@@ -1,7 +1,7 @@
-package me.matiego.counting.counting;
+package me.matiego.counting;
 
-import me.matiego.counting.counting.utils.Pair;
-import me.matiego.counting.counting.utils.Utils;
+import me.matiego.counting.utils.Pair;
+import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.GuildChannel;

@@ -1,7 +1,7 @@
-package me.matiego.counting.counting;
+package me.matiego.counting;
 
-import me.matiego.counting.counting.utils.Logs;
-import me.matiego.counting.counting.utils.Response;
+import me.matiego.counting.utils.Logs;
+import me.matiego.counting.utils.Response;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;

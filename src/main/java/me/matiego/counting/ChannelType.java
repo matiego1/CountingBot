@@ -1,7 +1,7 @@
-package me.matiego.counting.counting;
+package me.matiego.counting;
 
-import me.matiego.counting.counting.handlers.*;
-import me.matiego.counting.counting.utils.IChannelHandler;
+import me.matiego.counting.handlers.*;
+import me.matiego.counting.utils.IChannelHandler;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;

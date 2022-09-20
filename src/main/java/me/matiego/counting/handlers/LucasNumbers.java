@@ -1,6 +1,6 @@
-package me.matiego.counting.counting.handlers;
+package me.matiego.counting.handlers;
 
-import me.matiego.counting.counting.utils.IChannelHandler;
+import me.matiego.counting.utils.IChannelHandler;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Range;
 import java.math.BigInteger;
 import java.util.List;
 
-public class FibonacciSequence implements IChannelHandler {
+public class LucasNumbers implements IChannelHandler {
     /**
      * Returns the amount of messages retrieved from the channel history.
      *
@@ -29,16 +29,19 @@ public class FibonacciSequence implements IChannelHandler {
      */
     @Override
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
-        if (history.isEmpty()) return message.getContentDisplay().equals("1") ? "1" : null;
+        if (history.isEmpty()) return message.getContentDisplay().equals("2") ? "2" : null;
         if (history.size() == 1) return message.getContentDisplay().equals("1") ? "1" : null;
         BigInteger a = null, b = null, c = new BigInteger("-1");
         try {
-            a = new BigInteger(history.get(1).getContentDisplay());
+            a = new BigInteger(history.get(0).getContentDisplay());
         } catch (NumberFormatException ignored) {}
         try {
-            b = new BigInteger(history.get(0).getContentDisplay());
+            b = new BigInteger(history.get(1).getContentDisplay());
         } catch (NumberFormatException ignored) {}
-        if (a == null || b == null) {
+        if (b == null) {
+            return message.getContentDisplay().equals("2") ? "2" : null;
+        }
+        if (a == null) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }
         try {

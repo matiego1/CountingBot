@@ -1,9 +1,9 @@
-package me.matiego.counting.counting;
+package me.matiego.counting;
 
-import me.matiego.counting.counting.utils.IChannelHandler;
-import me.matiego.counting.counting.utils.Logs;
-import me.matiego.counting.counting.utils.Pair;
-import me.matiego.counting.counting.utils.Utils;
+import me.matiego.counting.utils.IChannelHandler;
+import me.matiego.counting.utils.Logs;
+import me.matiego.counting.utils.Pair;
+import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;

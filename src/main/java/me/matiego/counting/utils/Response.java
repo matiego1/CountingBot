@@ -1,4 +1,4 @@
-package me.matiego.counting.counting.utils;
+package me.matiego.counting.utils;
 
 public enum Response {
     SUCCESS,
