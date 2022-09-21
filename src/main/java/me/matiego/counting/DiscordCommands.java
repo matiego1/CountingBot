@@ -114,7 +114,7 @@ public class DiscordCommands extends ListenerAdapter {
                         }
                     }
                     case "load" -> {
-                        if (!event.getOption("admin-key", "null", OptionMapping::getAsString).equalsIgnoreCase(plugin.getConfig().getString("admin-key"))) {
+                        if (!event.getOption("admin-key", "", OptionMapping::getAsString).equalsIgnoreCase(plugin.getConfig().getString("admin-key"))) {
                             hook.sendMessage("Incorrect administrator key!\nThe admin-key can be found in the configuration file. This is to prevent uploading random files by people who do not have access to them.").queue();
                             return;
                         }
