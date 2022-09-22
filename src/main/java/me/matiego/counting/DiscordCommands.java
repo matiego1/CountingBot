@@ -177,7 +177,6 @@ public class DiscordCommands extends ListenerAdapter {
         event.editSelectMenu(event.getSelectMenu().asDisabled()).queue();
     }
 
-    //TODO: doesn't work
     @Override
     public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
         System.out.println("1" + event.getName() + event.getFocusedOption().getName());

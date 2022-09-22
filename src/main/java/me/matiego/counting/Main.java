@@ -25,10 +25,6 @@ import java.util.concurrent.*;
 
 public final class Main extends JavaPlugin {
 
-    //TODO: permissions
-    //TODO: slow mode
-    //TODO: auto-complete for dictionary language
-
     public Main() {
         instance = this;
     }
@@ -128,13 +124,13 @@ public final class Main extends JavaPlugin {
                             .setGuildOnly(true)
                             .addSubcommands(
                                     new SubcommandData("add", "Adds a word to the dictionary")
-                                            .addOption(OptionType.STRING, "language", "The dictionary's type", true)
+                                            .addOption(OptionType.STRING, "language", "The dictionary's type", true, true)
                                             .addOption(OptionType.STRING, "word", "A word to add", true),
                                     new SubcommandData("remove", "Removes a word from the dictionary")
-                                            .addOption(OptionType.STRING, "language", "The dictionary's type", true)
+                                            .addOption(OptionType.STRING, "language", "The dictionary's type", true, true)
                                             .addOption(OptionType.STRING, "word", "A word to remove", true),
                                     new SubcommandData("load", "Loads a file into the dictionary")
-                                            .addOption(OptionType.STRING, "language", "The dictionary type", true)
+                                            .addOption(OptionType.STRING, "language", "The dictionary type", true, true)
                                             .addOption(OptionType.STRING, "admin-key", "The secret administrator key", true)
                                             .addOption(OptionType.STRING, "file", "The dictionary file", true)
                             )
