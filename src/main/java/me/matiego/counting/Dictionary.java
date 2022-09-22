@@ -25,6 +25,14 @@ public class Dictionary {
             Logs.error("An error occurred while loading the dictionary (" + type.toString().toLowerCase() + ").", e);
             return Response.FAILURE;
         }
+        //TODO: check if necessary & if works on the hosting
+        try (Connection conn = Main.getInstance().getMySQLConnection();
+             PreparedStatement stmt = conn.prepareStatement("SET GLOBAL local_infile=1")) {
+            stmt.execute();
+        } catch (SQLException e) {
+            Logs.error("An error occurred while loading the dictionary (" + type.toString().toLowerCase() + ").", e);
+            return Response.FAILURE;
+        }
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("LOAD DATA LOCAL INFILE ? REPLACE INTO TABLE counting_" + type.toString().toLowerCase() + "  COLUMNS TERMINATED BY ','")) {
             stmt.setString(1, file.getAbsolutePath());
