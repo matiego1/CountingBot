@@ -25,6 +25,9 @@ import java.util.concurrent.*;
 
 public final class Main extends JavaPlugin {
 
+    //TODO: translation file
+    //TODO: Logs to Discord
+
     public Main() {
         instance = this;
     }

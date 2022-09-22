@@ -42,7 +42,7 @@ public class MessageHandler extends ListenerAdapter {
             if (correctMsg == null) return;
 
             if (!Utils.sendWebhook(pair.getSecond(), Utils.getAvatar(user, member), Utils.getName(user, member), correctMsg)) {
-                Utils.sendPrivateMessage(user, "**Oops!** An error occurred while sending your message. Please try again later.");
+                Utils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());
             }
             if (System.currentTimeMillis() - time >= 1000) {
                 Logs.warning("The message verification time exceeded 1s. Channel: " + event.getChannel().getName() + "; ID: " + event.getChannel().getId());

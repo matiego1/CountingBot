@@ -2,6 +2,7 @@ package me.matiego.counting.handlers;
 
 import me.matiego.counting.Dictionary;
 import me.matiego.counting.Main;
+import me.matiego.counting.Translation;
 import me.matiego.counting.utils.IChannelHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.entities.Message;
@@ -30,12 +31,12 @@ public class GermanLastLetter implements IChannelHandler {
         if (!history.isEmpty()) {
             String lastContent = history.get(0).getContentDisplay().toLowerCase();
             if (lastContent.charAt(lastContent.length() - 1) != msgContent.charAt(0)) {
-                Utils.sendPrivateMessage(user, "**Oops!** Your message does not start with the last character of the previous message.");
+                Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__INCORRECT_START_CHAR.toString());
                 return null;
             }
         }
         if (msgContent.length() <= 3) {
-            Utils.sendPrivateMessage(user, "**Oops!** Your message is too short.");
+            Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__TOO_SHORT.toString());
             return null;
         }
         if (msgContent.charAt(msgContent.length() - 1) == 'ß') {
@@ -44,7 +45,7 @@ public class GermanLastLetter implements IChannelHandler {
         }
         for (int i = 0; i < msgContent.length(); i++) {
             if (!ALPHABET.contains(String.valueOf(msgContent.charAt(i)))) {
-                Utils.sendPrivateMessage(user, "**Oops!** Your message contains illegal character: `" + msgContent.charAt(i) + "`");
+                Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__ILLEGAL_END_CHAR.getFormatted("ß"));
                 return null;
             }
         }
@@ -52,8 +53,8 @@ public class GermanLastLetter implements IChannelHandler {
         boolean success = false;
         switch (Main.getInstance().getDictionary().useWord(Dictionary.Type.GERMAN, msgContent)) {
             case SUCCESS -> success = true;
-            case NO_CHANGES -> Utils.sendPrivateMessage(user, "**Oops!** This word does not exists in the dictionary or has already been used!");
-            case FAILURE -> Utils.sendPrivateMessage(user, "**Oops!** An error occurred while loading dictionary. Try again.");
+            case NO_CHANGES -> Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__INCORRECT_WORD.toString());
+            case FAILURE -> Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__FAILURE.toString());
         }
         return success ? msgContent : null;
     }

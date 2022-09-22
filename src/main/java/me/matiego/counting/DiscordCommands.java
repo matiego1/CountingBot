@@ -42,12 +42,12 @@ public class DiscordCommands extends ListenerAdapter {
             InteractionHook hook = event.getHook();
             Utils.async(() -> {
                 if (event.getChannel().getType() != net.dv8tion.jda.api.entities.ChannelType.TEXT) {
-                    hook.sendMessage("This channel's type is not supported.").queue();
+                    hook.sendMessage(Translation.GENERAL__UNSUPPORTED_CHANNEL_TYPE.toString()).queue();
                     return;
                 }
                 switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
                     case "add" ->
-                            hook.sendMessage("**__Select the type of the new counting channel:__**")
+                            hook.sendMessage(Translation.COMMANDS__COUNTING__ADD.toString())
                                     .addActionRow(
                                             SelectMenu.create("counting-type")
                                                     .addOptions(ChannelType.getSelectMenuOptions())
@@ -57,20 +57,20 @@ public class DiscordCommands extends ListenerAdapter {
                     case "remove" -> {
                         switch (plugin.getStorage().removeChannel(event.getChannel().getIdLong())) {
                             case SUCCESS -> {
-                                hook.sendMessage("The channel has been successfully closed!").queue();
+                                hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__SUCCESS.toString()).queue();
                                 EmbedBuilder eb = new EmbedBuilder();
-                                eb.setTitle("Counting channel closed!");
+                                eb.setTitle(Translation.GENERAL__CLOSE_EMBED.toString());
                                 eb.setColor(Color.RED);
                                 eb.setTimestamp(Instant.now());
                                 eb.setFooter(Utils.getName(event.getUser(), event.getMember()) + "#" + event.getUser().getDiscriminator(), Utils.getAvatar(event.getUser(), event.getMember()));
                                 event.getChannel().sendMessageEmbeds(eb.build()).queue();
                             }
-                            case NO_CHANGES -> hook.sendMessage("This channel has been already closed.").queue();
-                            case FAILURE -> hook.sendMessage("An error occurred. Try again.").queue();
+                            case NO_CHANGES -> hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__NO_CHANGES.toString()).queue();
+                            case FAILURE -> hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__FAILURE.toString()).queue();
                         }
                     }
                     case "list" -> {
-                        StringBuilder msg = new StringBuilder("**__Open Counting Channels:__**\n");
+                        StringBuilder msg = new StringBuilder(Translation.COMMANDS__COUNTING__LIST__LIST + "\n");
                         int emptyMsgLength = msg.length();
                         JDA jda = event.getJDA();
                         for (Pair<Long, ChannelType> pair : plugin.getStorage().getChannels()) {
@@ -78,7 +78,7 @@ public class DiscordCommands extends ListenerAdapter {
                             msg.append(chn == null ? "`" + pair.getFirst() + "`" : chn.getAsMention()).append(": ").append(pair.getSecond()).append("\n");
                         }
                         if (emptyMsgLength == msg.length()) {
-                            hook.sendMessage("No counting channel has been opened yet. Open a new one with `/counting add`").queue();
+                            hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__EMPTY_LIST.toString()).queue();
                         } else {
                             hook.sendMessage(msg.toString()).queue();
                         }
@@ -94,35 +94,35 @@ public class DiscordCommands extends ListenerAdapter {
                     .findFirst()
                     .orElse(null);
             if (type == null) {
-                hook.sendMessage("Unknown dictionary type. Try again.").queue();
+                hook.sendMessage(Translation.GENERAL__UNKNOWN_LANGUAGE.toString()).queue();
                 return;
             }
             Utils.async(() -> {
                 switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
                     case "add" -> {
                         if (plugin.getDictionary().addWord(type, event.getOption("word", "null", OptionMapping::getAsString))) {
-                            hook.sendMessage("This word has been successfully added to the dictionary!").queue();
+                            hook.sendMessage(Translation.COMMANDS__DICTIONARY__ADD__SUCCESS.toString()).queue();
                         } else {
-                            hook.sendMessage("An error occurred. Try again.").queue();
+                            hook.sendMessage(Translation.COMMANDS__DICTIONARY__ADD__FAILURE.toString()).queue();
                         }
                     }
                     case "remove" -> {
                         if (plugin.getDictionary().removeWord(type, event.getOption("word", "null", OptionMapping::getAsString))) {
-                            hook.sendMessage("This word has been successfully removed from the dictionary!").queue();
+                            hook.sendMessage(Translation.COMMANDS__DICTIONARY__REMOVE__SUCCESS.toString()).queue();
                         } else {
-                            hook.sendMessage("An error occurred. Try again.").queue();
+                            hook.sendMessage(Translation.COMMANDS__DICTIONARY__REMOVE__FAILURE.toString()).queue();
                         }
                     }
                     case "load" -> {
                         if (!event.getOption("admin-key", "", OptionMapping::getAsString).equalsIgnoreCase(plugin.getConfig().getString("admin-key"))) {
-                            hook.sendMessage("Incorrect administrator key!\nThe admin-key can be found in the configuration file. This is to prevent uploading random files by people who do not have access to them.").queue();
+                            hook.sendMessage(Translation.COMMANDS__DICTIONARY__LOAD__INCORRECT_KEY.toString()).queue();
                             return;
                         }
                         hook.sendMessage(
                                 switch (plugin.getDictionary().loadDictionaryFromFile(new File(plugin.getDataFolder() + File.separator + event.getOption("file", "null", OptionMapping::getAsString)), type)) {
-                                    case SUCCESS -> "Success!";
-                                    case NO_CHANGES -> "This file does not exist.";
-                                    case FAILURE -> "An error occurred.";
+                                    case SUCCESS -> Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.toString();
+                                    case NO_CHANGES -> Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.toString();
+                                    case FAILURE -> Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.toString();
                                 }).queue();
                     }
                 }
@@ -140,13 +140,13 @@ public class DiscordCommands extends ListenerAdapter {
                         .findFirst()
                         .orElse(null);
                 if (type == null) {
-                    replySelectMenu(event, "Unknown channel type. Try again.");
+                    replySelectMenu(event, Translation.GENERAL__UNKNOWN_CHANNEL_TYPE.toString());
                     return;
                 }
 
                 MessageChannelUnion channelUnion = event.getChannel();
                 if (channelUnion.getType() != net.dv8tion.jda.api.entities.ChannelType.TEXT) {
-                    replySelectMenu(event, "An error occurred.");
+                    replySelectMenu(event, Translation.GENERAL__UNSUPPORTED_CHANNEL_TYPE.toString());
                     return;
                 }
                 TextChannel chn = channelUnion.asTextChannel();
@@ -156,17 +156,17 @@ public class DiscordCommands extends ListenerAdapter {
 
                 switch (plugin.getStorage().addChannel(chn.getIdLong(), type, url)) {
                     case SUCCESS -> {
-                        replySelectMenu(event, "The channel has been successfully opened!");
+                        replySelectMenu(event, Translation.COMMANDS__SELECT_MENU__SUCCESS.toString());
                         EmbedBuilder eb = new EmbedBuilder();
-                        eb.setTitle("**This counting channel is now open!**");
-                        eb.setDescription("**Feel free to play with us!**\n\nChannel type: `" + type + "`\nDescription: `" + type.getDescription() + "`");
+                        eb.setTitle(Translation.GENERAL__OPEN_EMBED__TITLE.toString());
+                        eb.setDescription(Translation.GENERAL__OPEN_EMBED__DESCRIPTION.getFormatted(type, type.getDescription()));
                         eb.setColor(Color.GREEN);
                         eb.setTimestamp(Instant.now());
                         eb.setFooter(Utils.getName(event.getUser(), event.getMember()) + "#" + event.getUser().getDiscriminator(), Utils.getAvatar(event.getUser(), event.getMember()));
                         chn.sendMessageEmbeds(eb.build()).queue();
                     }
-                    case NO_CHANGES -> replySelectMenu(event, "This channel is already opened!");
-                    case FAILURE -> replySelectMenu(event, "An error occurred. Try again.");
+                    case NO_CHANGES -> replySelectMenu(event, Translation.COMMANDS__SELECT_MENU__NO_CHANGES.toString());
+                    case FAILURE -> replySelectMenu(event, Translation.COMMANDS__SELECT_MENU__FAILURE.toString());
                 }
             });
         }
