@@ -3,9 +3,7 @@ package me.matiego.counting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
-import me.matiego.counting.utils.Logs;
-import me.matiego.counting.utils.Primes;
-import me.matiego.counting.utils.Utils;
+import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
@@ -29,7 +27,6 @@ public final class Main extends JavaPlugin {
 
     //TODO: permissions
     //TODO: slow mode
-    //TODO: removing nonexistent channels
     //TODO: auto-complete for dictionary language
 
     public Main() {
@@ -115,6 +112,7 @@ public final class Main extends JavaPlugin {
                     .addEventListeners(new DiscordCommands(this))
                     .addEventListeners(new MessageHandler())
                     .build();
+            jda.awaitReady(); //Yes I know, this will block the thread.
             jda.updateCommands().addCommands(
                     Commands.slash("ping", "Shows the current ping of the bot")
                             .addOption(OptionType.BOOLEAN, "ephemeral", "whether this message should only be visible to you", false),
@@ -146,6 +144,14 @@ public final class Main extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
+        //Check channels
+        int removed = (int) getStorage().getChannels().stream()
+                .map(Pair::getFirst)
+                .filter(id -> jda.getTextChannelById(id) == null)
+                .map(id -> getStorage().removeChannel(id))
+                .filter(response -> response == Response.SUCCESS)
+                .count();
+        if (removed > 0) Logs.info("Successfully removed " + removed + " unknown counting channel(s).");
         Logs.info("Plugin enabled in " + (System.currentTimeMillis() - time) + "ms.");
     }
 
