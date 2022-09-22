@@ -179,11 +179,10 @@ public class DiscordCommands extends ListenerAdapter {
 
     @Override
     public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
-        System.out.println("1" + event.getName() + event.getFocusedOption().getName());
         if (event.getName().equals("dictionary") && event.getFocusedOption().getName().equals("language")) {
-            System.out.println("2");
             event.replyChoices(Arrays.stream(Dictionary.Type.values())
                     .map(Enum::toString)
+                    .filter(value -> value.startsWith(event.getFocusedOption().getValue().toUpperCase()))
                     .map(value -> new Command.Choice(value, value))
                     .toList()
             ).queue();
