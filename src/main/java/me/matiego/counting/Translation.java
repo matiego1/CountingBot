@@ -43,7 +43,36 @@ public enum Translation {
     HANDLERS__LAST_LETTER__ILLEGAL_CHAR("**Oops!** Your message contains illegal character: `%s`"),
     HANDLERS__LAST_LETTER__ILLEGAL_END_CHAR("**Oops!** Your message cannot end with one of the following characters: %s"),
     HANDLERS__LAST_LETTER__INCORRECT_WORD("**Oops!** This word does not exists in the dictionary or has already been used!"),
-    HANDLERS__LAST_LETTER__FAILURE("**Oops!** An error occurred while loading dictionary. Try again.");
+    HANDLERS__LAST_LETTER__FAILURE("**Oops!** An error occurred while loading dictionary. Try again."),
+    /*--- Channel types---*/
+    TYPE__COUNTING__NAME("Counting"),
+    TYPE__BINARY_COUNTING__NAME("Binary Counting"),
+    TYPE__PRIME_COUNTING__NAME("Prime Counting"),
+    TYPE__SEMIPRIME_COUNTING__NAME("Semiprime counting"),
+    TYPE__SPHENIC_COUNTING__NAME("Sphenic counting"),
+    TYPE__FIBONACCI_SEQUENCE__NAME("Fibonacci sequence"),
+    TYPE__LUCAS_NUMBERS__NAME("Lucas numbers"),
+    TYPE__TRIANGULAR_NUMBERS__NAME("Triangular numbers"),
+    TYPE__PALINDROMIC_NUMBERS__NAME("Palindromic numbers"),
+    TYPE__ALPHABET__NAME("Alphabet"),
+    TYPE__POLISH_LAST_LETTER__NAME("Polish last letter"),
+    TYPE__ENGLISH_LAST_LETTER__NAME("English last letter"),
+    TYPE__GERMAN_LAST_LETTER__NAME("German last letter"),
+    TYPE__SPANISH_LAST_LETTER__NAME("Spanish last letter"),
+    TYPE__COUNTING__DESCRIPTION("Write the next numbers"),
+    TYPE__BINARY_COUNTING__DESCRIPTION("Write the next numbers in binary"),
+    TYPE__PRIME_COUNTING__DESCRIPTION("Write the next prime numbers"),
+    TYPE__SEMIPRIME_COUNTING__DESCRIPTION("Write the next semiprime numbers"),
+    TYPE__SPHENIC_COUNTING__DESCRIPTION("Write the next sphenic numbers"),
+    TYPE__FIBONACCI_SEQUENCE__DESCRIPTION("Write the next numbers of the fibonacci sequence"),
+    TYPE__LUCAS_NUMBERS__DESCRIPTION("Write the next numbers of the lucas sequence"),
+    TYPE__TRIANGULAR_NUMBERS__DESCRIPTION("Write the next triangular numbers"),
+    TYPE__PALINDROMIC_NUMBERS__DESCRIPTION("Write the next palindromic numbers"),
+    TYPE__ALPHABET__DESCRIPTION("Write the next letters in english alphabet"),
+    TYPE__POLISH_LAST_LETTER__DESCRIPTION("Write a word that starts with the last letter of the previous one (Polish)"),
+    TYPE__ENGLISH_LAST_LETTER__DESCRIPTION("Write a word that starts with the last letter of the previous one (English)"),
+    TYPE__GERMAN_LAST_LETTER__DESCRIPTION("Write a word that starts with the last letter of the previous one (German)"),
+    TYPE__SPANISH_LAST_LETTER__DESCRIPTION("Write a word that starts with the last letter of the previous one (Spanish)");
 
     private final String def;
 

@@ -10,20 +10,20 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum ChannelType {
-    COUNTING("Counting", "Write the next numbers", "U+1F9EE", new Counting()),
-    BINARY_COUNTING("Binary Counting", "Write the next numbers in binary", "U+1F4BB", new BinaryCounting()),
-    PRIME_COUNTING("Prime Counting", "Write the next prime numbers", "U+1F4DF", new PrimeCounting()),
-    SEMIPRIME_COUNTING("Semiprime counting", "Write the next semiprime numbers", "U+1F319", new SemiprimeCounting()),
-    SPHENIC_COUNTING("Sphenic counting", "Write the next sphenic numbers", "U+26AA", new SphenicCounting()),
-    FIBONACCI_SEQUENCE("Fibonacci sequence", "Write the next numbers of the fibonacci sequence", "U+1F69C", new FibonacciSequence()),
-    LUCAS_NUMBERS("Lucas numbers", "Write the next numbers of the lucas sequence", "U+1F471", new LucasNumbers()),
-    TRIANGULAR_NUMBERS("Triangular numbers", "Write the next triangular numbers", "U+1F4D0", new TriangularNumbers()),
-    PALINDROMIC_NUMBERS("Palindromic numbers", "Write the next palindromic numbers", "U+1FA9E", new PalindromicNumbers()),
-    ALPHABET("Alphabet", "Write the next letters in english alphabet", "U+1F18E", new Alphabet()),
-    POLISH_LAST_LETTER("Polish last letter", "Write a word that starts with the last letter of the previous one (Polish)", "U+1F524", new PolishLastLetter()),
-    ENGLISH_LAST_LETTER("English last letter", "Write a word that starts with the last letter of the previous one (English)", "U+1F445", new EnglishLastLetter()),
-    GERMAN_LAST_LETTER("German last letter", "Write a word that starts with the last letter of the previous one (German)", "U+1F7E5", new GermanLastLetter()),
-    SPANISH_LAST_LETTER("Spanish last letter", "Write a word that starts with the last letter of the previous one (Spanish)", "U+1F7E8", new SpanishLastLetter());
+    COUNTING(Translation.TYPE__COUNTING__NAME.toString(), Translation.TYPE__COUNTING__DESCRIPTION.toString(), "U+1F9EE", new Counting()),
+    BINARY_COUNTING(Translation.TYPE__BINARY_COUNTING__NAME.toString(), Translation.TYPE__BINARY_COUNTING__DESCRIPTION.toString(), "U+1F4BB", new BinaryCounting()),
+    PRIME_COUNTING(Translation.TYPE__PRIME_COUNTING__NAME.toString(), Translation.TYPE__PRIME_COUNTING__DESCRIPTION.toString(), "U+1F4DF", new PrimeCounting()),
+    SEMIPRIME_COUNTING(Translation.TYPE__SEMIPRIME_COUNTING__NAME.toString(), Translation.TYPE__SEMIPRIME_COUNTING__DESCRIPTION.toString(), "U+1F319", new SemiprimeCounting()),
+    SPHENIC_COUNTING(Translation.TYPE__SPHENIC_COUNTING__NAME.toString(), Translation.TYPE__SPHENIC_COUNTING__DESCRIPTION.toString(), "U+26AA", new SphenicCounting()),
+    FIBONACCI_SEQUENCE(Translation.TYPE__FIBONACCI_SEQUENCE__NAME.toString(), Translation.TYPE__FIBONACCI_SEQUENCE__DESCRIPTION.toString(), "U+1F69C", new FibonacciSequence()),
+    LUCAS_NUMBERS(Translation.TYPE__LUCAS_NUMBERS__NAME.toString(), Translation.TYPE__LUCAS_NUMBERS__DESCRIPTION.toString(), "U+1F471", new LucasNumbers()),
+    TRIANGULAR_NUMBERS(Translation.TYPE__TRIANGULAR_NUMBERS__NAME.toString(), Translation.TYPE__TRIANGULAR_NUMBERS__DESCRIPTION.toString(), "U+1F4D0", new TriangularNumbers()),
+    PALINDROMIC_NUMBERS(Translation.TYPE__PALINDROMIC_NUMBERS__NAME.toString(), Translation.TYPE__PALINDROMIC_NUMBERS__DESCRIPTION.toString(), "U+1FA9E", new PalindromicNumbers()),
+    ALPHABET(Translation.TYPE__ALPHABET__NAME.toString(), Translation.TYPE__ALPHABET__DESCRIPTION.toString(), "U+1F18E", new Alphabet()),
+    POLISH_LAST_LETTER(Translation.TYPE__POLISH_LAST_LETTER__NAME.toString(), Translation.TYPE__POLISH_LAST_LETTER__DESCRIPTION.toString(), "U+1F524", new PolishLastLetter()),
+    ENGLISH_LAST_LETTER(Translation.TYPE__ENGLISH_LAST_LETTER__NAME.toString(), Translation.TYPE__ENGLISH_LAST_LETTER__DESCRIPTION.toString(), "U+1F445", new EnglishLastLetter()),
+    GERMAN_LAST_LETTER(Translation.TYPE__GERMAN_LAST_LETTER__NAME.toString(), Translation.TYPE__GERMAN_LAST_LETTER__DESCRIPTION.toString(), "U+1F7E5", new GermanLastLetter()),
+    SPANISH_LAST_LETTER(Translation.TYPE__SPANISH_LAST_LETTER__NAME.toString(), Translation.TYPE__SPANISH_LAST_LETTER__DESCRIPTION.toString(), "U+1F7E8", new SpanishLastLetter());
 
     private final String name;
     private final String description;
