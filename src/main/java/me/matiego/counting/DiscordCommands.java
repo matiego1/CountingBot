@@ -25,6 +25,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ * A Discord commands handler.
+ */
 public class DiscordCommands extends ListenerAdapter {
     public DiscordCommands(@NotNull Main plugin) {
         this.plugin = plugin;

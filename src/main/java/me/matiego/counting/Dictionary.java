@@ -16,6 +16,14 @@ public class Dictionary {
         GERMAN,
         SPANISH
     }
+
+    /**
+     * Loads the dictionary from the file.
+     * <b>Execution of this method may block the thread for a long time!</b>
+     * @param file the file
+     * @param type the type of the dictionary
+     * @return {@code Response.SUCCESS} if file was loaded successfully, {@code Response.NO_CHANGES} if the file does not exist, {@code Response.FAILURE} if an error occurred.
+     */
     public @NotNull Response loadDictionaryFromFile(@NotNull File file, @NotNull Type type) {
         if (!file.exists()) return Response.NO_CHANGES;
         try (Connection conn = Main.getInstance().getMySQLConnection();
@@ -44,6 +52,12 @@ public class Dictionary {
         return Response.FAILURE;
     }
 
+    /**
+     * Adds a word to the dictionary
+     * @param type the type of the dictionary
+     * @param word the word
+     * @return {@code true} if the word was added successfully otherwise {@code false}
+     */
     public boolean addWord(@NotNull Type type, @NotNull String word) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_" + type.toString().toLowerCase() + "(word, used) VALUES(?, false) ON DUPLICATE KEY UPDATE word = ?, used = false")) {
@@ -57,6 +71,12 @@ public class Dictionary {
         return false;
     }
 
+    /**
+     * Removes a word from the dictionary
+     * @param type the type of the dictionary
+     * @param word the word
+     * @return {@code true} if the word was removed successfully otherwise {@code false}
+     */
     public boolean removeWord(@NotNull Type type, @NotNull String word) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("DELETE FROM counting_" + type.toString().toLowerCase() + " WHERE word = ?")) {
@@ -69,6 +89,12 @@ public class Dictionary {
         return false;
     }
 
+    /**
+     * Marks a word as used.
+     * @param type the type of the dictionary
+     * @param word the word
+     * @return {@code Response.SUCCESS} if the word was marked successfully, {@code Response.NO_CHANGES} if the word has already been marked or {@code Response.FAILURE} if an error occurred
+     */
     public @NotNull Response useWord(@NotNull Type type, @NotNull String word) {
         if (type == Type.POLISH && word.equalsIgnoreCase("yeti")) return Response.SUCCESS;
         try (Connection conn = Main.getInstance().getMySQLConnection();

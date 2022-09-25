@@ -35,12 +35,11 @@ import java.util.stream.Collectors;
 public class Utils {
 
     /**
-     * Returns the HttpClient for the JDABuilder. <br>
+     * Returns a {@code OkHttpClient} for the {@code JDABuilder}. <br>
      * Based on the <a href="https://github.com/DiscordSRV/DiscordSRV/blob/master/src/main/java/github/scarsz/discordsrv/DiscordSRV.java">DiscordSRV plugin</a>
-     * @return the HttpClient
+     * @return the {@code OkHttpClient}
      */
     public static @NotNull OkHttpClient getHttpClient(){
-
         Dns dns = Dns.SYSTEM;
         try {
             List<InetAddress> fallbackDnsServers = new CopyOnWriteArrayList<>(Arrays.asList(
@@ -136,8 +135,8 @@ public class Utils {
     }
 
     /**
-     * Returns a set of the GatewayIntents for the JDABuilder
-     * @return the set of the GatewayIntents
+     * Returns a set of {@code GatewayIntent}s for the {@code JDABuilder}
+     * @return the set of {@code GatewayIntent}s
      */
     public static @NotNull ImmutableSet<GatewayIntent> getIntents() {
         return Sets.immutableEnumSet(EnumSet.of(
@@ -148,6 +147,10 @@ public class Utils {
         ));
     }
 
+    /**
+     * Returns a list of disabled {@code CacheFlag}s for the {@code JDABuilder}
+     * @return the list of {@code CacheFlag}s
+     */
     public static @NotNull List<CacheFlag> getDisabledCacheFlag() {
         return List.of(
                 CacheFlag.ACTIVITY,
@@ -216,10 +219,22 @@ public class Utils {
         user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage(checkLength(message, Message.MAX_CONTENT_LENGTH)).queue());
     }
 
+    /**
+     * Returns an url of the member's effective avatar. If the member is {@code null} this will return an url of the user's effective avatar.
+     * @param user the user
+     * @param member the member
+     * @return the url of the avatar
+     */
     public static @NotNull String getAvatar(@NotNull User user, @Nullable Member member) {
         return (member != null) ? member.getEffectiveAvatarUrl() : user.getEffectiveAvatarUrl();
     }
 
+    /**
+     * Returns a name of the member. If the member is {@code null} this will return a name of the user.
+     * @param user the user
+     * @param member the member
+     * @return the name
+     */
     public static @NotNull String getName(@NotNull User user, @Nullable Member member) {
         return (member != null) ? member.getEffectiveName() : user.getName();
     }

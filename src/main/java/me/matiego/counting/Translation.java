@@ -4,6 +4,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.IllegalFormatException;
 
+/**
+ * Translation of some messages.
+ */
 public enum Translation {
     /*--- Generals ---*/
     GENERAL__NOT_SENT("**Oops!** An error occurred while sending your message. Please try again later."),
@@ -53,6 +56,11 @@ public enum Translation {
         return Main.getInstance().getConfig().getString("translations." + name().replace("__", "."), def);
     }
 
+    /**
+     * Returns a formatted message.
+     * @param args arguments
+     * @return the formatted message
+     */
     public @NotNull String getFormatted(Object... args) {
         try {
             return String.format(toString(), args);

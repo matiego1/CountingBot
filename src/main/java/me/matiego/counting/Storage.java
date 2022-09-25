@@ -14,6 +14,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Counting channels storage
+ */
 public class Storage {
 
     @SuppressWarnings("unused")
@@ -27,6 +30,13 @@ public class Storage {
 
     private final HashMap<Long, Pair<ChannelType, String>> cache;
 
+    /**
+     * Adds a new counting channel.
+     * @param id id of the channel
+     * @param type type of the channel
+     * @param url a webhook url
+     * @return {@code Response.SUCCESS} if the channel was added successfully, otherwise {@code Response.FAILURE}
+     */
     public synchronized @NotNull Response addChannel(long id, @NotNull ChannelType type, @NotNull String url) {
         if (cache.containsKey(id)) return Response.NO_CHANGES;
         try (Connection conn = Main.getInstance().getMySQLConnection();
@@ -45,6 +55,11 @@ public class Storage {
         return Response.FAILURE;
     }
 
+    /**
+     * Remove the counting channel.
+     * @param id id of the channel
+     * @return {@code Response.SUCCESS} if the channel was removed successfully, {@code Response.NO_CHANGES} if the channel has not been added yet or {@code Response.FAILURE} if an error occurred
+     */
     public synchronized @NotNull Response removeChannel(long id) {
         if (!cache.containsKey(id)) return Response.NO_CHANGES;
         try (Connection conn = Main.getInstance().getMySQLConnection();
@@ -59,16 +74,29 @@ public class Storage {
         return Response.FAILURE;
     }
 
-    public synchronized @Nullable Pair<ChannelType, String> getChannelType(long id) {
+    /**
+     * Returns a pair of the channel type and the webhook url associated with it.
+     * @param id id of the channel
+     * @return the pair of the channel type and the webhook url
+     */
+    public synchronized @Nullable Pair<ChannelType, String> getChannel(long id) {
         return cache.get(id);
     }
 
+    /**
+     * Returns a list of all added channels.
+     * @return the list of all added channels
+     */
     public synchronized @NotNull List<Pair<Long, ChannelType>> getChannels() {
         List<Pair<Long, ChannelType>> result = new ArrayList<>();
         cache.forEach((id, pair) -> result.add(new Pair<>(id, pair.getFirst())));
         return result;
     }
 
+    /**
+     * Loads counting channels from the database.
+     * @return a new instance of this class with loaded channels.
+     */
     public static @Nullable Storage load() {
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("SELECT chn, type, url FROM counting_channels")) {

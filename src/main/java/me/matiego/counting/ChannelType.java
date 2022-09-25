@@ -41,6 +41,10 @@ public enum ChannelType {
         return name;
     }
 
+    /**
+     * Returns a list of the channel types parsed as {@link SelectOption}.
+     * @return the list of the channel types
+     */
     public static @NotNull List<SelectOption> getSelectMenuOptions() {
         return Arrays.stream(ChannelType.values())
                 .map(value -> SelectOption.of(value.name, value.toString())
@@ -49,10 +53,18 @@ public enum ChannelType {
                 .toList();
     }
 
+    /**
+     * Returns the channel type description.
+     * @return the description
+     */
     public @NotNull String getDescription() {
         return description;
     }
 
+    /**
+     * Returns the channel type handler.
+     * @return the handler
+     */
     public @NotNull IChannelHandler getHandler() {
         return handler;
     }

@@ -23,10 +23,14 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.concurrent.*;
 
+/**
+ * The main class.
+ */
 public final class Main extends JavaPlugin {
 
     //TODO: translation file
     //TODO: Logs to Discord
+    //TODO: javadocs
 
     public Main() {
         instance = this;
@@ -40,6 +44,9 @@ public final class Main extends JavaPlugin {
     private JDA jda;
     private ExecutorService callbackThreadPool;
 
+    /**
+     * The plugin enable logic.
+     */
     @Override
     public void onEnable() {
         long time = System.currentTimeMillis();
@@ -154,6 +161,9 @@ public final class Main extends JavaPlugin {
         Logs.info("Plugin enabled in " + (System.currentTimeMillis() - time) + "ms.");
     }
 
+    /**
+     * The plugin disable logic.
+     */
     @Override
     public void onDisable() {
         long time = System.currentTimeMillis();
@@ -181,23 +191,44 @@ public final class Main extends JavaPlugin {
         Logs.info("Plugin disabled in " + (System.currentTimeMillis() - time) + "ms.");
     }
 
+    /**
+     * Returns an instance of the Main class.
+     * @return the instance of the Main class
+     */
     public static Main getInstance() {
         return instance;
     }
 
+    /**
+     * Returns a mysql connection.
+     * @return the mysql connection
+     * @throws SQLException if an error occurred while fetching the connection
+     */
     public @NotNull Connection getMySQLConnection() throws SQLException {
         if (mySQL == null) throw new SQLException("The MySQL database has not been opened yet.");
         return mySQL.getConnection();
     }
 
+    /**
+     * Returns the data storage.
+     * @return the data storage
+     */
     public Storage getStorage() {
         return storage;
     }
 
+    /**
+     * Returns the Discord bot instance.
+     * @return the Discord bot instance
+     */
     public JDA getJda() {
         return jda;
     }
 
+    /**
+     * Returns the dictionary.
+     * @return the dictionary
+     */
     public Dictionary getDictionary() {
         return dictionary;
     }

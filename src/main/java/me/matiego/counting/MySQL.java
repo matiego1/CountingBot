@@ -9,6 +9,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * A MySQL database.
+ */
 public class MySQL {
     private final HikariDataSource ds;
 
@@ -59,8 +62,8 @@ public class MySQL {
     }
 
     /**
-     * Creates the database table.
-     * @return {@code true} if the table creation was successful otherwise {@code false}
+     * Creates the database tables.
+     * @return {@code true} if the tables creation was successful otherwise {@code false}
      */
     public boolean createTable() {
         try (Connection conn = getConnection();

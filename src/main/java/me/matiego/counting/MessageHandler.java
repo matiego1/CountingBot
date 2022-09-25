@@ -14,6 +14,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A Discord messages handler
+ */
 public class MessageHandler extends ListenerAdapter {
 
     @Override
@@ -24,7 +27,7 @@ public class MessageHandler extends ListenerAdapter {
             if (user.isBot()) return;
             Member member = event.getMember();
 
-            Pair<ChannelType, String> pair = Main.getInstance().getStorage().getChannelType(event.getChannel().getIdLong());
+            Pair<ChannelType, String> pair = Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong());
             if (pair == null) return;
             IChannelHandler handler = pair.getFirst().getHandler();
 
