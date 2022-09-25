@@ -16,7 +16,7 @@ public enum Translation {
     GENERAL__UNSUPPORTED_CHANNEL_TYPE("This channel's type is not supported."),
     GENERAL__UNKNOWN_LANGUAGE("Unknown language. Try again."),
     GENERAL__UNKNOWN_CHANNEL_TYPE("Unknown channel type. Try again."),
-    GENERAL__STATUS("in the counting channels"),
+    GENERAL__STATUS("counting channels"),
     /*--- Commands ---*/
     //counting
     COMMANDS__COUNTING__ADD("**__Select the type of the new counting channel:__**"),
