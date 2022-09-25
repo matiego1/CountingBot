@@ -7,6 +7,7 @@ import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -117,6 +118,7 @@ public final class Main extends JavaPlugin {
                     .disableCache(Utils.getDisabledCacheFlag())
                     .addEventListeners(new DiscordCommands(this))
                     .addEventListeners(new MessageHandler())
+                    .setActivity(Activity.competing(Translation.GENERAL__STATUS.toString()))
                     .build();
             jda.awaitReady(); //Yes I know, this will block the thread.
             jda.updateCommands().addCommands(
