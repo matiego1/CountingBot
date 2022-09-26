@@ -31,4 +31,11 @@ public class Pair<FIRST, SECOND> {
     public String toString() {
         return "(" + getFirst() + ", " + getSecond() + ")";
     }
+
+    @Override
+    public boolean equals(Object other) {
+        if (other == this) return true;
+        if (!(other instanceof Pair<?, ?> pair)) return false;
+        return getFirst().equals(pair.getFirst()) && getSecond().equals(pair.getSecond());
+    }
 }
