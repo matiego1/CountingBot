@@ -31,6 +31,7 @@ public final class Main extends JavaPlugin {
 
     //TODO*: translation file loader
     //TODO: translations of Discord commands
+    //TODO: fixed Discord logs
 
     public Main() {
         instance = this;
