@@ -29,9 +29,8 @@ import java.util.concurrent.*;
  */
 public final class Main extends JavaPlugin {
 
-    //TODO: translation file loader
+    //TODO*: translation file loader
     //TODO: translations of Discord commands
-    //TODO: anti-spam
 
     public Main() {
         instance = this;

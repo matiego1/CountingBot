@@ -17,20 +17,20 @@ import java.util.List;
  */
 public class MessageHandler extends ListenerAdapter {
 
-    private final FixedSizeMap<Pair<UserSnowflake, Long>, Pair<Integer, Long>> map = new FixedSizeMap<>(1000);
+    private final FixedSizeMap<String, Pair<Integer, Long>> map = new FixedSizeMap<>(1000);
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        long time = System.currentTimeMillis();
         Utils.async(() -> {
+            long time = System.currentTimeMillis();
             User user = event.getAuthor();
             if (user.isBot()) return;
 
             Message message = event.getMessage();
             int minTime = Main.getInstance().getConfig().getInt("anti-spam.time"), maxCount = Main.getInstance().getConfig().getInt("anti-spam.count");
-            if (!check(user, event.getChannel().getIdLong(), time, minTime, maxCount)) {
+            if (!check(user, event.getChannel().getIdLong(), time, minTime * 1000, maxCount)) {
                 message.delete().queue();
-                Utils.sendPrivateMessage(user, Translation.GENERAL__DO_NOT_SPAM.getFormatted(minTime, maxCount));
+                Utils.sendPrivateMessage(user, Translation.GENERAL__DO_NOT_SPAM.getFormatted(maxCount, minTime));
                 return;
             }
 
@@ -54,16 +54,21 @@ public class MessageHandler extends ListenerAdapter {
             if (!Utils.sendWebhook(pair.getSecond(), Utils.getAvatar(user, member), Utils.getName(user, member), correctMsg)) {
                 Utils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());
             }
-            if (System.currentTimeMillis() - time >= 500) {
-                Logs.warning("The message verification time exceeded 500ms. Channel: " + event.getChannel().getName() + "; ID: " + event.getChannel().getId());
+
+            time = System.currentTimeMillis() - time;
+            if (time >= 1000) {
+                Logs.warning("The message verification time exceeded 1 second! (Time: " + time + "ms; Channel: " + event.getChannel().getName() + "; ID: " + event.getChannel().getId() + ")");
             }
         });
     }
 
     public synchronized boolean check(@NotNull UserSnowflake user, long chn, long now, int minTime, int maxCount) {
-        Pair<UserSnowflake, Long> key = new Pair<>(user, chn);
+        String key = new Pair<>(user, chn).toString();
         Pair<Integer, Long> last = map.getOrDefault(key, new Pair<>(0, now));
-        if (now - last.getSecond() > minTime) map.remove(key);
+        if (now - last.getSecond() > minTime) {
+            map.put(key, new Pair<>(0, now));
+            return true;
+        }
         map.put(key, new Pair<>(last.getFirst() + 1, now));
         return last.getFirst() + 1 <= maxCount;
     }
