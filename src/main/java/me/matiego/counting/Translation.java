@@ -12,7 +12,7 @@ public enum Translation {
     GENERAL__NOT_SENT("**Oops!** An error occurred while sending your message. Please try again later."),
     GENERAL__CLOSE_EMBED("Counting channel closed!"),
     GENERAL__OPEN_EMBED__TITLE("**This counting channel is now open!**"),
-    GENERAL__OPEN_EMBED__DESCRIPTION("**Feel free to play with us!**\n\nChannel type: `{title}`\nDescription: `{description}`"),
+    GENERAL__OPEN_EMBED__DESCRIPTION("**Feel free to play with us!**\n\nChannel type: `%s`\nDescription: `%s`"),
     GENERAL__UNSUPPORTED_CHANNEL_TYPE("This channel's type is not supported."),
     GENERAL__UNKNOWN_LANGUAGE("Unknown language. Try again."),
     GENERAL__UNKNOWN_CHANNEL_TYPE("Unknown channel type. Try again."),
