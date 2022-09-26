@@ -17,6 +17,7 @@ public enum Translation {
     GENERAL__UNKNOWN_LANGUAGE("Unknown language. Try again."),
     GENERAL__UNKNOWN_CHANNEL_TYPE("Unknown channel type. Try again."),
     GENERAL__STATUS("counting channels"),
+    GENERAL__DO_NOT_SPAM("Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each."),
     /*--- Commands ---*/
     //counting
     COMMANDS__COUNTING__ADD("**__Select the type of the new counting channel:__**"),
