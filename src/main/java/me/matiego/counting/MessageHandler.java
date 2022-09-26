@@ -63,8 +63,8 @@ public class MessageHandler extends ListenerAdapter {
     public synchronized boolean check(@NotNull UserSnowflake user, long chn, long now, int minTime, int maxCount) {
         Pair<UserSnowflake, Long> key = new Pair<>(user, chn);
         Pair<Integer, Long> last = map.getOrDefault(key, new Pair<>(0, now));
-        map.put(key, new Pair<>(last.getFirst() + 1, now));
         if (now - last.getSecond() > minTime) map.remove(key);
+        map.put(key, new Pair<>(last.getFirst() + 1, now));
         return last.getFirst() + 1 <= maxCount;
     }
 }
