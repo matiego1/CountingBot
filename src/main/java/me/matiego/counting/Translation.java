@@ -7,6 +7,7 @@ import java.util.IllegalFormatException;
 /**
  * Translation of some messages.
  */
+@SuppressWarnings("unused")
 public enum Translation {
     /*--- Generals ---*/
     GENERAL__NOT_SENT("**Oops!** An error occurred while sending your message. Please try again later."),
@@ -84,7 +85,7 @@ public enum Translation {
 
     @Override
     public @NotNull String toString() {
-        return Main.getInstance().getConfig().getString("translations." + name().replace("__", "."), def);
+        return Main.getInstance().getConfig().getString("translations." + name().replace("__", ".").toLowerCase(), def);
     }
 
     /**
