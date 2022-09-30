@@ -164,7 +164,7 @@ public final class Main extends JavaPlugin {
                 .filter(response -> response == Response.SUCCESS)
                 .count();
         if (removed > 0) Logs.info("Successfully removed " + removed + " unknown counting channel(s).");
-
+        //Check webhooks
         int refreshedWebhooks = (int) channels.stream()
                 .filter(pair -> {
                     try {
@@ -190,7 +190,7 @@ public final class Main extends JavaPlugin {
         Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
 
         if (getStorage().addChannel(id, new ChannelData(type, webhook)) != Response.FAILURE) return true;
-        Logs.warning("An error occurred while refreshing an unknown webhook. The counting channel will be removed.");
+        Logs.warning("An error occurred while refreshing an unknown webhook. The counting channel has been removed.");
         getStorage().removeChannel(id);
         return false;
     }
