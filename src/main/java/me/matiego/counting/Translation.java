@@ -85,7 +85,7 @@ public enum Translation {
 
     @Override
     public @NotNull String toString() {
-        return Main.getInstance().getConfig().getString("translations." + name().replace("__", ".").toLowerCase(), def);
+        return Main.getInstance().getConfig().getString("translations." + name().replace("__", ".").toLowerCase(), def).replace("\\n", "\n");
     }
 
     /**
