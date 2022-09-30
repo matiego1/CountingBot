@@ -11,6 +11,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.events.ShutdownEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
@@ -165,11 +166,17 @@ public final class Main extends JavaPlugin {
         if (removed > 0) Logs.info("Successfully removed " + removed + " unknown counting channel(s).");
 
         int refreshedWebhooks = (int) channels.stream()
-                .filter(pair -> jda.retrieveWebhookById(pair.getSecond().getWebhookId()).complete() == null)
+                .filter(pair -> {
+                    try {
+                        jda.retrieveWebhookById(pair.getSecond().getWebhookId()).complete();
+                        return false;
+                    } catch (ErrorResponseException ignored) {}
+                    return true;
+                })
                 .map(pair -> refreshWebhook(pair.getFirst(), pair.getSecond().getType()))
                 .filter(Boolean::booleanValue)
                 .count();
-        if (removed > 0) Logs.error("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
+        if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
 
         Logs.info("Plugin enabled in " + (System.currentTimeMillis() - time) + "ms.");
     }
