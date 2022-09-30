@@ -53,7 +53,7 @@ public class DiscordCommands extends ListenerAdapter {
                             hook.sendMessage(Translation.COMMANDS__COUNTING__ADD.toString())
                                     .addActionRow(
                                             SelectMenu.create("counting-type")
-                                                    .addOptions(ChannelType.getSelectMenuOptions())
+                                                    .addOptions(ChannelData.getSelectMenuOptions())
                                                     .setRequiredRange(1, 1)
                                                     .build())
                                     .queue();
@@ -76,9 +76,9 @@ public class DiscordCommands extends ListenerAdapter {
                         StringBuilder msg = new StringBuilder(Translation.COMMANDS__COUNTING__LIST__LIST + "\n");
                         int emptyMsgLength = msg.length();
                         JDA jda = event.getJDA();
-                        for (Pair<Long, ChannelType> pair : plugin.getStorage().getChannels()) {
+                        for (Pair<Long, ChannelData> pair : plugin.getStorage().getChannels()) {
                             GuildChannel chn = jda.getGuildChannelById(pair.getFirst());
-                            msg.append(chn == null ? "`" + pair.getFirst() + "`" : chn.getAsMention()).append(": ").append(pair.getSecond()).append("\n");
+                            msg.append(chn == null ? "`" + pair.getFirst() + "`" : chn.getAsMention()).append(": ").append(pair.getSecond().getType()).append("\n");
                         }
                         if (emptyMsgLength == msg.length()) {
                             hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__EMPTY_LIST.toString()).queue();
@@ -138,7 +138,7 @@ public class DiscordCommands extends ListenerAdapter {
         if (event.getComponentId().equals("counting-type")) {
             event.deferReply(true).queue();
             Utils.async(() -> {
-                ChannelType type = Arrays.stream(ChannelType.values())
+                ChannelData.Type type = Arrays.stream(ChannelData.Type.values())
                         .filter(value -> value.toString().equals(event.getValues().get(0)))
                         .findFirst()
                         .orElse(null);
@@ -155,9 +155,9 @@ public class DiscordCommands extends ListenerAdapter {
                 TextChannel chn = channelUnion.asTextChannel();
 
                 List<Webhook> webhooks = chn.retrieveWebhooks().complete();
-                String url = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete().getUrl() : webhooks.get(0).getUrl();
+                Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
 
-                switch (plugin.getStorage().addChannel(chn.getIdLong(), type, url)) {
+                switch (plugin.getStorage().addChannel(chn.getIdLong(), new ChannelData(type, webhook))) {
                     case SUCCESS -> {
                         replySelectMenu(event, Translation.COMMANDS__SELECT_MENU__SUCCESS.toString());
                         EmbedBuilder eb = new EmbedBuilder();

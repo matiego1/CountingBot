@@ -34,9 +34,9 @@ public class MessageHandler extends ListenerAdapter {
                 return;
             }
 
-            Pair<ChannelType, String> pair = Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong());
-            if (pair == null) return;
-            IChannelHandler handler = pair.getFirst().getHandler();
+            ChannelData data = Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong());
+            if (data == null) return;
+            IChannelHandler handler = data.getHandler();
 
             int amount = handler.getAmountOfMessages();
             List<Message> history = amount == 0 ? new ArrayList<>() : event.getChannel().getHistory().retrievePast(amount + 1).complete();
@@ -51,7 +51,7 @@ public class MessageHandler extends ListenerAdapter {
             if (correctMsg == null) return;
 
             Member member = event.getMember();
-            if (!Utils.sendWebhook(pair.getSecond(), Utils.getAvatar(user, member), Utils.getName(user, member), correctMsg)) {
+            if (!Utils.sendWebhook(data.getWebhookUrl(), Utils.getAvatar(user, member), Utils.getName(user, member), correctMsg)) {
                 Utils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());
             }
 

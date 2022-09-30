@@ -8,6 +8,8 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.events.ShutdownEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -22,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.security.auth.login.LoginException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -54,7 +57,7 @@ public final class Main extends JavaPlugin {
         //noinspection ResultOfMethodCallIgnored - generating prime numbers
         Primes.isPrime(2);
         //Checks
-        if (ChannelType.values().length > 25 || ChannelType.values().length == 0) {
+        if (ChannelData.Type.values().length > 25 || ChannelData.Type.values().length == 0) {
             Logs.error("Zero or too many types of the counting channels are implemented. Please contact the developer");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
@@ -153,14 +156,37 @@ public final class Main extends JavaPlugin {
             return;
         }
         //Check channels
-        int removed = (int) getStorage().getChannels().stream()
+        List<Pair<Long, ChannelData>> channels = getStorage().getChannels();
+        int removed = (int) channels.stream()
                 .map(Pair::getFirst)
                 .filter(id -> jda.getTextChannelById(id) == null)
                 .map(id -> getStorage().removeChannel(id))
                 .filter(response -> response == Response.SUCCESS)
                 .count();
         if (removed > 0) Logs.info("Successfully removed " + removed + " unknown counting channel(s).");
+
+        int refreshedWebhooks = (int) channels.stream()
+                .filter(pair -> jda.retrieveWebhookById(pair.getSecond().getWebhookId()).complete() == null)
+                .map(pair -> refreshWebhook(pair.getFirst(), pair.getSecond().getType()))
+                .filter(Boolean::booleanValue)
+                .count();
+        if (removed > 0) Logs.error("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
+
         Logs.info("Plugin enabled in " + (System.currentTimeMillis() - time) + "ms.");
+    }
+
+    private boolean refreshWebhook(long id, @NotNull ChannelData.Type type) {
+        if (getStorage().removeChannel(id) == Response.FAILURE) return false;
+
+        TextChannel chn = jda.getTextChannelById(id);
+        if (chn == null) return false;
+        List<Webhook> webhooks = chn.retrieveWebhooks().complete();
+        Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
+
+        if (getStorage().addChannel(id, new ChannelData(type, webhook)) != Response.FAILURE) return true;
+        Logs.warning("An error occurred while refreshing an unknown webhook. The counting channel will be removed.");
+        getStorage().removeChannel(id);
+        return false;
     }
 
     /**
