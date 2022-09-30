@@ -11,7 +11,7 @@ translations:
     open_embed:
       title: '**This counting channel is now open!**'
       description: '**Feel free to play with us!**\n\nChannel type: `%s`\nDescription: `%s`'
-    unsupported_channel_type: 'This channel's type is not supported.'
+    unsupported_channel_type: 'This channel\0027s type is not supported.'
     unknown_language: 'Unknown language. Try again.'
     unknown_channel_type: 'Unknown channel type. Try again.'
     status: 'counting channels'
