@@ -6,90 +6,90 @@ anti-spam:
 
 translations:
   general:
-    NOT_SENT: '**Oops!** An error occurred while sending your message. Please try again later.'
-    CLOSE_EMBED: 'Counting channel closed!'
+    not_sent: '**Oops!** An error occurred while sending your message. Please try again later.'
+    close_embed: 'Counting channel closed!'
     open_embed:
-      TITLE: '**This counting channel is now open!**'
-      DESCRIPTION: '**Feel free to play with us!**\n\nChannel type: `%s`\nDescription: `%s`'
-    UNSUPPORTED_CHANNEL_TYPE: 'This channel's type is not supported.'
-    UNKNOWN_LANGUAGE: 'Unknown language. Try again.'
-    UNKNOWN_CHANNEL_TYPE: 'Unknown channel type. Try again.'
-    STATUS: 'counting channels'
-    DO_NOT_SPAM: 'Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each.'
+      title: '**This counting channel is now open!**'
+      description: '**Feel free to play with us!**\n\nChannel type: `%s`\nDescription: `%s`'
+    unsupported_channel_type: 'This channel's type is not supported.'
+    unknown_language: 'Unknown language. Try again.'
+    unknown_channel_type: 'Unknown channel type. Try again.'
+    status: 'counting channels'
+    do_not_spam: 'Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each.'
   commands:
     counting:
-      ADD: '**Select the type of the new counting channel:**'
+      add: '**Select the type of the new counting channel:**'
       remove:
-        SUCCESS: 'The channel has been successfully closed!'
-        NO_CHANGES: 'This channel has been already closed.'
-        FAILURE: 'An error occurred. Try again.'
+        success: 'The channel has been successfully closed!'
+        no_changes: 'This channel has been already closed.'
+        failure: 'An error occurred. Try again.'
       list:
-        LIST: '**Open Counting Channels:**'
-        EMPTY_LIST: 'No counting channel has been opened yet. Open a new one with `/counting add`'
+        list: '**Open Counting Channels:**'
+        empty_list: 'No counting channel has been opened yet. Open a new one with `/counting add`'
     dictionary:
       add:
-        SUCCESS: 'This word has been successfully added to the dictionary!'
-        FAILURE: 'An error occurred. Try again.'
+        success: 'This word has been successfully added to the dictionary!'
+        failure: 'An error occurred. Try again.'
       remove:
-        SUCCESS: 'This word has been successfully removed from the dictionary!'
-        FAILURE: 'An error occurred. Try again.'
+        success: 'This word has been successfully removed from the dictionary!'
+        failure: 'An error occurred. Try again.'
       load:
-        INCORRECT_KEY: 'Incorrect administrator key!\nThe admin-key can be found in the configuration file. This is to prevent uploading random files by people who do not have access to them.'
-        SUCCESS: 'Success!'
-        NO_CHANGES: 'This file does not exist.'
-        FAILURE: 'An error occurred. Try again.'
+        incorrect_key: 'Incorrect administrator key!\nThe admin-key can be found in the configuration file. This is to prevent uploading random files by people who do not have access to them.'
+        success: 'Success!'
+        no_changes: 'This file does not exist.'
+        failure: 'An error occurred. Try again.'
     select_menu:
-      SUCCESS: 'The channel has been successfully opened!'
-      NO_CHANGES: 'This channel is already opened!'
-      FAILURE: 'An error occurred. Try again.'
+      success: 'The channel has been successfully opened!'
+      no_changes: 'This channel is already opened!'
+      failure: 'An error occurred. Try again.'
   handlers:
     last_letter:
-      INCORRECT_START_CHAR: '**Oops!** Your message does not start with the last character of the previous message.'
-      TOO_SHORT: '**Oops!** Your message is too short.'
-      ILLEGAL_CHAR: '**Oops!** Your message contains illegal character: `%s`'
-      ILLEGAL_END_CHAR: '**Oops!** Your message cannot end with one of the following characters: %s'
-      INCORRECT_WORD: '**Oops!** This word does not exists in the dictionary or has already been used!'
-      FAILURE: '**Oops!** An error occurred while loading dictionary. Try again.'
+      incorrect_start_char: '**Oops!** Your message does not start with the last character of the previous message.'
+      too_short: '**Oops!** Your message is too short.'
+      illegal_char: '**Oops!** Your message contains illegal character: `%s`'
+      illegal_end_char: '**Oops!** Your message cannot end with one of the following characters: %s'
+      incorrect_word: '**Oops!** This word does not exists in the dictionary or has already been used!'
+      failure: '**Oops!** An error occurred while loading dictionary. Try again.'
   type:
     counting:
-      NAME: 'Counting'
-      DESCRIPTION: 'Write the next numbers'
+      name: 'Counting'
+      description: 'Write the next numbers'
     binary_counting:
-      NAME: 'Binary Counting'
-      DESCRIPTION: 'Write the next numbers in binary'
+      name: 'Binary Counting'
+      description: 'Write the next numbers in binary'
     prime_counting:
-      NAME: 'Prime Counting'
-      DESCRIPTION: 'Write the next prime numbers'
+      name: 'Prime Counting'
+      description: 'Write the next prime numbers'
     semipime_counting:
-      NAME: 'Semiprime counting'
-      DESCRIPTION: 'Write the next semiprime numbers'
+      name: 'Semiprime counting'
+      description: 'Write the next semiprime numbers'
     sphenic_counting:
-      NAME: 'Sphenic counting'
-      DESCRIPTION: 'Write the next sphenic numbers'
+      name: 'Sphenic counting'
+      description: 'Write the next sphenic numbers'
     fibonacci_sequence:
-      NAME: 'Fibonacci sequence'
-      DESCRIPTION: 'Write the next numbers of the fibonacci sequence'
+      name: 'Fibonacci sequence'
+      description: 'Write the next numbers of the fibonacci sequence'
     lucas_numbers:
-      NAME: 'Lucas numbers'
-      DESCRIPTION: 'Write the next numbers of the lucas sequence'
+      name: 'Lucas numbers'
+      description: 'Write the next numbers of the lucas sequence'
     triangular_numbers:
-      NAME: 'Triangular numbers'
-      DESCRIPTION: 'Write the next triangular numbers'
+      name: 'Triangular numbers'
+      description: 'Write the next triangular numbers'
     palindromic_numbers:
-      NAME: 'Palindromic numbers'
-      DESCRIPTION: 'Write the next palindromic numbers'
+      name: 'Palindromic numbers'
+      description: 'Write the next palindromic numbers'
     alphabet:
-      NAME: 'Alphabet'
-      DESCRIPTION: 'Write the next letters in english alphabet'
+      name: 'Alphabet'
+      description: 'Write the next letters in english alphabet'
     polish_last_letter:
-      NAME: 'Polish last letter'
-      DESCRIPTION: 'Write a word that starts with the last letter of the previous one (Polish)'
+      name: 'Polish last letter'
+      description: 'Write a word that starts with the last letter of the previous one (Polish)'
     english_last_letter:
-      NAME: 'English last letter'
-      DESCRIPTION: 'Write a word that starts with the last letter of the previous one (English)'
+      name: 'English last letter'
+      description: 'Write a word that starts with the last letter of the previous one (English)'
     german_last_letter:
-      NAME: 'German last letter'
-      DESCRIPTION: 'Write a word that starts with the last letter of the previous one (German)'
+      name: 'German last letter'
+      description: 'Write a word that starts with the last letter of the previous one (German)'
     spanish_last_letter:
-      NAME: 'Spanish last letter'
-      DESCRIPTION: 'Write a word that starts with the last letter of the previous one (Spanish)'
+      name: 'Spanish last letter'
+      description: 'Write a word that starts with the last letter of the previous one (Spanish)'
