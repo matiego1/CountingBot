@@ -46,7 +46,7 @@ public class SpanishLastLetter implements IChannelHandler {
         }
         for (int i = 0; i < msgContent.length(); i++) {
             if (!ALPHABET.contains(String.valueOf(msgContent.charAt(i)))) {
-                Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__ILLEGAL_END_CHAR.getFormatted("ß"));
+                Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__ILLEGAL_CHAR.getFormatted(msgContent.charAt(i)));
                 return null;
             }
         }
