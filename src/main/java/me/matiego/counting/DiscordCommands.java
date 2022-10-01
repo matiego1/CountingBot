@@ -83,7 +83,11 @@ public class DiscordCommands extends ListenerAdapter {
                         for (Pair<Long, ChannelData> pair : plugin.getStorage().getChannels()) {
                             GuildChannel chn = jda.getGuildChannelById(pair.getFirst());
                             if (guildId == plugin.getConfig().getLong("main-guild-id")) {
-                                msg.append(chn == null ? "`" + pair.getFirst() + "`" : chn.getAsMention()).append(": ").append(pair.getSecond().getType()).append("\n");
+                                msg.append(chn == null ? "`" + pair.getFirst() + "`" : chn.getAsMention()).append(": ").append(pair.getSecond().getType());
+                                if (chn != null && chn.getGuild().getIdLong() != guildId) {
+                                    msg.append(" [").append(chn.getGuild().getName()).append("]");
+                                }
+                                msg.append("\n");
                             } else if (chn != null && chn.getGuild().getIdLong() == guildId) {
                                 msg.append(chn.getAsMention()).append(": ").append(pair.getSecond().getType()).append("\n");
                             }
