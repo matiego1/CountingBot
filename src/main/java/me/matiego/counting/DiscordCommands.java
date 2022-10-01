@@ -76,9 +76,17 @@ public class DiscordCommands extends ListenerAdapter {
                         StringBuilder msg = new StringBuilder(Translation.COMMANDS__COUNTING__LIST__LIST + "\n");
                         int emptyMsgLength = msg.length();
                         JDA jda = event.getJDA();
+                        long guildId = -1;
+                        try {
+                            guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+                        } catch (NullPointerException ignored) {}
                         for (Pair<Long, ChannelData> pair : plugin.getStorage().getChannels()) {
                             GuildChannel chn = jda.getGuildChannelById(pair.getFirst());
-                            msg.append(chn == null ? "`" + pair.getFirst() + "`" : chn.getAsMention()).append(": ").append(pair.getSecond().getType()).append("\n");
+                            if (guildId == plugin.getConfig().getLong("main-guild-id")) {
+                                msg.append(chn == null ? "`" + pair.getFirst() + "`" : chn.getAsMention()).append(": ").append(pair.getSecond().getType()).append("\n");
+                            } else if (chn != null && chn.getGuild().getIdLong() == guildId) {
+                                msg.append(chn.getAsMention()).append(": ").append(pair.getSecond().getType()).append("\n");
+                            }
                         }
                         if (emptyMsgLength == msg.length()) {
                             hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__EMPTY_LIST.toString()).queue();
