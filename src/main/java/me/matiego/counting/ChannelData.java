@@ -102,7 +102,7 @@ public class ChannelData {
      */
     public static @NotNull List<SelectOption> getSelectMenuOptions() {
         return Arrays.stream(Type.values())
-                .map(value -> SelectOption.of(value.toString(), value.name())
+                .map(value -> SelectOption.of(value.toString(), value.toString())
                         .withDescription(value.description)
                         .withEmoji(Emoji.fromUnicode(value.emojiUnicode)))
                 .toList();
