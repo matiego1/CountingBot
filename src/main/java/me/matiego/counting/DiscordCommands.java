@@ -82,14 +82,14 @@ public class DiscordCommands extends ListenerAdapter {
                         } catch (NullPointerException ignored) {}
                         for (Pair<Long, ChannelData> pair : plugin.getStorage().getChannels()) {
                             GuildChannel chn = jda.getGuildChannelById(pair.getFirst());
-                            if (guildId == plugin.getConfig().getLong("main-guild-id")) {
+                            if (chn != null && chn.getGuild().getIdLong() == guildId) {
+                                msg.append(chn.getAsMention()).append(": ").append(pair.getSecond().getType()).append("\n");
+                            } else if (plugin.getConfig().getLong("main-guild-id") == guildId) {
                                 msg.append(chn == null ? "`" + pair.getFirst() + "`" : chn.getAsMention()).append(": ").append(pair.getSecond().getType());
-                                if (chn != null && chn.getGuild().getIdLong() != guildId) {
-                                    msg.append(" [").append(chn.getGuild().getName()).append("]");
+                                if (chn != null) {
+                                    msg.append("; Guild: `[").append(chn.getGuild().getName()).append("]`");
                                 }
                                 msg.append("\n");
-                            } else if (chn != null && chn.getGuild().getIdLong() == guildId) {
-                                msg.append(chn.getAsMention()).append(": ").append(pair.getSecond().getType()).append("\n");
                             }
                         }
                         if (emptyMsgLength == msg.length()) {
