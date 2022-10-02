@@ -4,6 +4,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import me.matiego.counting.utils.*;
+import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
@@ -23,8 +24,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
 import javax.security.auth.login.LoginException;
+import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -178,6 +181,13 @@ public final class Main extends JavaPlugin {
                 .count();
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
 
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setDescription("Bot has been enabled!");
+        eb.setTimestamp(Instant.now());
+        eb.setColor(Color.GREEN);
+        TextChannel chn = getJda().getTextChannelById(getConfig().getLong("logs-channel-id"));
+        if (chn != null) chn.sendMessageEmbeds(eb.build()).queue();
+
         Logs.info("Plugin enabled in " + (System.currentTimeMillis() - time) + "ms.");
     }
 
@@ -202,6 +212,14 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         long time = System.currentTimeMillis();
         //shut down JDA
+
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setDescription("Bot has been disabled!");
+        eb.setTimestamp(Instant.now());
+        eb.setColor(Color.RED);
+        TextChannel chn = getJda().getTextChannelById(getConfig().getLong("logs-channel-id"));
+        if (chn != null) chn.sendMessageEmbeds(eb.build()).queue();
+
         if (jda == null) return;
         CompletableFuture<Void> shutdownTask = new CompletableFuture<>();
         jda.addEventListener(new ListenerAdapter() {
