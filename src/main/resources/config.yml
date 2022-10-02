@@ -59,6 +59,9 @@ translations:
     binary_counting:
       name: 'Binary Counting'
       description: 'Write the next numbers in binary'
+    hexadecimal_counting:
+      name: 'Hexadecimal Counting'
+      description: 'Write next hexadecimal numbers.'
     prime_counting:
       name: 'Prime Counting'
       description: 'Write the next prime numbers'
