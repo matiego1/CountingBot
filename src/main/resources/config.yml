@@ -19,7 +19,7 @@ translations:
     status: 'counting channels'
     do_not_spam: 'Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each.'
   commands:
-    about: 'Coming soon!'
+    about: '**__Counting bot__**\nCounts in different ways and have a lot of fun!\n\n**Author**: `Matiego#8675`\n**Source code**: https://github.com/matiego1/CountingBot\n**Version**: `%s`'
     feedback:
       title: 'Send feedback'
       subject: 'Subject'
@@ -69,7 +69,7 @@ translations:
       description: 'Write the next numbers in binary'
     hexadecimal_counting:
       name: 'Hexadecimal Counting'
-      description: 'Write next hexadecimal numbers.'
+      description: 'Write next hexadecimal numbers'
     prime_counting:
       name: 'Prime Counting'
       description: 'Write the next prime numbers'
