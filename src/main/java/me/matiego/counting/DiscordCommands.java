@@ -5,7 +5,6 @@ import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.GuildChannel;
-import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
@@ -45,9 +44,9 @@ public class DiscordCommands extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         if (event.getName().equals("ping")) {
             long time = System.currentTimeMillis();
-            event.reply("Pong!").setEphemeral(event.getOption("ephemeral", true, OptionMapping::getAsBoolean)).flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time)).queue();
+            event.reply("Pong!").setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time)).queue();
         } else if (event.getName().equals("about")) {
-            event.reply(Translation.COMMANDS__ABOUT.toString()).setEphemeral(event.getOption("ephemeral", true, OptionMapping::getAsBoolean)).queue();
+            event.reply(Translation.COMMANDS__ABOUT.toString()).setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).queue();
         } else if (event.getName().equals("feedback")) {
             event.replyModal(Modal.create("feedback-modal", Translation.COMMANDS__FEEDBACK__TITLE.toString())
                     .addActionRows(
@@ -56,7 +55,7 @@ public class DiscordCommands extends ListenerAdapter {
                                     .setPlaceholder(Translation.COMMANDS__FEEDBACK__SUBJECT_PLACEHOLDER.toString())
                                     .build()),
                             ActionRow.of(TextInput.create("description", Translation.COMMANDS__FEEDBACK__DESCRIPTION.toString(), TextInputStyle.PARAGRAPH)
-                                    .setRequiredRange(30, MessageEmbed.DESCRIPTION_MAX_LENGTH)
+                                    .setRequiredRange(30, 4000)
                                     .build())
                     )
                     .build()).queue();
