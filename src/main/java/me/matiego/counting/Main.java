@@ -222,7 +222,7 @@ public final class Main extends JavaPlugin {
         eb.setTimestamp(Instant.now());
         eb.setColor(Color.RED);
         TextChannel chn = getJda().getTextChannelById(getConfig().getLong("logs-channel-id"));
-        if (chn != null) chn.sendMessageEmbeds(eb.build()).queue();
+        if (chn != null) chn.sendMessageEmbeds(eb.build()).complete();
 
         if (jda == null) return;
         CompletableFuture<Void> shutdownTask = new CompletableFuture<>();
