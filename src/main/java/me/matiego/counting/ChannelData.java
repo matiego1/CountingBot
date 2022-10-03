@@ -50,7 +50,7 @@ public class ChannelData {
     enum Type {
         COUNTING("U+1F9EE", new Counting()),
         BINARY_COUNTING("U+1F4BB", new BinaryCounting()),
-        HEXADECIMAL_COUNTING("U+FE0F", new HexadecimalCounting()),
+        HEXADECIMAL_COUNTING("U+1F524", new HexadecimalCounting()),
         PRIME_COUNTING("U+1F4DF", new PrimeCounting()),
         SEMIPRIME_COUNTING("U+1F319", new SemiprimeCounting()),
         SPHENIC_COUNTING("U+26AA", new SphenicCounting()),
