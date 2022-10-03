@@ -19,6 +19,14 @@ translations:
     status: 'counting channels'
     do_not_spam: 'Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each.'
   commands:
+    about: 'Coming soon!'
+    feedback:
+      title: 'Send feedback'
+      subject: 'Subject'
+      subject_placeholder: 'e.g. bug report, suggestion'
+      description: 'Description'
+      success: 'Thank you for your feedback!'
+      failure: 'An error occurred. Try again.'
     counting:
       add: '**Select the type of the new counting channel:**'
       remove:

@@ -5,9 +5,11 @@ import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.GuildChannel;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
@@ -15,7 +17,11 @@ import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.components.ActionRow;
+import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
+import net.dv8tion.jda.api.interactions.components.text.TextInput;
+import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -40,6 +46,20 @@ public class DiscordCommands extends ListenerAdapter {
         if (event.getName().equals("ping")) {
             long time = System.currentTimeMillis();
             event.reply("Pong!").setEphemeral(event.getOption("ephemeral", true, OptionMapping::getAsBoolean)).flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time)).queue();
+        } else if (event.getName().equals("about")) {
+            event.reply(Translation.COMMANDS__ABOUT.toString()).setEphemeral(event.getOption("ephemeral", true, OptionMapping::getAsBoolean)).queue();
+        } else if (event.getName().equals("feedback")) {
+            event.replyModal(Modal.create("feedback-modal", Translation.COMMANDS__FEEDBACK__TITLE.toString())
+                    .addActionRows(
+                            ActionRow.of(TextInput.create("subject", Translation.COMMANDS__FEEDBACK__SUBJECT.toString(), TextInputStyle.SHORT)
+                                    .setRequiredRange(10, 100)
+                                    .setPlaceholder(Translation.COMMANDS__FEEDBACK__SUBJECT_PLACEHOLDER.toString())
+                                    .build()),
+                            ActionRow.of(TextInput.create("description", Translation.COMMANDS__FEEDBACK__DESCRIPTION.toString(), TextInputStyle.PARAGRAPH)
+                                    .setRequiredRange(30, MessageEmbed.DESCRIPTION_MAX_LENGTH)
+                                    .build())
+                    )
+                    .build()).queue();
         } else if (event.getName().equals("counting")) {
             event.deferReply(true).queue();
             InteractionHook hook = event.getHook();
@@ -201,6 +221,26 @@ public class DiscordCommands extends ListenerAdapter {
                     .map(value -> new Command.Choice(value, value))
                     .toList()
             ).queue();
+        }
+    }
+
+    @Override
+    public void onModalInteraction(@NotNull ModalInteractionEvent event) {
+        if (event.getModalId().equals("feedback-modal")) {
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.setTitle("Feedback - " + Objects.requireNonNull(event.getValue("subject")).getAsString());
+            eb.setDescription(Objects.requireNonNull(event.getValue("description")).getAsString());
+            eb.setTimestamp(Instant.now());
+            eb.setColor(Color.BLUE);
+            eb.setFooter(event.getUser().getAsTag());
+
+            TextChannel chn = plugin.getJda().getTextChannelById(plugin.getConfig().getLong("logs-channel-id"));
+            if (chn != null) {
+                chn.sendMessageEmbeds(eb.build()).queue();
+                event.reply(Translation.COMMANDS__FEEDBACK__SUCCESS.toString()).setEphemeral(true).queue();
+            } else {
+                event.reply(Translation.COMMANDS__FEEDBACK__FAILURE.toString()).setEphemeral(true).queue();
+            }
         }
     }
 }

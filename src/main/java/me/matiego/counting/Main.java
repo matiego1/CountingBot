@@ -151,7 +151,11 @@ public final class Main extends JavaPlugin {
                                             .addOption(OptionType.STRING, "language", "The dictionary type", true, true)
                                             .addOption(OptionType.STRING, "admin-key", "The secret administrator key", true)
                                             .addOption(OptionType.STRING, "file", "The dictionary file", true)
-                            )
+                            ),
+                    Commands.slash("feedback", "Report a bug, suggest a change or share your impressions"),
+                    Commands.slash("about", "Shows some basic information about this bot.")
+                            .addOption(OptionType.BOOLEAN, "ephemeral", "whether this message should only be visible to you", false)
+
             ).queue();
         } catch (Exception e) {
             Logs.error("An error occurred while enabling the Discord bot." + (e instanceof LoginException ? " Is the provided bot token correct?" : ""), e);
