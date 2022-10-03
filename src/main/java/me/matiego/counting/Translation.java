@@ -20,7 +20,14 @@ public enum Translation {
     GENERAL__STATUS("counting channels"),
     GENERAL__DO_NOT_SPAM("Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each."),
     /*--- Commands ---*/
-    COMMANDS__ABOUT("Coming soon!"),
+    COMMANDS__ABOUT("""
+            **Counting bot**
+            Counts in different ways and have a lot of fun!
+            
+            Author: Matiego#8675
+            Source code: https://github.com/matiego1/CountingBot
+            Version: %s
+            """),
     //feedback
     COMMANDS__FEEDBACK__TITLE("Send feedback"),
     COMMANDS__FEEDBACK__SUBJECT("Subject"),
