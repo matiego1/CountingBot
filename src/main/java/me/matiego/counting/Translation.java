@@ -80,7 +80,7 @@ public enum Translation {
     TYPE__SPANISH_LAST_LETTER__NAME("Spanish last letter"),
     TYPE__COUNTING__DESCRIPTION("Write next numbers"),
     TYPE__BINARY_COUNTING__DESCRIPTION("Write next numbers in binary"),
-    TYPE__HEXADECIMAL_COUNTING__DESCRIPTION("Write next hexadecimal numbers."),
+    TYPE__HEXADECIMAL_COUNTING__DESCRIPTION("Write next hexadecimal numbers"),
     TYPE__PRIME_COUNTING__DESCRIPTION("Write next prime numbers"),
     TYPE__SEMIPRIME_COUNTING__DESCRIPTION("Write next semiprime numbers"),
     TYPE__SPHENIC_COUNTING__DESCRIPTION("Write next sphenic numbers"),
