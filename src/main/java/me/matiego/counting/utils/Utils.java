@@ -5,6 +5,7 @@ import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import me.matiego.counting.Main;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -153,13 +154,24 @@ public class Utils {
      * @return the list of {@code CacheFlag}s
      */
     public static @NotNull List<CacheFlag> getDisabledCacheFlag() {
-        return List.of(
+        return Arrays.asList(
                 CacheFlag.ACTIVITY,
                 CacheFlag.VOICE_STATE,
                 CacheFlag.EMOJI,
                 CacheFlag.STICKER,
                 CacheFlag.CLIENT_STATUS,
                 CacheFlag.ONLINE_STATUS
+        );
+    }
+
+    public static @NotNull List<Permission> getRequiredPermissions() {
+        return Arrays.asList(
+                Permission.MANAGE_CHANNEL,
+                Permission.MANAGE_WEBHOOKS,
+                Permission.VIEW_CHANNEL,
+                Permission.MESSAGE_SEND,
+                Permission.MANAGE_CHANNEL,
+                Permission.MESSAGE_HISTORY
         );
     }
 
