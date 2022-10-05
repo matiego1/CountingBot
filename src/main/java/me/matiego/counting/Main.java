@@ -216,6 +216,7 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         long time = System.currentTimeMillis();
         //shut down JDA
+        getJda().getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
 
         EmbedBuilder eb = new EmbedBuilder();
         eb.setDescription("Bot has been disabled!");
@@ -224,15 +225,15 @@ public final class Main extends JavaPlugin {
         TextChannel chn = getJda().getTextChannelById(getConfig().getLong("logs-channel-id"));
         if (chn != null) chn.sendMessageEmbeds(eb.build()).complete();
 
-        if (jda == null) return;
+        if (getJda() == null) return;
         CompletableFuture<Void> shutdownTask = new CompletableFuture<>();
-        jda.addEventListener(new ListenerAdapter() {
+        getJda().addEventListener(new ListenerAdapter() {
             @Override
             public void onShutdown(@NotNull ShutdownEvent event) {
                 shutdownTask.complete(null);
             }
         });
-        jda.shutdown();
+        getJda().shutdown();
         try {
             shutdownTask.get(5, TimeUnit.SECONDS);
             Logs.info("Successfully shut down the Discord bot.");

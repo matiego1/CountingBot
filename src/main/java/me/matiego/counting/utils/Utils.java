@@ -15,6 +15,7 @@ import okhttp3.Dns;
 import okhttp3.OkHttpClient;
 import okhttp3.internal.tls.OkHostnameVerifier;
 import org.bukkit.Bukkit;
+import org.bukkit.plugin.IllegalPluginAccessException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -167,7 +168,9 @@ public class Utils {
      * @param task the task
      */
     public static void async(@NotNull Runnable task) {
-        Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), task);
+        try {
+            Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), task);
+        } catch (IllegalPluginAccessException ignored) {}
     }
 
     /**

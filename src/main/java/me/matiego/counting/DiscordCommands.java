@@ -46,7 +46,7 @@ public class DiscordCommands extends ListenerAdapter {
             long time = System.currentTimeMillis();
             event.reply("Pong!").setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time)).queue();
         } else if (event.getName().equals("about")) {
-            event.reply(Translation.COMMANDS__ABOUT.getFormatted(plugin.getDescription().getVersion())).setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).setEphemeral(true).queue();
+            event.reply(Translation.COMMANDS__ABOUT.getFormatted(plugin.getDescription().getVersion())).setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).queue();
         } else if (event.getName().equals("feedback")) {
             event.replyModal(Modal.create("feedback-modal", Translation.COMMANDS__FEEDBACK__TITLE.toString())
                     .addActionRows(
