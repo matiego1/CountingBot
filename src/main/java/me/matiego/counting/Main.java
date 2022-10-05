@@ -171,7 +171,6 @@ public final class Main extends JavaPlugin {
         getJda().getGuilds().forEach(guild -> {
             if (!guild.getSelfMember().hasPermission(Utils.getRequiredPermissions())) {
                 Logs.warning("The Discord bot does not have all the required permissions in the " + guild.getName() + " guild. Add the bot to it again.");
-                guild.leave().complete();
             }
         });
         //Check channels
