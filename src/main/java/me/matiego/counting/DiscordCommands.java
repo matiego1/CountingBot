@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.GuildChannel;
 import net.dv8tion.jda.api.entities.TextChannel;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -42,6 +43,7 @@ public class DiscordCommands extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+        User user = event.getUser();
         if (event.getName().equals("ping")) {
             long time = System.currentTimeMillis();
             event.reply("Pong!").setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time)).queue();
@@ -84,7 +86,7 @@ public class DiscordCommands extends ListenerAdapter {
                                 eb.setTitle(Translation.GENERAL__CLOSE_EMBED.toString());
                                 eb.setColor(Color.RED);
                                 eb.setTimestamp(Instant.now());
-                                eb.setFooter(Utils.getName(event.getUser(), event.getMember()) + "#" + event.getUser().getDiscriminator(), Utils.getAvatar(event.getUser(), event.getMember()));
+                                eb.setFooter(Utils.getName(user, event.getMember()) + "#" + user.getDiscriminator(), Utils.getAvatar(user, event.getMember()));
                                 event.getChannel().sendMessageEmbeds(eb.build()).queue();
                             }
                             case NO_CHANGES -> hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__NO_CHANGES.toString()).queue();
@@ -166,6 +168,7 @@ public class DiscordCommands extends ListenerAdapter {
 
     @Override
     public void onSelectMenuInteraction(@NotNull SelectMenuInteractionEvent event) {
+        User user = event.getUser();
         if (event.getComponentId().equals("counting-type")) {
             event.deferReply(true).queue();
             Utils.async(() -> {
@@ -196,7 +199,7 @@ public class DiscordCommands extends ListenerAdapter {
                         eb.setDescription(Translation.GENERAL__OPEN_EMBED__DESCRIPTION.getFormatted(type, type.getDescription()));
                         eb.setColor(Color.GREEN);
                         eb.setTimestamp(Instant.now());
-                        eb.setFooter(Utils.getName(event.getUser(), event.getMember()) + "#" + event.getUser().getDiscriminator(), Utils.getAvatar(event.getUser(), event.getMember()));
+                        eb.setFooter(Utils.getName(user, event.getMember()) + "#" + user.getDiscriminator(), Utils.getAvatar(user, event.getMember()));
                         chn.sendMessageEmbeds(eb.build()).queue();
                     }
                     case NO_CHANGES -> replySelectMenu(event, Translation.COMMANDS__SELECT_MENU__NO_CHANGES.toString());
