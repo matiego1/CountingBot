@@ -4,10 +4,11 @@ import me.matiego.counting.utils.Pair;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.GuildChannel;
-import net.dv8tion.jda.api.entities.TextChannel;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
@@ -65,7 +66,7 @@ public class DiscordCommands extends ListenerAdapter {
             event.deferReply(true).queue();
             InteractionHook hook = event.getHook();
             Utils.async(() -> {
-                if (event.getChannel().getType() != net.dv8tion.jda.api.entities.ChannelType.TEXT) {
+                if (event.getChannel().getType() != ChannelType.TEXT) {
                     hook.sendMessage(Translation.GENERAL__UNSUPPORTED_CHANNEL_TYPE.toString()).queue();
                     return;
                 }
@@ -182,7 +183,7 @@ public class DiscordCommands extends ListenerAdapter {
                 }
 
                 MessageChannelUnion channelUnion = event.getChannel();
-                if (channelUnion.getType() != net.dv8tion.jda.api.entities.ChannelType.TEXT) {
+                if (channelUnion.getType() != ChannelType.TEXT) {
                     replySelectMenu(event, Translation.GENERAL__UNSUPPORTED_CHANNEL_TYPE.toString());
                     return;
                 }
