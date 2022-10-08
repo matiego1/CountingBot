@@ -19,6 +19,7 @@ public enum Translation {
     GENERAL__UNKNOWN_CHANNEL_TYPE("Unknown channel type. Try again."),
     GENERAL__STATUS("counting channels"),
     GENERAL__DO_NOT_SPAM("Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each."),
+    GENERLA__CHANNEL_TOPIC(""),
     /*--- Commands ---*/
     COMMANDS__ABOUT("""
             **__Counting bot__**

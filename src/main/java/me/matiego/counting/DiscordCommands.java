@@ -191,6 +191,9 @@ public class DiscordCommands extends ListenerAdapter {
                 List<Webhook> webhooks = chn.retrieveWebhooks().complete();
                 Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
 
+                String topic = Translation.GENERLA__CHANNEL_TOPIC.toString();
+                if (!topic.isBlank()) chn.getManager().setTopic(topic).queue();
+
                 switch (plugin.getStorage().addChannel(chn.getIdLong(), new ChannelData(type, webhook))) {
                     case SUCCESS -> {
                         replySelectMenu(event, Translation.COMMANDS__SELECT_MENU__SUCCESS.toString());
