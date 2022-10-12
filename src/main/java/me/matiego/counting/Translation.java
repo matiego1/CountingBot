@@ -19,7 +19,6 @@ public enum Translation {
     GENERAL__UNKNOWN_CHANNEL_TYPE("Unknown channel type. Try again."),
     GENERAL__STATUS("counting channels"),
     GENERAL__DO_NOT_SPAM("Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each."),
-    GENERLA__CHANNEL_TOPIC(""),
     /*--- Commands ---*/
     COMMANDS__ABOUT("""
             **__Counting bot__**
@@ -36,6 +35,7 @@ public enum Translation {
     COMMANDS__FEEDBACK__DESCRIPTION("Description"),
     COMMANDS__FEEDBACK__SUCCESS("Thank you for your feedback!"),
     COMMANDS__FEEDBACK__FAILURE("An error occurred. Try again."),
+    COMMANDS__FEEDBACK__OPEN_CHANNELS("Opened %s channels out of %s!"),
     //counting
     COMMANDS__COUNTING__ADD("**__Select the type of the new counting channel:__**"),
     COMMANDS__COUNTING__REMOVE__SUCCESS("The channel has been successfully closed!"),

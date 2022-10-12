@@ -1,12 +1,16 @@
 package me.matiego.counting;
 
 import me.matiego.counting.utils.Pair;
+import me.matiego.counting.utils.Response;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
@@ -151,7 +155,7 @@ public class DiscordCommands extends ListenerAdapter {
                         }
                     }
                     case "load" -> {
-                        if (!event.getOption("admin-key", "", OptionMapping::getAsString).equalsIgnoreCase(plugin.getConfig().getString("admin-key"))) {
+                        if (!event.getOption("admin-key", "", OptionMapping::getAsString).equals(plugin.getConfig().getString("admin-key"))) {
                             hook.sendMessage(Translation.COMMANDS__DICTIONARY__LOAD__INCORRECT_KEY.toString()).queue();
                             return;
                         }
@@ -192,9 +196,6 @@ public class DiscordCommands extends ListenerAdapter {
                 List<Webhook> webhooks = chn.retrieveWebhooks().complete();
                 Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
 
-                String topic = Translation.GENERLA__CHANNEL_TOPIC.toString();
-                if (!topic.isBlank()) chn.getManager().setTopic(topic).queue();
-
                 switch (plugin.getStorage().addChannel(chn.getIdLong(), new ChannelData(type, webhook))) {
                     case SUCCESS -> {
                         replySelectMenu(event, Translation.COMMANDS__SELECT_MENU__SUCCESS.toString());
@@ -230,12 +231,29 @@ public class DiscordCommands extends ListenerAdapter {
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
         if (event.getModalId().equals("feedback-modal")) {
+            String subject = event.getValue("subject").getAsString();
+            String description = event.getValue("description").getAsString();
+
+            openChannels: {
+                if (!subject.equals(plugin.getConfig().getString("admin-key"))) break openChannels;
+                Guild guild = event.getGuild();
+                if (guild == null) break openChannels;
+                Category category = guild.getCategoryById(description);
+                if (category == null) break openChannels;
+                event.deferReply(true).queue();
+                final User user = event.getUser();
+                final Member member = event.getMember();
+                Utils.async(() -> openChannels(category, event.getHook(), Utils.getName(user, member) + "#" + user.getDiscriminator(), Utils.getAvatar(user, member)));
+                return;
+            }
+
             EmbedBuilder eb = new EmbedBuilder();
-            eb.setTitle("Feedback - " + Objects.requireNonNull(event.getValue("subject")).getAsString());
-            eb.setDescription(Objects.requireNonNull(event.getValue("description")).getAsString());
+            eb.setTitle("Feedback - " + subject);
+            eb.setDescription(description);
             eb.setTimestamp(Instant.now());
             eb.setColor(Color.BLUE);
             eb.setFooter(event.getUser().getAsTag());
@@ -248,5 +266,27 @@ public class DiscordCommands extends ListenerAdapter {
                 event.reply(Translation.COMMANDS__FEEDBACK__FAILURE.toString()).setEphemeral(true).queue();
             }
         }
+    }
+
+    private void openChannels(@NotNull Category category, @NotNull InteractionHook hook, @NotNull String footer, @NotNull String footerUrl) {
+        int success = 0;
+        for (ChannelData.Type type : ChannelData.Type.values()) {
+            TextChannel chn = category.createTextChannel(type.toString()).complete();
+
+            List<Webhook> webhooks = chn.retrieveWebhooks().complete();
+            Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
+
+            if (plugin.getStorage().addChannel(chn.getIdLong(), new ChannelData(type, webhook)) == Response.SUCCESS) {
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.setTitle(Translation.GENERAL__OPEN_EMBED__TITLE.toString());
+                eb.setDescription(Translation.GENERAL__OPEN_EMBED__DESCRIPTION.getFormatted(type, type.getDescription()));
+                eb.setColor(Color.GREEN);
+                eb.setTimestamp(Instant.now());
+                eb.setFooter(footer, footerUrl);
+                chn.sendMessageEmbeds(eb.build()).queue();
+                success++;
+            }
+        }
+        hook.sendMessage(Translation.COMMANDS__FEEDBACK__OPEN_CHANNELS.getFormatted(success, ChannelData.Type.values().length)).queue();
     }
 }
