@@ -3,3 +3,6 @@ version: '${project.version}'
 main: me.matiego.counting.Main
 api-version: 1.19
 author: Matiego
+commands:
+  counting:
+    description: reloads the config
