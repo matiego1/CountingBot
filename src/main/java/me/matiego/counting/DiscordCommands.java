@@ -50,11 +50,13 @@ public class DiscordCommands extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         User user = event.getUser();
         long time = System.currentTimeMillis();
-        long cooldownTime = cooldown.getOrDefault(new Pair<>(event.getUser().getId(), event.getName()).toString(), 0L);
+        
+        long cooldownTime = cooldown.getOrDefault(new Pair<>(user.getId(), event.getName()).toString(), 0L);
         if (cooldownTime >= time) {
-            event.reply(Translation.GENERAL__COMMAND_COOLDOWN.getFormatted(time - cooldownTime)).setEphemeral(true).queue();
+            event.reply(Translation.GENERAL__COMMAND_COOLDOWN.getFormatted((cooldownTime - time) / SECOND)).setEphemeral(true).queue();
             return;
         }
+
         if (event.getName().equals("ping")) {
             long pingTime = System.currentTimeMillis();
             event.reply("Pong!").setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - pingTime)).queue();
@@ -80,7 +82,9 @@ public class DiscordCommands extends ListenerAdapter {
                     hook.sendMessage(Translation.GENERAL__UNSUPPORTED_CHANNEL_TYPE.toString()).queue();
                     return;
                 }
+
                 putSlowdown(user, event.getName(), 5 * SECOND);
+
                 switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
                     case "add" -> hook.sendMessage(Translation.COMMANDS__COUNTING__ADD.toString())
                             .addActionRow(
@@ -198,6 +202,8 @@ public class DiscordCommands extends ListenerAdapter {
                 }
                 TextChannel chn = channelUnion.asTextChannel();
 
+                putSlowdown(user, "counting", 5 * SECOND);
+
                 List<Webhook> webhooks = chn.retrieveWebhooks().complete();
                 Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
 
@@ -270,6 +276,7 @@ public class DiscordCommands extends ListenerAdapter {
             } else {
                 event.reply(Translation.COMMANDS__FEEDBACK__FAILURE.toString()).setEphemeral(true).queue();
             }
+            putSlowdown(event.getUser(), "feedback", 15 * SECOND);
         }
     }
 
@@ -296,7 +303,7 @@ public class DiscordCommands extends ListenerAdapter {
     }
 
     private synchronized void putSlowdown(@NotNull UserSnowflake user, @NotNull String command, long time) {
-        cooldown.put(new Pair<>(user, command).toString(), System.currentTimeMillis() + time);
+        cooldown.put(new Pair<>(user.getId(), command).toString(), System.currentTimeMillis() + time);
     }
 
     private void replyAndPutSlowdown(@NotNull InteractionHook hook, @NotNull UserSnowflake user, @NotNull String command, long time, @NotNull String msg) {
