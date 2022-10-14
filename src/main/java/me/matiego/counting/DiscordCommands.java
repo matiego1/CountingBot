@@ -1,14 +1,12 @@
 package me.matiego.counting;
 
+import me.matiego.counting.utils.FixedSizeMap;
 import me.matiego.counting.utils.Pair;
 import me.matiego.counting.utils.Response;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -45,13 +43,21 @@ public class DiscordCommands extends ListenerAdapter {
     }
 
     private final Main plugin;
+    private final int SECOND = 1000;
+    private final FixedSizeMap<String, Long> cooldown = new FixedSizeMap<>(1000);
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         User user = event.getUser();
+        long time = System.currentTimeMillis();
+        long cooldownTime = cooldown.getOrDefault(new Pair<>(event.getUser().getId(), event.getName()).toString(), 0L);
+        if (cooldownTime >= time) {
+            event.reply(Translation.GENERAL__COMMAND_COOLDOWN.getFormatted(time - cooldownTime)).setEphemeral(true).queue();
+            return;
+        }
         if (event.getName().equals("ping")) {
-            long time = System.currentTimeMillis();
-            event.reply("Pong!").setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time)).queue();
+            long pingTime = System.currentTimeMillis();
+            event.reply("Pong!").setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - pingTime)).queue();
         } else if (event.getName().equals("about")) {
             event.reply(Translation.COMMANDS__ABOUT.getFormatted(plugin.getDescription().getVersion())).setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).queue();
         } else if (event.getName().equals("feedback")) {
@@ -74,15 +80,15 @@ public class DiscordCommands extends ListenerAdapter {
                     hook.sendMessage(Translation.GENERAL__UNSUPPORTED_CHANNEL_TYPE.toString()).queue();
                     return;
                 }
+                putSlowdown(user, event.getName(), 5 * SECOND);
                 switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
-                    case "add" ->
-                            hook.sendMessage(Translation.COMMANDS__COUNTING__ADD.toString())
-                                    .addActionRow(
-                                            SelectMenu.create("counting-type")
-                                                    .addOptions(ChannelData.getSelectMenuOptions())
-                                                    .setRequiredRange(1, 1)
-                                                    .build())
-                                    .queue();
+                    case "add" -> hook.sendMessage(Translation.COMMANDS__COUNTING__ADD.toString())
+                            .addActionRow(
+                                    SelectMenu.create("counting-type")
+                                            .addOptions(ChannelData.getSelectMenuOptions())
+                                            .setRequiredRange(1, 1)
+                                            .build())
+                            .queue();
                     case "remove" -> {
                         switch (plugin.getStorage().removeChannel(event.getChannel().getIdLong())) {
                             case SUCCESS -> {
@@ -142,29 +148,28 @@ public class DiscordCommands extends ListenerAdapter {
                 switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
                     case "add" -> {
                         if (plugin.getDictionary().addWord(type, event.getOption("word", "null", OptionMapping::getAsString))) {
-                            hook.sendMessage(Translation.COMMANDS__DICTIONARY__ADD__SUCCESS.toString()).queue();
+                            replyAndPutSlowdown(hook, user, event.getName(), 7 * SECOND, Translation.COMMANDS__DICTIONARY__ADD__SUCCESS.getFormatted(System.currentTimeMillis() - time));
                         } else {
-                            hook.sendMessage(Translation.COMMANDS__DICTIONARY__ADD__FAILURE.toString()).queue();
+                            replyAndPutSlowdown(hook, user, event.getName(), 3 * SECOND, Translation.COMMANDS__DICTIONARY__ADD__FAILURE.toString());
                         }
                     }
                     case "remove" -> {
                         if (plugin.getDictionary().removeWord(type, event.getOption("word", "null", OptionMapping::getAsString))) {
-                            hook.sendMessage(Translation.COMMANDS__DICTIONARY__REMOVE__SUCCESS.toString()).queue();
+                            replyAndPutSlowdown(hook, user, event.getName(), 7 * SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__SUCCESS.getFormatted(System.currentTimeMillis() - time));
                         } else {
-                            hook.sendMessage(Translation.COMMANDS__DICTIONARY__REMOVE__FAILURE.toString()).queue();
+                            replyAndPutSlowdown(hook, user, event.getName(), 3 * SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__FAILURE.toString());
                         }
                     }
                     case "load" -> {
                         if (!event.getOption("admin-key", "", OptionMapping::getAsString).equals(plugin.getConfig().getString("admin-key"))) {
-                            hook.sendMessage(Translation.COMMANDS__DICTIONARY__LOAD__INCORRECT_KEY.toString()).queue();
+                            replyAndPutSlowdown(hook, user, event.getName(), 3 * SECOND, Translation.COMMANDS__DICTIONARY__LOAD__INCORRECT_KEY.toString());
                             return;
                         }
-                        hook.sendMessage(
-                                switch (plugin.getDictionary().loadDictionaryFromFile(new File(plugin.getDataFolder() + File.separator + event.getOption("file", "null", OptionMapping::getAsString)), type)) {
-                                    case SUCCESS -> Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.toString();
-                                    case NO_CHANGES -> Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.toString();
-                                    case FAILURE -> Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.toString();
-                                }).queue();
+                        switch (plugin.getDictionary().loadDictionaryFromFile(new File(plugin.getDataFolder() + File.separator + event.getOption("file", "null", OptionMapping::getAsString)), type)) {
+                            case SUCCESS -> replyAndPutSlowdown(hook, user, event.getName(), 300 * SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(System.currentTimeMillis() - time));
+                            case NO_CHANGES -> replyAndPutSlowdown(hook, user, event.getName(), 5 * SECOND, Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.getFormatted(System.currentTimeMillis() - time));
+                            case FAILURE -> replyAndPutSlowdown(hook, user, event.getName(), 30 * SECOND, Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.getFormatted(System.currentTimeMillis() - time));
+                        }
                     }
                 }
             });
@@ -288,5 +293,14 @@ public class DiscordCommands extends ListenerAdapter {
             }
         }
         hook.sendMessage(Translation.COMMANDS__FEEDBACK__OPEN_CHANNELS.getFormatted(success, ChannelData.Type.values().length)).queue();
+    }
+
+    private synchronized void putSlowdown(@NotNull UserSnowflake user, @NotNull String command, long time) {
+        cooldown.put(new Pair<>(user, command).toString(), System.currentTimeMillis() + time);
+    }
+
+    private void replyAndPutSlowdown(@NotNull InteractionHook hook, @NotNull UserSnowflake user, @NotNull String command, long time, @NotNull String msg) {
+        hook.sendMessage(msg).queue();
+        putSlowdown(user, command, time);
     }
 }

@@ -19,6 +19,7 @@ public enum Translation {
     GENERAL__UNKNOWN_CHANNEL_TYPE("Unknown channel type. Try again."),
     GENERAL__STATUS("counting channels"),
     GENERAL__DO_NOT_SPAM("Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each."),
+    GENERAL__COMMAND_COOLDOWN("You can use this command again in %s seconds."),
     /*--- Commands ---*/
     COMMANDS__ABOUT("""
             **__Counting bot__**
@@ -44,12 +45,12 @@ public enum Translation {
     COMMANDS__COUNTING__LIST__LIST("**__Open Counting Channels:__**"),
     COMMANDS__COUNTING__LIST__EMPTY_LIST("No counting channel has been opened yet. Open a new one with `/counting add`"),
     //dictionary
-    COMMANDS__DICTIONARY__ADD__SUCCESS("This word has been successfully added to the dictionary!"),
+    COMMANDS__DICTIONARY__ADD__SUCCESS("This word has been successfully added to the dictionary in %s ms."),
     COMMANDS__DICTIONARY__ADD__FAILURE("An error occurred. Try again."),
-    COMMANDS__DICTIONARY__REMOVE__SUCCESS("This word has been successfully removed from the dictionary!"),
+    COMMANDS__DICTIONARY__REMOVE__SUCCESS("This word has been successfully removed from the dictionary in %s ms."),
     COMMANDS__DICTIONARY__REMOVE__FAILURE("An error occurred. Try again."),
     COMMANDS__DICTIONARY__LOAD__INCORRECT_KEY("Incorrect administrator key!\nThe admin-key can be found in the configuration file. This is to prevent uploading random files by people who do not have access to them."),
-    COMMANDS__DICTIONARY__LOAD__SUCCESS("Success!"),
+    COMMANDS__DICTIONARY__LOAD__SUCCESS("Success! (%s ms)"),
     COMMANDS__DICTIONARY__LOAD__NO_CHANGES("This file does not exist."),
     COMMANDS__DICTIONARY__LOAD__FAILURE("An error occurred. Try again."),
     //select menu
