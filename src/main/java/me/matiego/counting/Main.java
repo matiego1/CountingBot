@@ -15,9 +15,11 @@ import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.bukkit.Bukkit;
@@ -29,6 +31,7 @@ import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -97,9 +100,9 @@ public final class Main extends JavaPlugin {
         dictionary = new Dictionary();
         //Discord bot
         Logs.info("Enabling the Discord bot...");
-        if (getJda() != null) {
+        if (jda != null) {
             try {
-                getJda().shutdownNow();
+                jda.shutdownNow();
                 callbackThreadPool.shutdownNow();
             } catch (Exception e) {
                 Logs.error("An error occurred while shutting down the Discord bot.", e);
@@ -131,8 +134,8 @@ public final class Main extends JavaPlugin {
                     .addEventListeners(new MessageHandler())
                     .setActivity(Activity.competing(Translation.GENERAL__STATUS.toString()))
                     .build();
-            getJda().awaitReady(); //Yes I know, this will block the thread.
-            getJda().updateCommands().addCommands(
+            jda.awaitReady(); //Yes I know, this will block the thread.
+            jda.updateCommands().addCommands(
                     Commands.slash("ping", "Shows the current ping of the bot")
                             .addOption(OptionType.BOOLEAN, "ephemeral", "whether this message should only be visible to you", false),
                     Commands.slash("counting", "Manages the counting channels")
@@ -141,21 +144,46 @@ public final class Main extends JavaPlugin {
                             .addSubcommands(
                                     new SubcommandData("add", "Opens a new counting channel"),
                                     new SubcommandData("remove", "Closes the counting channel"),
-                                    new SubcommandData("list", "Shows all opened counting channel in this guild")),
+                                    new SubcommandData("list", "Shows all opened counting channel in this guild")
+                            ),
                     Commands.slash("dictionary", "Manages dictionaries")
                             .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                             .setGuildOnly(true)
                             .addSubcommands(
                                     new SubcommandData("add", "Adds a word to the dictionary")
-                                            .addOption(OptionType.STRING, "language", "The dictionary's type", true, true)
-                                            .addOption(OptionType.STRING, "word", "A word to add", true),
+                                            .addOptions(
+                                                    new OptionData(OptionType.STRING, "language", "The dictionary's type", true)
+                                                            .addChoices(
+                                                                    Arrays.stream(Dictionary.Type.values())
+                                                                    .map(Enum::toString)
+                                                                    .map(value -> new Command.Choice(value, value))
+                                                                    .toList()
+                                                            ),
+                                                    new OptionData(OptionType.STRING, "word", "A word to add", true)
+                                            ),
                                     new SubcommandData("remove", "Removes a word from the dictionary")
-                                            .addOption(OptionType.STRING, "language", "The dictionary's type", true, true)
-                                            .addOption(OptionType.STRING, "word", "A word to remove", true),
+                                            .addOptions(
+                                                    new OptionData(OptionType.STRING, "language", "The dictionary's type", true)
+                                                            .addChoices(
+                                                                    Arrays.stream(Dictionary.Type.values())
+                                                                            .map(Enum::toString)
+                                                                            .map(value -> new Command.Choice(value, value))
+                                                                            .toList()
+                                                            ),
+                                                    new OptionData(OptionType.STRING, "word", "A word to add", true)
+                                            ),
                                     new SubcommandData("load", "Loads a file into the dictionary")
-                                            .addOption(OptionType.STRING, "language", "The dictionary type", true, true)
-                                            .addOption(OptionType.STRING, "admin-key", "The secret administrator key", true)
-                                            .addOption(OptionType.STRING, "file", "The dictionary file", true)
+                                            .addOptions(
+                                                    new OptionData(OptionType.STRING, "language", "The dictionary's type", true)
+                                                            .addChoices(
+                                                                    Arrays.stream(Dictionary.Type.values())
+                                                                            .map(Enum::toString)
+                                                                            .map(value -> new Command.Choice(value, value))
+                                                                            .toList()
+                                                            ),
+                                                    new OptionData(OptionType.STRING, "word", "A word to add", true),
+                                                    new OptionData(OptionType.STRING, "file", "The dictionary file", true)
+                                            )
                             ),
                     Commands.slash("feedback", "Report a bug, suggest a change or share your impressions"),
                     Commands.slash("about", "Shows some basic information about this bot.")
@@ -168,7 +196,7 @@ public final class Main extends JavaPlugin {
             return;
         }
         //Check permissions
-        getJda().getGuilds().forEach(guild -> {
+        jda.getGuilds().forEach(guild -> {
             if (!guild.getSelfMember().hasPermission(Utils.getRequiredPermissions())) {
                 Logs.warning("The Discord bot does not have all the required permissions in the " + guild.getName() + " guild. Add the bot to it again.");
             }
@@ -177,7 +205,7 @@ public final class Main extends JavaPlugin {
         List<Pair<Long, ChannelData>> channels = getStorage().getChannels();
         int removed = (int) channels.stream()
                 .map(Pair::getFirst)
-                .filter(id -> getJda().getTextChannelById(id) == null)
+                .filter(id -> jda.getTextChannelById(id) == null)
                 .map(id -> getStorage().removeChannel(id))
                 .filter(response -> response == Response.SUCCESS)
                 .count();
@@ -186,7 +214,7 @@ public final class Main extends JavaPlugin {
         int refreshedWebhooks = (int) channels.stream()
                 .filter(pair -> {
                     try {
-                        getJda().retrieveWebhookById(pair.getSecond().getWebhookId()).complete();
+                        jda.retrieveWebhookById(pair.getSecond().getWebhookId()).complete();
                         return false;
                     } catch (ErrorResponseException ignored) {}
                     return true;
@@ -200,7 +228,7 @@ public final class Main extends JavaPlugin {
         eb.setDescription("Bot has been enabled!");
         eb.setTimestamp(Instant.now());
         eb.setColor(Color.GREEN);
-        TextChannel chn = getJda().getTextChannelById(getConfig().getLong("logs-channel-id"));
+        TextChannel chn = jda.getTextChannelById(getConfig().getLong("logs-channel-id"));
         if (chn != null) chn.sendMessageEmbeds(eb.build()).queue();
 
         Logs.info("Plugin enabled in " + (System.currentTimeMillis() - time) + "ms.");
@@ -209,7 +237,7 @@ public final class Main extends JavaPlugin {
     private boolean refreshWebhook(long id, @NotNull ChannelData.Type type) {
         if (getStorage().removeChannel(id) == Response.FAILURE) return false;
 
-        TextChannel chn = getJda().getTextChannelById(id);
+        TextChannel chn = jda.getTextChannelById(id);
         if (chn == null) return false;
         List<Webhook> webhooks = chn.retrieveWebhooks().complete();
         Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
@@ -227,24 +255,24 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         long time = System.currentTimeMillis();
         //shut down JDA
-        getJda().getRegisteredListeners().forEach(listener -> getJda().removeEventListener(listener));
+        jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
 
         EmbedBuilder eb = new EmbedBuilder();
         eb.setDescription("Bot has been disabled!");
         eb.setTimestamp(Instant.now());
         eb.setColor(Color.RED);
-        TextChannel chn = getJda().getTextChannelById(getConfig().getLong("logs-channel-id"));
+        TextChannel chn = jda.getTextChannelById(getConfig().getLong("logs-channel-id"));
         if (chn != null) chn.sendMessageEmbeds(eb.build()).complete();
 
-        if (getJda() == null) return;
+        if (jda == null) return;
         CompletableFuture<Void> shutdownTask = new CompletableFuture<>();
-        getJda().addEventListener(new ListenerAdapter() {
+        jda.addEventListener(new ListenerAdapter() {
             @Override
             public void onShutdown(@NotNull ShutdownEvent event) {
                 shutdownTask.complete(null);
             }
         });
-        getJda().shutdown();
+        jda.shutdown();
         try {
             shutdownTask.get(5, TimeUnit.SECONDS);
             Logs.info("Successfully shut down the Discord bot.");

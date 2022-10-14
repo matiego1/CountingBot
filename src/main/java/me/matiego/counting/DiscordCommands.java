@@ -13,12 +13,10 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.command.CommandAutoCompleteInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Modal;
@@ -228,18 +226,6 @@ public class DiscordCommands extends ListenerAdapter {
     private void replySelectMenu(@NotNull SelectMenuInteractionEvent event, @NotNull String msg) {
         event.getHook().sendMessage(msg).queue();
         event.editSelectMenu(event.getSelectMenu().asDisabled()).queue();
-    }
-
-    @Override
-    public void onCommandAutoCompleteInteraction(@NotNull CommandAutoCompleteInteractionEvent event) {
-        if (event.getName().equals("dictionary") && event.getFocusedOption().getName().equals("language")) {
-            event.replyChoices(Arrays.stream(Dictionary.Type.values())
-                    .map(Enum::toString)
-                    .filter(value -> value.startsWith(event.getFocusedOption().getValue().toUpperCase()))
-                    .map(value -> new Command.Choice(value, value))
-                    .toList()
-            ).queue();
-        }
     }
 
     @SuppressWarnings("ConstantConditions")
