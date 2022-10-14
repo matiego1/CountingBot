@@ -59,7 +59,7 @@ public class DiscordCommands extends ListenerAdapter {
             long pingTime = System.currentTimeMillis();
             event.reply("Pong!").setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - pingTime)).queue();
         } else if (event.getName().equals("about")) {
-            event.reply(Translation.COMMANDS__ABOUT.getFormatted(plugin.getDescription().getVersion())).setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).queue();
+            event.reply(Translation.COMMANDS__ABOUT__MESSAGE.getFormatted(plugin.getDescription().getVersion())).setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean)).queue();
         } else if (event.getName().equals("feedback")) {
             event.replyModal(Modal.create("feedback-modal", Translation.COMMANDS__FEEDBACK__TITLE.toString())
                     .addActionRows(
@@ -67,7 +67,7 @@ public class DiscordCommands extends ListenerAdapter {
                                     .setRequiredRange(10, 100)
                                     .setPlaceholder(Translation.COMMANDS__FEEDBACK__SUBJECT_PLACEHOLDER.toString())
                                     .build()),
-                            ActionRow.of(TextInput.create("description", Translation.COMMANDS__FEEDBACK__DESCRIPTION.toString(), TextInputStyle.PARAGRAPH)
+                            ActionRow.of(TextInput.create("description", Translation.COMMANDS__FEEDBACK__MODAL_DESCRIPTION.toString(), TextInputStyle.PARAGRAPH)
                                     .setRequiredRange(30, 4000)
                                     .build())
                     )

@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.DiscordLocale;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.dv8tion.jda.internal.utils.IOUtil;
@@ -26,10 +27,7 @@ import org.minidns.record.Record;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -252,5 +250,18 @@ public class Utils {
      */
     public static @NotNull String getName(@NotNull User user, @Nullable Member member) {
         return (member != null) ? member.getEffectiveName() : user.getName();
+    }
+
+    /**
+     * Returns a map of all {@code DiscordLocale}s associated with the given string.
+     * @param string the string
+     * @return the map of {@code DiscordLocale} and string
+     */
+    public static @NotNull Map<DiscordLocale, String> getAllLocalizations(@NotNull String string) {
+        Map<DiscordLocale, String> result = new HashMap<>();
+        for (DiscordLocale value : DiscordLocale.values()) {
+            if (value != DiscordLocale.UNKNOWN) result.put(value, string);
+        }
+        return result;
     }
 }

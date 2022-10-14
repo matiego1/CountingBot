@@ -21,7 +21,17 @@ public enum Translation {
     GENERAL__DO_NOT_SPAM("Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each."),
     GENERAL__COMMAND_COOLDOWN("You can use this command again in %s seconds."),
     /*--- Commands ---*/
-    COMMANDS__ABOUT("""
+    //ping
+    COMMANDS__PING__NAME("ping"),
+    COMMANDS__PING__DESCRIPTION("Shows the current ping of the bot"),
+    COMMANDS__PING__OPTION__NAME("ephemeral"),
+    COMMANDS__PING__OPTION__DESCRIPTION("whether this message should only be visible to you"),
+    //about
+    COMMANDS__ABOUT__NAME("about"),
+    COMMANDS__ABOUT__DESCRIPTION("Shows some basic information about this bot."),
+    COMMANDS__ABOUT__OPTION__NAME("ephemeral"),
+    COMMANDS__ABOUT__OPTION__DESCRIPTION("whether this message should only be visible to you"),
+    COMMANDS__ABOUT__MESSAGE("""
             **__Counting bot__**
             Counts in different ways and have a lot of fun!
             
@@ -30,14 +40,24 @@ public enum Translation {
             **Version**: `%s`
             """),
     //feedback
+    COMMANDS__FEEDBACK__NAME("feedback"),
+    COMMANDS__FEEDBACK__DESCRIPTION("Report a bug, suggest a change or share your impressions"),
     COMMANDS__FEEDBACK__TITLE("Send feedback"),
     COMMANDS__FEEDBACK__SUBJECT("Subject"),
     COMMANDS__FEEDBACK__SUBJECT_PLACEHOLDER("e.g. bug report, suggestion"),
-    COMMANDS__FEEDBACK__DESCRIPTION("Description"),
+    COMMANDS__FEEDBACK__MODAL_DESCRIPTION("Description"),
     COMMANDS__FEEDBACK__SUCCESS("Thank you for your feedback!"),
     COMMANDS__FEEDBACK__FAILURE("An error occurred. Try again."),
     COMMANDS__FEEDBACK__OPEN_CHANNELS("Opened %s channels out of %s!"),
     //counting
+    COMMANDS__COUNTING__NAME("counting"),
+    COMMANDS__COUNTING__DESCRIPTION("Manages the counting channels"),
+    COMMANDS__COUNTING__OPTIONS__ADD__NAME("add"),
+    COMMANDS__COUNTING__OPTIONS__ADD__DESCRIPTION("Opens a new counting channel"),
+    COMMANDS__COUNTING__OPTIONS__REMOVE__NAME("remove"),
+    COMMANDS__COUNTING__OPTIONS__REMOVE__DESCRIPTION("Closes the counting channel"),
+    COMMANDS__COUNTING__OPTIONS__LIST__NAME("list"),
+    COMMANDS__COUNTING__OPTIONS__LIST__DESCRIPTION("Shows all opened counting channel in this guild"),
     COMMANDS__COUNTING__ADD("**__Select the type of the new counting channel:__**"),
     COMMANDS__COUNTING__REMOVE__SUCCESS("The channel has been successfully closed!"),
     COMMANDS__COUNTING__REMOVE__NO_CHANGES("This channel has been already closed."),
@@ -45,6 +65,22 @@ public enum Translation {
     COMMANDS__COUNTING__LIST__LIST("**__Open Counting Channels:__**"),
     COMMANDS__COUNTING__LIST__EMPTY_LIST("No counting channel has been opened yet. Open a new one with `/counting add`"),
     //dictionary
+    COMMANDS__DICTIONARY__NAME("dictionary"),
+    COMMANDS__DICTIONARY__DESCRIPTION("Manages dictionaries"),
+    COMMANDS__DICTIONARY__OPTIONS__ADD__NAME("add"),
+    COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION("Adds a word to the dictionary"),
+    COMMANDS__DICTIONARY__OPTIONS__REMOVE__NAME("remove"),
+    COMMANDS__DICTIONARY__OPTIONS__REMOVE__DESCRIPTION("Removes a word from the dictionary"),
+    COMMANDS__DICTIONARY__OPTIONS__LOAD__NAME("load"),
+    COMMANDS__DICTIONARY__OPTIONS__LOAD__DESCRIPTION("Loads a file into the dictionary"),
+    COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__NAME("language"),
+    COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION("The dictionary's type"),
+    COMMANDS__DICTIONARY__OPTIONS__WORD__NAME("word"),
+    COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION("A word to add/remove"),
+    COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__NAME("admin-key"),
+    COMMANDS__DICTIONARY__OPTIONS__FILE__NAME("file"),
+    COMMANDS__DICTIONARY__OPTIONS__FILE__DESCRIPTION("The dictionary file"),
+    COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__DESCRIPTION("The secret administrator key"),
     COMMANDS__DICTIONARY__ADD__SUCCESS("This word has been successfully added to the dictionary in %s ms."),
     COMMANDS__DICTIONARY__ADD__FAILURE("An error occurred. Try again."),
     COMMANDS__DICTIONARY__REMOVE__SUCCESS("This word has been successfully removed from the dictionary in %s ms."),
@@ -118,5 +154,13 @@ public enum Translation {
         } catch (IllegalFormatException e) {
             return toString();
         }
+    }
+
+    /**
+     * Returns the default value for this translation.
+     * @return the default translation
+     */
+    public @NotNull String getDefault() {
+        return def;
     }
 }

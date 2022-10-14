@@ -136,58 +136,102 @@ public final class Main extends JavaPlugin {
                     .build();
             jda.awaitReady(); //Yes I know, this will block the thread.
             jda.updateCommands().addCommands(
-                    Commands.slash("ping", "Shows the current ping of the bot")
-                            .addOption(OptionType.BOOLEAN, "ephemeral", "whether this message should only be visible to you", false),
-                    Commands.slash("counting", "Manages the counting channels")
-                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
-                            .setGuildOnly(true)
-                            .addSubcommands(
-                                    new SubcommandData("add", "Opens a new counting channel"),
-                                    new SubcommandData("remove", "Closes the counting channel"),
-                                    new SubcommandData("list", "Shows all opened counting channel in this guild")
+                    Commands.slash("ping", Translation.COMMANDS__PING__DESCRIPTION.getDefault())
+                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__NAME.toString()))
+                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__DESCRIPTION.toString()))
+                            .addOptions(
+                                    new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__PING__OPTION__DESCRIPTION.getDefault(), false)
+                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__OPTION__NAME.toString()))
+                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__OPTION__DESCRIPTION.toString()))
                             ),
-                    Commands.slash("dictionary", "Manages dictionaries")
+                    Commands.slash("counting", Translation.COMMANDS__COUNTING__DESCRIPTION.getDefault())
+                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__NAME.toString()))
+                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__DESCRIPTION.toString()))
                             .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                             .setGuildOnly(true)
                             .addSubcommands(
-                                    new SubcommandData("add", "Adds a word to the dictionary")
+                                    new SubcommandData("add", Translation.COMMANDS__COUNTING__OPTIONS__ADD__DESCRIPTION.getDefault())
+                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__ADD__NAME.toString()))
+                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__ADD__DESCRIPTION.toString())),
+                                    new SubcommandData("remove", Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__DESCRIPTION.getDefault())
+                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__NAME.toString()))
+                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__DESCRIPTION.toString())),
+                                    new SubcommandData("list", Translation.COMMANDS__COUNTING__OPTIONS__LIST__DESCRIPTION.getDefault())
+                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__LIST__NAME.toString()))
+                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__LIST__DESCRIPTION.toString()))
+                            ),
+                    Commands.slash("dictionary", Translation.COMMANDS__DICTIONARY__DESCRIPTION.getDefault())
+                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__NAME.toString()))
+                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__DESCRIPTION.toString()))
+                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
+                            .setGuildOnly(true)
+                            .addSubcommands(
+                                    new SubcommandData("add", Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION.getDefault())
+                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__NAME.toString()))
+                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION.toString()))
                                             .addOptions(
-                                                    new OptionData(OptionType.STRING, "language", "The dictionary's type", true)
+                                                    new OptionData(OptionType.STRING, "language", Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.getDefault(), true)
+                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__NAME.toString()))
+                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.toString()))
                                                             .addChoices(
                                                                     Arrays.stream(Dictionary.Type.values())
                                                                     .map(Enum::toString)
                                                                     .map(value -> new Command.Choice(value, value))
                                                                     .toList()
                                                             ),
-                                                    new OptionData(OptionType.STRING, "word", "A word to add", true)
+                                                    new OptionData(OptionType.STRING, "word", Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION.getDefault(), true)
+                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__NAME.toString()))
+                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION.toString()))
                                             ),
-                                    new SubcommandData("remove", "Removes a word from the dictionary")
+                                    new SubcommandData("remove", Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__DESCRIPTION.getDefault())
+                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__NAME.toString()))
+                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__DESCRIPTION.toString()))
                                             .addOptions(
-                                                    new OptionData(OptionType.STRING, "language", "The dictionary's type", true)
+                                                    new OptionData(OptionType.STRING, "language", Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.getDefault(), true)
+                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__NAME.toString()))
+                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.toString()))
                                                             .addChoices(
                                                                     Arrays.stream(Dictionary.Type.values())
                                                                             .map(Enum::toString)
                                                                             .map(value -> new Command.Choice(value, value))
                                                                             .toList()
                                                             ),
-                                                    new OptionData(OptionType.STRING, "word", "A word to add", true)
+                                                    new OptionData(OptionType.STRING, "word", Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION.getDefault(), true)
+                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__NAME.toString()))
+                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION.toString()))
                                             ),
-                                    new SubcommandData("load", "Loads a file into the dictionary")
+                                    new SubcommandData("load", Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__DESCRIPTION.getDefault())
+                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__NAME.toString()))
+                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__DESCRIPTION.toString()))
                                             .addOptions(
-                                                    new OptionData(OptionType.STRING, "language", "The dictionary's type", true)
+                                                    new OptionData(OptionType.STRING, "language", Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.getDefault(), true)
+                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__NAME.toString()))
+                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.toString()))
                                                             .addChoices(
                                                                     Arrays.stream(Dictionary.Type.values())
                                                                             .map(Enum::toString)
                                                                             .map(value -> new Command.Choice(value, value))
                                                                             .toList()
                                                             ),
-                                                    new OptionData(OptionType.STRING, "word", "A word to add", true),
-                                                    new OptionData(OptionType.STRING, "file", "The dictionary file", true)
+                                                    new OptionData(OptionType.STRING, "admin-key", Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__DESCRIPTION.getDefault(), true)
+                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__NAME.toString()))
+                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__DESCRIPTION.toString())),
+                                                    new OptionData(OptionType.STRING, "file", Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__DESCRIPTION.getDefault(), true)
+                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__NAME.toString()))
+                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__DESCRIPTION.toString()))
                                             )
                             ),
-                    Commands.slash("feedback", "Report a bug, suggest a change or share your impressions"),
-                    Commands.slash("about", "Shows some basic information about this bot.")
-                            .addOption(OptionType.BOOLEAN, "ephemeral", "whether this message should only be visible to you", false)
+                    Commands.slash("feedback", Translation.COMMANDS__FEEDBACK__DESCRIPTION.getDefault())
+                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__FEEDBACK__NAME.toString()))
+                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__FEEDBACK__DESCRIPTION.toString())),
+                    Commands.slash("about", Translation.COMMANDS__ABOUT__DESCRIPTION.getDefault())
+                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__NAME.toString()))
+                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__DESCRIPTION.toString()))
+                            .addOptions(
+                                    new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__ABOUT__DESCRIPTION.getDefault(), false)
+                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__NAME.toString()))
+                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__DESCRIPTION.toString()))
+                            )
 
             ).queue();
         } catch (Exception e) {
