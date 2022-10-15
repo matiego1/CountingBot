@@ -7,6 +7,7 @@ anti-spam:
   time: 3
 
 translations:
+  ##### Generals #####
   general:
     not_sent: '**Oops!** An error occurred while sending your message. Please try again later.'
     close_embed: 'Counting channel closed!'
@@ -18,40 +19,100 @@ translations:
     unknown_channel_type: 'Unknown channel type. Try again.'
     status: 'counting channels'
     do_not_spam: 'Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each.'
+    command_cooldown: 'You can use this command again in %s seconds.'
+  ##### Commands #####
+  #ping
   commands:
-    about: '**__Counting bot__**\nCounts in different ways and have a lot of fun!\n\n**Author**: `Matiego#8675`\n**Source code**: https://github.com/matiego1/CountingBot\n**Version**: `%s`'
+    ping:
+      name: 'ping'
+      description: 'Shows the current ping of the bot'
+      option:
+        name: 'ephemeral'
+        description: 'whether this message should only be visible to you'
+    #about
+    about:
+      name: 'about'
+      description: 'Shows some basic information about this bot.'
+      option:
+        name: 'ephemeral'
+        description: 'whether this message should only be visible to you'
+      message: '**__Counting bot__**\nCounts in different ways and have a lot of fun!\n\n**Author**: `Matiego#8675`\n**Source code**: https://github.com/matiego1/CountingBot\n**Version**: `%s`'
+    #feedback
     feedback:
+      name: 'feedback'
+      description: 'Report a bug, suggest a change or share your impressions'
       title: 'Send feedback'
       subject: 'Subject'
       subject_placeholder: 'e.g. bug report, suggestion'
-      description: 'Description'
+      modal_description: 'Description'
       success: 'Thank you for your feedback!'
       failure: 'An error occurred. Try again.'
+      open_channels: 'Opened %s channels out of %s!'
+    #counting
     counting:
-      add: '**Select the type of the new counting channel:**'
+      name: 'counting'
+      description: 'Manages the counting channels'
+      options:
+        add:
+          name: 'add'
+          description: 'Opens a new counting channel'
+        remove:
+          name: 'remove'
+          description: 'Closes the counting channel'
+        list:
+          name: 'list'
+          description: 'Shows all opened counting channel in this guild'
+      add: '**__Select the type of the new counting channel:__**'
       remove:
         success: 'The channel has been successfully closed!'
         no_changes: 'This channel has been already closed.'
         failure: 'An error occurred. Try again.'
       list:
-        list: '**Open Counting Channels:**'
+        list: '**__Open Counting Channels:__**'
         empty_list: 'No counting channel has been opened yet. Open a new one with `/counting add`'
+    #dictionary
     dictionary:
+      name: 'dictionary'
+      description: 'Manages dictionaries'
+      options:
+        add:
+          name: 'add'
+          description: 'Adds a word to the dictionary'
+        remove:
+          name: 'remove'
+          description: 'Removes a word from the dictionary'
+        load:
+          name: 'load'
+          description: 'Loads a file into the dictionary'
+        language:
+          name: 'language'
+          description: 'The dictionary\0027s type'
+        word:
+          name: 'word'
+          description: 'A word to add/remove'
+        admin_key:
+          name: 'admin-key'
+          description: 'The secret administrator key'
+        file:
+          name: 'file'
+          description: 'The dictionary file'
       add:
-        success: 'This word has been successfully added to the dictionary!'
+        success: 'This word has been successfully added to the dictionary in %s ms.'
         failure: 'An error occurred. Try again.'
       remove:
-        success: 'This word has been successfully removed from the dictionary!'
+        success: 'This word has been successfully removed from the dictionary in %s ms.'
         failure: 'An error occurred. Try again.'
       load:
         incorrect_key: 'Incorrect administrator key!\nThe admin-key can be found in the configuration file. This is to prevent uploading random files by people who do not have access to them.'
-        success: 'Success!'
+        success: 'Success! (%s ms)'
         no_changes: 'This file does not exist.'
         failure: 'An error occurred. Try again.'
+    #select menu
     select_menu:
       success: 'The channel has been successfully opened!'
       no_changes: 'This channel is already opened!'
       failure: 'An error occurred. Try again.'
+  ##### Handlers #####
   handlers:
     last_letter:
       incorrect_start_char: '**Oops!** Your message does not start with the last character of the previous message.'
@@ -60,40 +121,41 @@ translations:
       illegal_end_char: '**Oops!** Your message cannot end with one of the following characters: %s'
       incorrect_word: '**Oops!** This word does not exists in the dictionary or has already been used!'
       failure: '**Oops!** An error occurred while loading dictionary. Try again.'
+  ##### Channel types #####
   type:
     counting:
       name: 'Counting'
-      description: 'Write the next numbers'
+      description: 'Write next numbers'
     binary_counting:
       name: 'Binary Counting'
-      description: 'Write the next numbers in binary'
+      description: 'Write next numbers in binary'
     hexadecimal_counting:
       name: 'Hexadecimal Counting'
       description: 'Write next hexadecimal numbers'
     prime_counting:
       name: 'Prime Counting'
-      description: 'Write the next prime numbers'
-    semipime_counting:
+      description: 'Write next prime numbers'
+    semiprime_counting:
       name: 'Semiprime counting'
-      description: 'Write the next semiprime numbers'
+      description: 'Write next semiprime numbers'
     sphenic_counting:
       name: 'Sphenic counting'
-      description: 'Write the next sphenic numbers'
+      description: 'Write next sphenic numbers'
     fibonacci_sequence:
       name: 'Fibonacci sequence'
-      description: 'Write the next numbers of the fibonacci sequence'
+      description: 'Write next numbers of the fibonacci sequence'
     lucas_numbers:
       name: 'Lucas numbers'
-      description: 'Write the next numbers of the lucas sequence'
+      description: 'Write next numbers of the lucas sequence'
     triangular_numbers:
       name: 'Triangular numbers'
-      description: 'Write the next triangular numbers'
+      description: 'Write next triangular numbers'
     palindromic_numbers:
       name: 'Palindromic numbers'
-      description: 'Write the next palindromic numbers'
+      description: 'Write next palindromic numbers'
     alphabet:
       name: 'Alphabet'
-      description: 'Write the next letters in english alphabet'
+      description: 'Write next letters in english alphabet'
     polish_last_letter:
       name: 'Polish last letter'
       description: 'Write a word that starts with the last letter of the previous one (Polish)'
