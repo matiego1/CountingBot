@@ -34,6 +34,8 @@ import java.util.stream.Collectors;
 
 public class Utils {
 
+    public static final int SECOND = 1000;
+
     /**
      * Returns a {@code OkHttpClient} for the {@code JDABuilder}. <br>
      * Based on the <a href="https://github.com/DiscordSRV/DiscordSRV/blob/master/src/main/java/github/scarsz/discordsrv/DiscordSRV.java">DiscordSRV plugin</a>

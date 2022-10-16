@@ -1,0 +1,84 @@
+package me.matiego.counting;
+
+import me.matiego.counting.utils.FixedSizeMap;
+import me.matiego.counting.utils.ICommandHandler;
+import me.matiego.counting.utils.Pair;
+import me.matiego.counting.utils.Utils;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.interactions.ModalInteraction;
+import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.components.selections.SelectMenuInteraction;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
+public class CommandHandler extends ListenerAdapter {
+    public CommandHandler(@NotNull List<ICommandHandler> handlers) {
+        List<SlashCommandData> commandsData = new ArrayList<>();
+        handlers.forEach(handler -> {
+            SlashCommandData data = handler.getCommand();
+            commands.put(data.getName(), handler);
+            commandsData.add(data);
+        });
+        Main.getInstance().getJda().updateCommands().addCommands(commandsData).queue();
+    }
+
+
+    private final FixedSizeMap<String, Long> cooldown = new FixedSizeMap<>(1000);
+    private final HashMap<String, ICommandHandler> commands = new HashMap<>();
+
+    @Override
+    public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
+        User user = event.getUser();
+        String command = event.getName();
+        long time = System.currentTimeMillis();
+        //check cooldown
+        long cooldownTime = cooldown.getOrDefault(new Pair<>(user.getId(), command).toString(), 0L);
+        if (cooldownTime >= time) {
+            event.reply(Translation.COMMANDS__COOLDOWN.getFormatted((cooldownTime - time) / Utils.SECOND)).setEphemeral(true).queue();
+            return;
+        }
+        //get handler
+        ICommandHandler handler = commands.get(command);
+        if (handler == null) {
+            event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+            return;
+        }
+        //execute command
+        try {
+            handler.onSlashCommandInteraction(event.getInteraction());
+        } catch (Exception e) {
+            event.reply(Translation.COMMANDS__ERROR.toString()).setEphemeral(true).queue(success -> {}, failure -> {});
+        }
+    }
+
+    @Override
+    public void onSelectMenuInteraction(@NotNull SelectMenuInteractionEvent event) {
+        SelectMenuInteraction interaction = event.getInteraction();
+        for (ICommandHandler handler : commands.values()) {
+            try {
+                handler.onSelectMenuInteraction(interaction);
+            } catch (Exception ignored) {}
+            if (interaction.isAcknowledged()) return;
+        }
+        event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+    }
+
+    @Override
+    public void onModalInteraction(@NotNull ModalInteractionEvent event) {
+        ModalInteraction interaction = event.getInteraction();
+        for (ICommandHandler handler : commands.values()) {
+            try {
+                handler.onModalInteraction(interaction);
+            } catch (Exception ignored) {}
+            if (interaction.isAcknowledged()) return;
+        }
+        event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+    }
+}
