@@ -37,8 +37,8 @@ public class CommandHandler extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         User user = event.getUser();
         String command = event.getName();
-        long time = System.currentTimeMillis();
         //check cooldown
+        long time = System.currentTimeMillis();
         long cooldownTime = cooldown.getOrDefault(new Pair<>(user.getId(), command).toString(), 0L);
         if (cooldownTime >= time) {
             event.reply(Translation.COMMANDS__COOLDOWN.getFormatted((cooldownTime - time) / Utils.SECOND)).setEphemeral(true).queue();

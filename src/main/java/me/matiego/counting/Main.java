@@ -3,6 +3,9 @@ package me.matiego.counting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
+import me.matiego.counting.commands.AboutCommand;
+import me.matiego.counting.commands.FeedbackCommand;
+import me.matiego.counting.commands.PingCommand;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -160,10 +163,12 @@ public final class Main extends JavaPlugin {
                 .count();
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
         //Add event listeners
-        //noinspection ArraysAsListWithZeroOrOneArgument
         jda.addEventListener(
                 new MessageHandler(),
                 new CommandHandler(Arrays.asList(
+                        new PingCommand(),
+                        new AboutCommand(),
+                        new FeedbackCommand()
                 ))
         );
 
