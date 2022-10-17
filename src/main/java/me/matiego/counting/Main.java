@@ -72,7 +72,7 @@ public final class Main extends JavaPlugin {
         PluginCommand command = getCommand("counting");
         if (command != null) command.setExecutor((sender, cmd, label, args) -> {
             reloadConfig();
-            sender.sendMessage("&aSuccessfully reloaded config.");
+            sender.sendRichMessage("<green>Successfully reloaded config.");
             return true;
         });
         //MySQL
@@ -228,9 +228,9 @@ public final class Main extends JavaPlugin {
                             .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__NAME.toString()))
                             .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__DESCRIPTION.toString()))
                             .addOptions(
-                                    new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__ABOUT__DESCRIPTION.getDefault(), false)
-                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__NAME.toString()))
-                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__DESCRIPTION.toString()))
+                                    new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__ABOUT__OPTION__DESCRIPTION.getDefault(), false)
+                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__OPTION__NAME.toString()))
+                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__OPTION__DESCRIPTION.toString()))
                             )
 
             ).queue();
