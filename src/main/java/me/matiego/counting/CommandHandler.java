@@ -5,6 +5,7 @@ import me.matiego.counting.utils.ICommandHandler;
 import me.matiego.counting.utils.Pair;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
@@ -80,5 +81,9 @@ public class CommandHandler extends ListenerAdapter {
             if (interaction.isAcknowledged()) return;
         }
         event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+    }
+
+    public synchronized void putSlowdown(@NotNull UserSnowflake user, @NotNull String command, long time) {
+        cooldown.put(new Pair<>(user.getId(), command).toString(), System.currentTimeMillis() + time);
     }
 }
