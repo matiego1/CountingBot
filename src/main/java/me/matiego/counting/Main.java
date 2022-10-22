@@ -67,7 +67,7 @@ public final class Main extends JavaPlugin {
         PluginCommand command = getCommand("counting");
         if (command != null) command.setExecutor((sender, cmd, label, args) -> {
             reloadConfig();
-            sender.sendMessage("&aSuccessfully reloaded config.");
+            sender.sendRichMessage("<green>Successfully reloaded config.");
             return true;
         });
         //Open MySQL connection
