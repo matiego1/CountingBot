@@ -254,6 +254,10 @@ public class Utils {
         return (member != null) ? member.getEffectiveName() : user.getName();
     }
 
+    public static @NotNull String getMemberAsTag(@NotNull User user, @Nullable Member member) {
+        return getName(user, member) + "#" + user.getDiscriminator();
+    }
+
     /**
      * Returns a map of all {@code DiscordLocale}s associated with the given string.
      * @param string the string
