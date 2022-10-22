@@ -24,9 +24,9 @@ public class AboutCommand implements ICommandHandler {
                 .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__NAME.toString()))
                 .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__DESCRIPTION.toString()))
                 .addOptions(
-                        new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__ABOUT__DESCRIPTION.getDefault(), false)
-                                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__NAME.toString()))
-                                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__DESCRIPTION.toString()))
+                        new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__ABOUT__OPTION__DESCRIPTION.getDefault(), false)
+                                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__OPTION__NAME.toString()))
+                                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__OPTION__DESCRIPTION.toString()))
                 );
     }
 
