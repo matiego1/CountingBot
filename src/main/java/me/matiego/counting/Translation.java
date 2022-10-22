@@ -19,8 +19,10 @@ public enum Translation {
     GENERAL__UNKNOWN_CHANNEL_TYPE("Unknown channel type. Try again."),
     GENERAL__STATUS("counting channels"),
     GENERAL__DO_NOT_SPAM("Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each."),
-    GENERAL__COMMAND_COOLDOWN("You can use this command again in %s seconds."),
     /*--- Commands ---*/
+    COMMANDS__UNKNOWN("Unknown command."),
+    COMMANDS__COOLDOWN("You can use this command again in %s seconds."),
+    COMMANDS__ERROR("An error occurred. Try again."),
     //ping
     COMMANDS__PING__NAME("ping"),
     COMMANDS__PING__DESCRIPTION("Shows the current ping of the bot"),

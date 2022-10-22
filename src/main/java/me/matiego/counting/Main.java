@@ -3,11 +3,11 @@ package me.matiego.counting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
+import me.matiego.counting.commands.*;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -15,12 +15,6 @@ import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.commands.Command;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -48,6 +42,7 @@ public final class Main extends JavaPlugin {
     private MySQL mySQL;
     private Storage storage;
     private Dictionary dictionary;
+    private CommandHandler commandHandler;
 
     private JDA jda;
     private ExecutorService callbackThreadPool;
@@ -66,16 +61,16 @@ public final class Main extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        //Config
+        //Save default config
         saveDefaultConfig();
-        //Console command
+        //Add console command
         PluginCommand command = getCommand("counting");
         if (command != null) command.setExecutor((sender, cmd, label, args) -> {
             reloadConfig();
             sender.sendRichMessage("<green>Successfully reloaded config.");
             return true;
         });
-        //MySQL
+        //Open MySQL connection
         Logs.info("Opening the MySQL connection...");
         String username = getConfig().getString("database.username", "");
         String password = getConfig().getString("database.password", "");
@@ -90,7 +85,7 @@ public final class Main extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        //Storage
+        //Load storage
         Logs.info("Loading saved channels...");
         storage = Storage.load();
         if (storage == null) {
@@ -98,7 +93,7 @@ public final class Main extends JavaPlugin {
             return;
         }
         dictionary = new Dictionary();
-        //Discord bot
+        //Enable Discord bot
         Logs.info("Enabling the Discord bot...");
         if (jda != null) {
             try {
@@ -130,110 +125,9 @@ public final class Main extends JavaPlugin {
                     .setEnableShutdownHook(false)
                     .setContextEnabled(false)
                     .disableCache(Utils.getDisabledCacheFlag())
-                    .addEventListeners(new DiscordCommands(this))
-                    .addEventListeners(new MessageHandler())
                     .setActivity(Activity.competing(Translation.GENERAL__STATUS.toString()))
                     .build();
             jda.awaitReady(); //Yes I know, this will block the thread.
-            jda.updateCommands().addCommands(
-                    Commands.slash("ping", Translation.COMMANDS__PING__DESCRIPTION.getDefault())
-                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__NAME.toString()))
-                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__DESCRIPTION.toString()))
-                            .addOptions(
-                                    new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__PING__OPTION__DESCRIPTION.getDefault(), false)
-                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__OPTION__NAME.toString()))
-                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__OPTION__DESCRIPTION.toString()))
-                            ),
-                    Commands.slash("counting", Translation.COMMANDS__COUNTING__DESCRIPTION.getDefault())
-                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__NAME.toString()))
-                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__DESCRIPTION.toString()))
-                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
-                            .setGuildOnly(true)
-                            .addSubcommands(
-                                    new SubcommandData("add", Translation.COMMANDS__COUNTING__OPTIONS__ADD__DESCRIPTION.getDefault())
-                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__ADD__NAME.toString()))
-                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__ADD__DESCRIPTION.toString())),
-                                    new SubcommandData("remove", Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__DESCRIPTION.getDefault())
-                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__NAME.toString()))
-                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__DESCRIPTION.toString())),
-                                    new SubcommandData("list", Translation.COMMANDS__COUNTING__OPTIONS__LIST__DESCRIPTION.getDefault())
-                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__LIST__NAME.toString()))
-                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__OPTIONS__LIST__DESCRIPTION.toString()))
-                            ),
-                    Commands.slash("dictionary", Translation.COMMANDS__DICTIONARY__DESCRIPTION.getDefault())
-                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__NAME.toString()))
-                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__DESCRIPTION.toString()))
-                            .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
-                            .setGuildOnly(true)
-                            .addSubcommands(
-                                    new SubcommandData("add", Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION.getDefault())
-                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__NAME.toString()))
-                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION.toString()))
-                                            .addOptions(
-                                                    new OptionData(OptionType.STRING, "language", Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.getDefault(), true)
-                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__NAME.toString()))
-                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.toString()))
-                                                            .addChoices(
-                                                                    Arrays.stream(Dictionary.Type.values())
-                                                                    .map(Enum::toString)
-                                                                    .map(value -> new Command.Choice(value, value))
-                                                                    .toList()
-                                                            ),
-                                                    new OptionData(OptionType.STRING, "word", Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION.getDefault(), true)
-                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__NAME.toString()))
-                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION.toString()))
-                                            ),
-                                    new SubcommandData("remove", Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__DESCRIPTION.getDefault())
-                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__NAME.toString()))
-                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__DESCRIPTION.toString()))
-                                            .addOptions(
-                                                    new OptionData(OptionType.STRING, "language", Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.getDefault(), true)
-                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__NAME.toString()))
-                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.toString()))
-                                                            .addChoices(
-                                                                    Arrays.stream(Dictionary.Type.values())
-                                                                            .map(Enum::toString)
-                                                                            .map(value -> new Command.Choice(value, value))
-                                                                            .toList()
-                                                            ),
-                                                    new OptionData(OptionType.STRING, "word", Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION.getDefault(), true)
-                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__NAME.toString()))
-                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION.toString()))
-                                            ),
-                                    new SubcommandData("load", Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__DESCRIPTION.getDefault())
-                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__NAME.toString()))
-                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__DESCRIPTION.toString()))
-                                            .addOptions(
-                                                    new OptionData(OptionType.STRING, "language", Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.getDefault(), true)
-                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__NAME.toString()))
-                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION.toString()))
-                                                            .addChoices(
-                                                                    Arrays.stream(Dictionary.Type.values())
-                                                                            .map(Enum::toString)
-                                                                            .map(value -> new Command.Choice(value, value))
-                                                                            .toList()
-                                                            ),
-                                                    new OptionData(OptionType.STRING, "admin-key", Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__DESCRIPTION.getDefault(), true)
-                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__NAME.toString()))
-                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__DESCRIPTION.toString())),
-                                                    new OptionData(OptionType.STRING, "file", Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__DESCRIPTION.getDefault(), true)
-                                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__NAME.toString()))
-                                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__DESCRIPTION.toString()))
-                                            )
-                            ),
-                    Commands.slash("feedback", Translation.COMMANDS__FEEDBACK__DESCRIPTION.getDefault())
-                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__FEEDBACK__NAME.toString()))
-                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__FEEDBACK__DESCRIPTION.toString())),
-                    Commands.slash("about", Translation.COMMANDS__ABOUT__DESCRIPTION.getDefault())
-                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__NAME.toString()))
-                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__DESCRIPTION.toString()))
-                            .addOptions(
-                                    new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__ABOUT__OPTION__DESCRIPTION.getDefault(), false)
-                                            .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__OPTION__NAME.toString()))
-                                            .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__OPTION__DESCRIPTION.toString()))
-                            )
-
-            ).queue();
         } catch (Exception e) {
             Logs.error("An error occurred while enabling the Discord bot." + (e instanceof InvalidTokenException ? " Is the provided bot token correct?" : ""), e);
             Bukkit.getPluginManager().disablePlugin(this);
@@ -267,6 +161,18 @@ public final class Main extends JavaPlugin {
                 .filter(Boolean::booleanValue)
                 .count();
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
+        //Add event listeners
+        commandHandler = new CommandHandler(Arrays.asList(
+                new PingCommand(),
+                new AboutCommand(),
+                new FeedbackCommand(this),
+                new CountingCommand(this),
+                new DictionaryCommand(this)
+        ));
+        jda.addEventListener(
+                new MessageHandler(),
+                commandHandler
+        );
 
         EmbedBuilder eb = new EmbedBuilder();
         eb.setDescription("Bot has been enabled!");
@@ -371,5 +277,9 @@ public final class Main extends JavaPlugin {
      */
     public Dictionary getDictionary() {
         return dictionary;
+    }
+
+    public CommandHandler getCommandHandler() {
+        return commandHandler;
     }
 }
