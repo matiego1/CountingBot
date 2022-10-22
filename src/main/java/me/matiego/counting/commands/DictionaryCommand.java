@@ -142,7 +142,7 @@ public class DictionaryCommand implements ICommandHandler {
                         return;
                     }
                     switch (plugin.getDictionary().loadDictionaryFromFile(new File(plugin.getDataFolder() + File.separator + event.getOption("file", "null", OptionMapping::getAsString)), type)) {
-                        case SUCCESS -> reply(hook, user, event.getName(), 300 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(System.currentTimeMillis() - time));
+                        case SUCCESS -> reply(hook, user, event.getName(), 5 * 60 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(System.currentTimeMillis() - time));
                         case NO_CHANGES -> reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.getFormatted(System.currentTimeMillis() - time));
                         case FAILURE -> reply(hook, user, event.getName(), 30 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.getFormatted(System.currentTimeMillis() - time));
                     }
@@ -153,6 +153,6 @@ public class DictionaryCommand implements ICommandHandler {
 
     private void reply(@NotNull InteractionHook hook, @NotNull User user, @NotNull String command, long time, @NotNull String message) {
         hook.sendMessage(message).queue();
-        //TODO: cooldown
+        plugin.getCommandHandler().putSlowdown(user, command, time);
     }
 }
