@@ -47,7 +47,7 @@ public class ChannelData {
         return webhookUrl;
     }
 
-    enum Type {
+    public enum Type {
         COUNTING("U+1F9EE", new Counting()),
         BINARY_COUNTING("U+1F4BB", new BinaryCounting()),
         HEXADECIMAL_COUNTING("U+1F524", new HexadecimalCounting()),
