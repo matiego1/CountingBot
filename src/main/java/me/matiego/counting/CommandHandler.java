@@ -7,11 +7,13 @@ import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.ModalInteraction;
-import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.interactions.commands.build.CommandData;
+import net.dv8tion.jda.api.interactions.commands.context.MessageContextInteraction;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenuInteraction;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,9 +23,9 @@ import java.util.List;
 
 public class CommandHandler extends ListenerAdapter {
     public CommandHandler(@NotNull List<ICommandHandler> handlers) {
-        List<SlashCommandData> commandsData = new ArrayList<>();
+        List<CommandData> commandsData = new ArrayList<>();
         handlers.forEach(handler -> {
-            SlashCommandData data = handler.getCommand();
+            CommandData data = handler.getCommand();
             commands.put(data.getName(), handler);
             commandsData.add(data);
         });
@@ -77,6 +79,18 @@ public class CommandHandler extends ListenerAdapter {
         for (ICommandHandler handler : commands.values()) {
             try {
                 handler.onModalInteraction(interaction);
+            } catch (Exception ignored) {}
+            if (interaction.isAcknowledged()) return;
+        }
+        event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+    }
+
+    @Override
+    public void onMessageContextInteraction(@NotNull MessageContextInteractionEvent event) {
+        MessageContextInteraction interaction = event.getInteraction();
+        for (ICommandHandler handler : commands.values()) {
+            try {
+                handler.onMessageContextInteraction(interaction);
             } catch (Exception ignored) {}
             if (interaction.isAcknowledged()) return;
         }

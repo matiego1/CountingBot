@@ -167,7 +167,8 @@ public final class Main extends JavaPlugin {
                 new AboutCommand(),
                 new FeedbackCommand(this),
                 new CountingCommand(this),
-                new DictionaryCommand(this)
+                new DictionaryCommand(this),
+                new DeleteMessageCommand()
         ));
         jda.addEventListener(
                 new MessageHandler(),
