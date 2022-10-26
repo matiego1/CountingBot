@@ -17,11 +17,11 @@ Discord bot for counting in many ways.
 - Semiprime counting
 - Sphenic counting
 - Fibonacci sequence
-- lucas numbers
-- trangular numbers
-- palindromic numbers
-- aplhabet
-- polish last letter
-- english last letter
-- german last letter
-- spanish last letter
+- Lucas numbers
+- Trangular numbers
+- Palindromic numbers
+- Aplhabet
+- Polish last letter
+- English last letter
+- German last letter
+- S panish last letter
