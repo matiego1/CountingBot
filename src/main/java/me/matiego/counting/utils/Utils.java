@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
@@ -231,7 +232,14 @@ public class Utils {
      * @param message the message
      */
     public static void sendPrivateMessage(@NotNull User user, @NotNull String message) {
-        user.openPrivateChannel().queue(privateChannel -> privateChannel.sendMessage(checkLength(message, Message.MAX_CONTENT_LENGTH)).queue());
+        user.openPrivateChannel().queue(
+                privateChannel -> privateChannel.sendMessage(checkLength(message, Message.MAX_CONTENT_LENGTH)).queue(),
+                failure -> {
+                    if (failure instanceof ErrorResponseException e && e.getErrorCode() == 50007) {
+                        Logs.warning("User " + user.getAsTag() + " doesn't allow private messages.");
+                    }
+                }
+        );
     }
 
     /**
