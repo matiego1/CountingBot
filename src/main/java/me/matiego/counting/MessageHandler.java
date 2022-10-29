@@ -24,13 +24,18 @@ public class MessageHandler extends ListenerAdapter {
         Utils.async(() -> {
             long time = System.currentTimeMillis();
             User user = event.getAuthor();
-            if (user.isBot()) return;
+            Message message = event.getMessage();
+            if (user.isBot()) {
+                if (event.getJDA().getSelfUser().getId().equals(user.getId())) return;
+                if (message.isWebhookMessage()) return;
+                message.delete().queue();
+                return;
+            }
 
             ChannelData data = Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong());
             if (data == null) return;
             IChannelHandler handler = data.getHandler();
 
-            Message message = event.getMessage();
             int minTime = Main.getInstance().getConfig().getInt("anti-spam.time"), maxCount = Main.getInstance().getConfig().getInt("anti-spam.count");
             if (!check(user, event.getChannel().getIdLong(), time, minTime * 1000, maxCount)) {
                 message.delete().queue();
