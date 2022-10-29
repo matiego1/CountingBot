@@ -1,7 +1,9 @@
 package me.matiego.counting.commands;
 
 import me.matiego.counting.Main;
+import me.matiego.counting.Translation;
 import me.matiego.counting.utils.ICommandHandler;
+import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -19,6 +21,7 @@ public class DeleteMessageCommand implements ICommandHandler {
     @Override
     public @NotNull CommandData getCommand() {
         return Commands.message("delete this message")
+                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DELETE_MESSAGE__NAME.toString()))
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
                 .setGuildOnly(true);
     }
@@ -28,18 +31,18 @@ public class DeleteMessageCommand implements ICommandHandler {
         if (!event.getName().equals("delete this message")) return;
         MessageChannelUnion union = event.getChannel();
         if (union == null) {
-            event.reply("You cannot delete this message.").setEphemeral(true).queue();
+            event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE.toString()).setEphemeral(true).queue();
             return;
         }
         if (Main.getInstance().getStorage().getChannel(union.getIdLong()) == null) {
-            event.reply("You cannot delete this message.").setEphemeral(true).queue();
+            event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE.toString()).setEphemeral(true).queue();
             return;
         }
         if (event.getUser().getIdLong() != Main.getInstance().getConfig().getLong("admin-user-id")) {
-            event.reply("You cannot delete this message.").setEphemeral(true).queue();
+            event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE.toString()).setEphemeral(true).queue();
             return;
         }
         event.getTarget().delete().queue();
-        event.reply("Success!").setEphemeral(true).queue();
+        event.reply(Translation.COMMANDS__DELETE_MESSAGE__SUCCESS.toString()).setEphemeral(true).queue();
     }
 }

@@ -22,6 +22,7 @@ public enum Translation {
     /*--- Commands ---*/
     COMMANDS__UNKNOWN("Unknown command."),
     COMMANDS__COOLDOWN("You can use this command again in %s seconds."),
+    COMMANDS__DISABLED_CHANNEL("You cannot use this command here."),
     COMMANDS__ERROR("An error occurred. Try again."),
     //ping
     COMMANDS__PING__NAME("ping"),
@@ -95,6 +96,10 @@ public enum Translation {
     COMMANDS__SELECT_MENU__SUCCESS("The channel has been successfully opened!"),
     COMMANDS__SELECT_MENU__NO_CHANGES("This channel is already opened!"),
     COMMANDS__SELECT_MENU__FAILURE("An error occurred. Try again."),
+    //delete message
+    COMMANDS__DELETE_MESSAGE__NAME("delete this message"),
+    COMMANDS__DELETE_MESSAGE__FAILURE("You cannot delete this message."),
+    COMMANDS__DELETE_MESSAGE__SUCCESS("Success!"),
     /*--- Handlers ---*/
     HANDLERS__LAST_LETTER__INCORRECT_START_CHAR("**Oops!** Your message does not start with the last character of the previous message."),
     HANDLERS__LAST_LETTER__TOO_SHORT("**Oops!** Your message is too short."),
