@@ -233,12 +233,13 @@ public class Utils {
      */
     public static void sendPrivateMessage(@NotNull User user, @NotNull String message) {
         user.openPrivateChannel().queue(
-                privateChannel -> privateChannel.sendMessage(checkLength(message, Message.MAX_CONTENT_LENGTH)).queue(),
-                failure -> {
-                    if (failure instanceof ErrorResponseException e && e.getErrorCode() == 50007) {
-                        Logs.warning("User " + user.getAsTag() + " doesn't allow private messages.");
-                    }
-                }
+                privateChannel -> privateChannel.sendMessage(checkLength(message, Message.MAX_CONTENT_LENGTH)).queue(
+                        success -> {},
+                        failure -> {
+                            if (failure instanceof ErrorResponseException e && e.getErrorCode() == 50007) {
+                                Logs.warning("User " + user.getAsTag() + " doesn't allow private messages.");
+                            }
+                        })
         );
     }
 
