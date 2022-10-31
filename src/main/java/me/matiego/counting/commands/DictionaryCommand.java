@@ -50,6 +50,12 @@ public class DictionaryCommand implements ICommandHandler {
                         "word", Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__NAME,
                         Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION
                 );
+        OptionData adminKeyOption =
+                getOption(
+                        "admin-key",
+                        Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__NAME,
+                        Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__DESCRIPTION
+                );
 
         return Commands.slash("dictionary", Translation.COMMANDS__DICTIONARY__DESCRIPTION.getDefault())
                 .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__NAME.toString()))
@@ -62,6 +68,7 @@ public class DictionaryCommand implements ICommandHandler {
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__NAME,
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION,
                                 languageOption,
+                                adminKeyOption,
                                 wordOption
                         ),
                         getSubcommand(
@@ -69,6 +76,7 @@ public class DictionaryCommand implements ICommandHandler {
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__NAME,
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__DESCRIPTION,
                                 languageOption,
+                                adminKeyOption,
                                 wordOption
                         ),
                         getSubcommand(
@@ -76,11 +84,7 @@ public class DictionaryCommand implements ICommandHandler {
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__NAME,
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__DESCRIPTION,
                                 languageOption,
-                                getOption(
-                                        "admin-key",
-                                        Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__NAME,
-                                        Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__DESCRIPTION
-                                ),
+                                adminKeyOption,
                                 getOption(
                                         "file",
                                         Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__NAME,
@@ -110,6 +114,12 @@ public class DictionaryCommand implements ICommandHandler {
         InteractionHook hook = event.getHook();
         User user = event.getUser();
 
+
+        if (!event.getOption("admin-key", "", OptionMapping::getAsString).equals(plugin.getConfig().getString("admin-key"))) {
+            reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.GENERAL__INCORRECT_ADMIN_KEY.toString());
+            return;
+        }
+
         String typeString = event.getOption("language", "null", OptionMapping::getAsString).toUpperCase();
         Dictionary.Type type = Arrays.stream(Dictionary.Type.values())
                 .filter(value -> value.toString().equals(typeString))
@@ -137,10 +147,6 @@ public class DictionaryCommand implements ICommandHandler {
                     }
                 }
                 case "load" -> {
-                    if (!event.getOption("admin-key", "", OptionMapping::getAsString).equals(plugin.getConfig().getString("admin-key"))) {
-                        reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__INCORRECT_KEY.toString());
-                        return;
-                    }
                     switch (plugin.getDictionary().loadDictionaryFromFile(new File(plugin.getDataFolder() + File.separator + event.getOption("file", "null", OptionMapping::getAsString)), type)) {
                         case SUCCESS -> reply(hook, user, event.getName(), 5 * 60 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(System.currentTimeMillis() - time));
                         case NO_CHANGES -> reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.getFormatted(System.currentTimeMillis() - time));

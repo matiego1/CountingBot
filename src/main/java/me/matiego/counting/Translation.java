@@ -19,6 +19,7 @@ public enum Translation {
     GENERAL__UNKNOWN_CHANNEL_TYPE("Unknown channel type. Try again."),
     GENERAL__STATUS("counting channels"),
     GENERAL__DO_NOT_SPAM("Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each."),
+    GENERAL__INCORRECT_ADMIN_KEY("Incorrect administrator key!"),
     /*--- Commands ---*/
     COMMANDS__UNKNOWN("Unknown command."),
     COMMANDS__COOLDOWN("You can use this command again in %s seconds."),
@@ -92,7 +93,6 @@ public enum Translation {
     COMMANDS__DICTIONARY__ADD__FAILURE("An error occurred. Try again."),
     COMMANDS__DICTIONARY__REMOVE__SUCCESS("This word has been successfully removed from the dictionary in %s ms."),
     COMMANDS__DICTIONARY__REMOVE__FAILURE("An error occurred. Try again."),
-    COMMANDS__DICTIONARY__LOAD__INCORRECT_KEY("Incorrect administrator key!\nThe admin-key can be found in the configuration file. This is to prevent uploading random files by people who do not have access to them."),
     COMMANDS__DICTIONARY__LOAD__SUCCESS("Success! (%s ms)"),
     COMMANDS__DICTIONARY__LOAD__NO_CHANGES("This file does not exist."),
     COMMANDS__DICTIONARY__LOAD__FAILURE("An error occurred. Try again."),
