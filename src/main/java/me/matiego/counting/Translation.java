@@ -70,6 +70,10 @@ public enum Translation {
     //dictionary
     COMMANDS__DICTIONARY__NAME("dictionary"),
     COMMANDS__DICTIONARY__DESCRIPTION("Manages dictionaries"),
+    COMMANDS__DICTIONARY__TYPES__POLISH("Polish"),
+    COMMANDS__DICTIONARY__TYPES__ENGLISH("English"),
+    COMMANDS__DICTIONARY__TYPES__GERMAN("German"),
+    COMMANDS__DICTIONARY__TYPES__SPANISH("Spanish"),
     COMMANDS__DICTIONARY__OPTIONS__ADD__NAME("add"),
     COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION("Adds a word to the dictionary"),
     COMMANDS__DICTIONARY__OPTIONS__REMOVE__NAME("remove"),

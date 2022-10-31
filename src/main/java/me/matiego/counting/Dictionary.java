@@ -3,6 +3,7 @@ package me.matiego.counting;
 import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Response;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.sql.Connection;
@@ -14,7 +15,21 @@ public class Dictionary {
         POLISH,
         ENGLISH,
         GERMAN,
-        SPANISH
+        SPANISH;
+
+        @Override
+        public @NotNull String toString() {
+            return Translation.valueOf("COMMANDS__DICTIONARY__TYPES__" + name()).toString();
+        }
+
+        static public @Nullable Type parseString(@NotNull String string) {
+            for (Type type : values()) {
+                if (type.toString().equalsIgnoreCase(string)) {
+                    return type;
+                }
+            }
+            return null;
+        }
     }
 
     /**
