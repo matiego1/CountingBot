@@ -1,8 +1,6 @@
 bot-token: token
 admin-key: 12345
-admin-user-id: 0
 main-guild-id: 0
-logs-channel-id: 0
 anti-spam:
   count: 10
   time: 3
