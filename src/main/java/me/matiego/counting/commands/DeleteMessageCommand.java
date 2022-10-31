@@ -69,11 +69,11 @@ public class DeleteMessageCommand implements ICommandHandler {
         if (mapping == null) return;
         String key = mapping.getAsString();
         if (key.equalsIgnoreCase("null")) {
-            event.reply(Translation.GENERAL__INCORRECT_ADMIN_KEY.toString()).queue();
+            event.reply(Translation.GENERAL__INCORRECT_ADMIN_KEY.toString()).setEphemeral(true).queue();
             return;
         }
         if (!Main.getInstance().getConfig().getString("admin-key", "null").equals(key)) {
-            event.reply(Translation.GENERAL__INCORRECT_ADMIN_KEY.toString()).queue();
+            event.reply(Translation.GENERAL__INCORRECT_ADMIN_KEY.toString()).setEphemeral(true).queue();
             return;
         }
 
