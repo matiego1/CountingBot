@@ -75,9 +75,10 @@ public class DeleteMessageCommand implements ICommandHandler {
             event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE.toString()).setEphemeral(true).queue();
             return;
         }
+        event.deferReply(true).queue();
         union.asTextChannel().retrieveMessageById(messageId).queue(message -> {
             message.delete().queue();
-            event.reply(Translation.COMMANDS__DELETE_MESSAGE__SUCCESS.toString()).setEphemeral(true).queue();
-        }, failure -> event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE.toString()).setEphemeral(true).queue());
+            event.getHook().sendMessage(Translation.COMMANDS__DELETE_MESSAGE__SUCCESS.toString()).setEphemeral(true).queue();
+        }, failure -> event.getHook().sendMessage(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE.toString()).setEphemeral(true).queue());
     }
 }
