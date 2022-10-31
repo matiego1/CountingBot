@@ -36,8 +36,8 @@ public class FixedSizeMap<K, V> {
         return value == null ? def : value;
     }
 
-    public void remove(@NotNull K key) {
-        map.remove(key);
+    public @Nullable V remove(@NotNull K key) {
+        return map.remove(key);
     }
 
 }

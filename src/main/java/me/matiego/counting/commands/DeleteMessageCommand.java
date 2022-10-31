@@ -17,6 +17,7 @@ import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.Modal;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
 import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
+import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import org.jetbrains.annotations.NotNull;
 
 public class DeleteMessageCommand implements ICommandHandler {
@@ -64,7 +65,19 @@ public class DeleteMessageCommand implements ICommandHandler {
     public void onModalInteraction(@NotNull ModalInteraction event) {
         if (!event.getModalId().equals("delete-msg-modal")) return;
 
-        Long messageId = messages.get(event.getUser().getIdLong());
+        ModalMapping mapping = event.getValue("admin-key");
+        if (mapping == null) return;
+        String key = mapping.getAsString();
+        if (key.equalsIgnoreCase("null")) {
+            event.reply(Translation.GENERAL__INCORRECT_ADMIN_KEY.toString()).queue();
+            return;
+        }
+        if (!Main.getInstance().getConfig().getString("admin-key", "null").equals(key)) {
+            event.reply(Translation.GENERAL__INCORRECT_ADMIN_KEY.toString()).queue();
+            return;
+        }
+
+        Long messageId = messages.remove(event.getUser().getIdLong());
         if (messageId == null) {
             event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE.toString()).setEphemeral(true).queue();
             return;
@@ -75,6 +88,7 @@ public class DeleteMessageCommand implements ICommandHandler {
             event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE.toString()).setEphemeral(true).queue();
             return;
         }
+
         event.deferReply(true).queue();
         union.asTextChannel().retrieveMessageById(messageId).queue(message -> {
             message.delete().queue();
