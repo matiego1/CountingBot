@@ -120,11 +120,7 @@ public class DictionaryCommand implements ICommandHandler {
             return;
         }
 
-        String typeString = event.getOption("language", "null", OptionMapping::getAsString).toUpperCase();
-        Dictionary.Type type = Arrays.stream(Dictionary.Type.values())
-                .filter(value -> value.toString().equals(typeString))
-                .findFirst()
-                .orElse(null);
+        Dictionary.Type type = Dictionary.Type.parseString(event.getOption("language", "null", OptionMapping::getAsString).toUpperCase());
         if (type == null) {
             hook.sendMessage(Translation.GENERAL__UNKNOWN_LANGUAGE.toString()).queue();
             return;
