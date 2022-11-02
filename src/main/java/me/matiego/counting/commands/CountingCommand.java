@@ -180,7 +180,7 @@ public class CountingCommand implements ICommandHandler {
                         eb.setColor(Color.GREEN);
                         eb.setTimestamp(Instant.now());
                         eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
-                        chn.sendMessageEmbeds(eb.build()).queue();
+                        chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
                     }
                     case NO_CHANGES -> reply(event, Translation.COMMANDS__SELECT_MENU__NO_CHANGES.toString());
                     case FAILURE -> reply(event, Translation.COMMANDS__SELECT_MENU__FAILURE.toString());
