@@ -23,11 +23,11 @@ public class PingCommand implements ICommandHandler {
                 .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__NAME.toString()))
                 .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__DESCRIPTION.toString()))
                 .addOptions(
-                        new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__PING__OPTION__DESCRIPTION.getDefault(), false)
+                        new OptionData(OptionType.STRING, "ephemeral", Translation.COMMANDS__PING__OPTION__DESCRIPTION.getDefault(), false)
                                 .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__OPTION__NAME.toString()))
                                 .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__OPTION__DESCRIPTION.toString()))
-                                .addChoice(Translation.COMMANDS__ABOUT__OPTION__VALUES__TRUE.toString(), 1)
-                                .addChoice(Translation.COMMANDS__ABOUT__OPTION__VALUES__FALSE.toString(), 0)
+                                .addChoice(Translation.COMMANDS__PING__OPTION__VALUES__TRUE.toString(), 1)
+                                .addChoice(Translation.COMMANDS__PING__OPTION__VALUES__FALSE.toString(), 0)
                 );
     }
 

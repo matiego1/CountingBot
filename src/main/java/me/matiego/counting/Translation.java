@@ -30,6 +30,8 @@ public enum Translation {
     COMMANDS__PING__DESCRIPTION("Shows the current ping of the bot"),
     COMMANDS__PING__OPTION__NAME("ephemeral"),
     COMMANDS__PING__OPTION__DESCRIPTION("whether this message should only be visible to you"),
+    COMMANDS__PING__OPTION__VALUES__TRUE("True"),
+    COMMANDS__PING__OPTION__VALUES__FALSE("False"),
     //about
     COMMANDS__ABOUT__NAME("about"),
     COMMANDS__ABOUT__DESCRIPTION("Shows some basic information about this bot."),
