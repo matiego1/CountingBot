@@ -135,6 +135,8 @@ public enum Translation {
     TYPE__TRIANGULAR_NUMBERS__DESCRIPTION("Write next triangular numbers"),
     TYPE__PALINDROMIC_NUMBERS__NAME("Palindromic numbers"),
     TYPE__PALINDROMIC_NUMBERS__DESCRIPTION("Write next palindromic numbers"),
+    TYPE__ROMAN__COUNTING__NAME("Roman counting"),
+    TYPE__ROMAN__COUNTING__DESCRIPTION("Write next roman numbers"),
     TYPE__ALPHABET__NAME("Alphabet"),
     TYPE__ALPHABET__DESCRIPTION("Write next letters in english alphabet"),
     TYPE__POLISH_LAST_LETTER__NAME("Polish last letter"),

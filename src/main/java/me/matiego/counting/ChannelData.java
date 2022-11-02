@@ -58,6 +58,7 @@ public class ChannelData {
         LUCAS_NUMBERS("U+1F471", new LucasNumbers()),
         TRIANGULAR_NUMBERS("U+1F4D0", new TriangularNumbers()),
         PALINDROMIC_NUMBERS("U+1FA9E", new PalindromicNumbers()),
+        ROMAN_COUNTING("U+1F531", new RomanCounting()),
         ALPHABET("U+1F18E", new Alphabet()),
         POLISH_LAST_LETTER("U+1F524", new PolishLastLetter()),
         ENGLISH_LAST_LETTER("U+1F445", new EnglishLastLetter()),
