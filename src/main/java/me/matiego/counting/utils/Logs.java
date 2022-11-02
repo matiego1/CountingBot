@@ -29,21 +29,12 @@ public class Logs {
     }
 
     /**
-     * Sends a warning to the console.
+     * Sends a warning to the console and Discord logs channel.
      * @param message the message to send
      */
     public static void warning(@NotNull String message) {
-        warning(message, true);
-    }
-
-    /**
-     * Sends a warning to the console and Discord logs channel.
-     * @param message the message to send
-     * @param quiet whether the message should not be sent to Discord
-     */
-    public static void warning(@NotNull String message, boolean quiet) {
         plugin.getLogger().warning(message);
-        if (quiet) return;
+
         EmbedBuilder eb = new EmbedBuilder();
         eb.setDescription(Utils.checkLength(message, MessageEmbed.DESCRIPTION_MAX_LENGTH));
         eb.setColor(Color.YELLOW);
@@ -53,21 +44,12 @@ public class Logs {
     }
 
     /**
-     * Sends an error to the console.
+     * Sends a warning to the console and Discord logs channel.
      * @param message the message to send
      */
     public static void error(@NotNull String message) {
-        error(message, true);
-    }
-
-    /**
-     * Sends a warning to the console and Discord logs channel.
-     * @param message the message to send
-     * @param quiet whether the message should not be sent to Discord
-     */
-    public static void error(@NotNull String message, boolean quiet) {
         plugin.getLogger().severe(message);
-        if (quiet) return;
+
         EmbedBuilder eb = new EmbedBuilder();
         eb.setDescription(Utils.checkLength(message, MessageEmbed.DESCRIPTION_MAX_LENGTH));
         eb.setColor(Color.RED);
@@ -77,29 +59,17 @@ public class Logs {
     }
 
     /**
-     * Sends an error to the console.
-     * This will also send a throwable stack trace to the console.
-     * @param message the message to send
-     * @param throwable the throwable whose stack trace is to be sent to the console
-     */
-    public static void error(@NotNull String message, @NotNull Throwable throwable) {
-        error(message, throwable, true);
-    }
-
-    /**
      * Sends an error to the console and Discord logs channel.
      * This will also send a throwable stack trace.
      * @param message the message to send
      * @param throwable the throwable whose stack trace is to be sent to the console
-     * @param quiet whether the message should not be sent to Discord
      */
-    public static void error(@NotNull String message, @NotNull Throwable throwable, boolean quiet) {
-        error(message, true);
+    public static void error(@NotNull String message, @NotNull Throwable throwable) {
+        plugin.getLogger().severe(message);
         StringWriter stringWriter = new StringWriter();
         throwable.printStackTrace(new PrintWriter(stringWriter));
-        for (String line : stringWriter.toString().split("\n")) error(line, true);
+        for (String line : stringWriter.toString().split("\n")) plugin.getLogger().severe(line);
 
-        if (quiet) return;
         EmbedBuilder eb = new EmbedBuilder();
         eb.setDescription(Utils.checkLength(message, MessageEmbed.DESCRIPTION_MAX_LENGTH));
         eb.addField("**Stack trace:**", Utils.checkLength(stringWriter.toString(), MessageEmbed.VALUE_MAX_LENGTH), false);
