@@ -24,16 +24,18 @@ public class AboutCommand implements ICommandHandler {
                 .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__NAME.toString()))
                 .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__DESCRIPTION.toString()))
                 .addOptions(
-                        new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__ABOUT__OPTION__DESCRIPTION.getDefault(), false)
+                        new OptionData(OptionType.STRING, "ephemeral", Translation.COMMANDS__ABOUT__OPTION__DESCRIPTION.getDefault(), false)
                                 .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__OPTION__NAME.toString()))
                                 .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__ABOUT__OPTION__DESCRIPTION.toString()))
+                                .addChoice(Translation.COMMANDS__ABOUT__OPTION__VALUES__TRUE.toString(), 1)
+                                .addChoice(Translation.COMMANDS__ABOUT__OPTION__VALUES__FALSE.toString(), 0)
                 );
     }
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         event.reply(Translation.COMMANDS__ABOUT__MESSAGE.getFormatted(Main.getInstance().getDescription().getVersion()))
-                .setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean))
+                .setEphemeral(event.getOption("ephemeral", 0, OptionMapping::getAsInt) == 1)
                 .queue();
     }
 }

@@ -35,6 +35,8 @@ public enum Translation {
     COMMANDS__ABOUT__DESCRIPTION("Shows some basic information about this bot."),
     COMMANDS__ABOUT__OPTION__NAME("ephemeral"),
     COMMANDS__ABOUT__OPTION__DESCRIPTION("whether this message should only be visible to you"),
+    COMMANDS__ABOUT__OPTION__VALUES__TRUE("True"),
+    COMMANDS__ABOUT__OPTION__VALUES__FALSE("False"),
     COMMANDS__ABOUT__MESSAGE("""
             **__Counting bot__**
             Counts in different ways and have a lot of fun!

@@ -26,6 +26,8 @@ public class PingCommand implements ICommandHandler {
                         new OptionData(OptionType.BOOLEAN, "ephemeral", Translation.COMMANDS__PING__OPTION__DESCRIPTION.getDefault(), false)
                                 .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__OPTION__NAME.toString()))
                                 .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__PING__OPTION__DESCRIPTION.toString()))
+                                .addChoice(Translation.COMMANDS__ABOUT__OPTION__VALUES__TRUE.toString(), 1)
+                                .addChoice(Translation.COMMANDS__ABOUT__OPTION__VALUES__FALSE.toString(), 0)
                 );
     }
 
@@ -33,7 +35,7 @@ public class PingCommand implements ICommandHandler {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         long time = System.currentTimeMillis();
         event.reply("Pong!")
-                .setEphemeral(event.getOption("ephemeral", false, OptionMapping::getAsBoolean))
+                .setEphemeral(event.getOption("ephemeral", 0, OptionMapping::getAsInt) == 1)
                 .flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time))
                 .queue();
     }
