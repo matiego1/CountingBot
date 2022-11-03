@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class DeleteMessageCommand implements ICommandHandler {
 
-    FixedSizeMap<Long, Long> messages = new FixedSizeMap<>(1000);
+    private final FixedSizeMap<Long, Long> messages = new FixedSizeMap<>(1000);
 
     /**
      * Returns the slash command.

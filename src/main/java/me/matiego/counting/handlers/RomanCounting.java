@@ -22,9 +22,9 @@ public class RomanCounting implements IChannelHandler {
         romanToInt.put("D", 500);
         romanToInt.put("M", 1000);
     }
-    HashMap<String, Integer> romanToInt = new HashMap<>();
+    private final HashMap<String, Integer> romanToInt = new HashMap<>();
     @SuppressWarnings("SpellCheckingInspection")
-    List<Pair<String, String>> toReplace = Arrays.asList(
+    private final List<Pair<String, String>> toReplace = Arrays.asList(
             new Pair<>("IV", "IIII"),
             new Pair<>("IX", "VIIII"),
             new Pair<>("XL", "XXXX"),
@@ -47,7 +47,7 @@ public class RomanCounting implements IChannelHandler {
         return result;
     }
 
-    List<Pair<Integer, String>> intToRoman = Arrays.asList(
+    private final List<Pair<Integer, String>> intToRoman = Arrays.asList(
             new Pair<>(1000, "M"),
             new Pair<>(900, "CM"),
             new Pair<>(500, "D"),
