@@ -7,7 +7,6 @@ import java.util.IllegalFormatException;
 /**
  * Translation of some messages.
  */
-@SuppressWarnings("unused")
 public enum Translation {
     /*--- Generals ---*/
     GENERAL__NOT_SENT("**Oops!** An error occurred while sending your message. Please try again later."),
@@ -23,7 +22,6 @@ public enum Translation {
     /*--- Commands ---*/
     COMMANDS__UNKNOWN("Unknown command."),
     COMMANDS__COOLDOWN("You can use this command again in %s seconds."),
-    COMMANDS__DISABLED_CHANNEL("You cannot use this command here."),
     COMMANDS__ERROR("An error occurred. Try again."),
     //ping
     COMMANDS__PING__NAME("ping"),
