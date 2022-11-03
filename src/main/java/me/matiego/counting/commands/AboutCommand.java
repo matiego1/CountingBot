@@ -35,7 +35,7 @@ public class AboutCommand implements ICommandHandler {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         event.reply(Translation.COMMANDS__ABOUT__MESSAGE.getFormatted(Main.getInstance().getDescription().getVersion()))
-                .setEphemeral(event.getOption("ephemeral", "True", OptionMapping::getAsString).equals("True"))
+                .setEphemeral(event.getOption("ephemeral", "False", OptionMapping::getAsString).equals("True"))
                 .queue();
     }
 }

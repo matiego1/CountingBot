@@ -35,7 +35,7 @@ public class PingCommand implements ICommandHandler {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         long time = System.currentTimeMillis();
         event.reply("Pong!")
-                .setEphemeral(event.getOption("ephemeral", "True", OptionMapping::getAsString).equals("True"))
+                .setEphemeral(event.getOption("ephemeral", "False", OptionMapping::getAsString).equals("True"))
                 .flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time))
                 .queue();
     }
