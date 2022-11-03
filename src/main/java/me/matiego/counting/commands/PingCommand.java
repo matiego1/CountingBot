@@ -1,5 +1,6 @@
 package me.matiego.counting.commands;
 
+import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.utils.ICommandHandler;
 import me.matiego.counting.utils.Utils;
@@ -33,9 +34,12 @@ public class PingCommand implements ICommandHandler {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
+        boolean ephemeral = event.getOption("ephemeral", "False", OptionMapping::getAsString).equals("True");
+        if (Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
+
         long time = System.currentTimeMillis();
         event.reply("Pong!")
-                .setEphemeral(event.getOption("ephemeral", "False", OptionMapping::getAsString).equals("True"))
+                .setEphemeral(ephemeral)
                 .flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time))
                 .queue();
     }

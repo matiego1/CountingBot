@@ -53,11 +53,6 @@ public class CommandHandler extends ListenerAdapter {
             event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
             return;
         }
-        //check channel
-        if (Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong()) != null) {
-            event.reply(Translation.COMMANDS__DISABLED_CHANNEL.toString()).setEphemeral(true).queue();
-            return;
-        }
         //execute command
         try {
             handler.onSlashCommandInteraction(event.getInteraction());
