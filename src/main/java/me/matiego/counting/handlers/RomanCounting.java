@@ -13,6 +13,7 @@ import java.util.List;
 
 public class RomanCounting implements IChannelHandler {
 
+    //Roman number to integer
     public RomanCounting() {
         romanToInt.put("I", 1);
         romanToInt.put("V", 5);
@@ -24,18 +25,14 @@ public class RomanCounting implements IChannelHandler {
     }
     private final HashMap<String, Integer> romanToInt = new HashMap<>();
     @SuppressWarnings("SpellCheckingInspection")
-    private final List<Pair<String, String>> toReplace = Arrays.asList(
-            new Pair<>("IV", "IIII"),
-            new Pair<>("IX", "VIIII"),
-            new Pair<>("XL", "XXXX"),
-            new Pair<>("XC", "LXXXX"),
-            new Pair<>("CD", "CCCC"),
-            new Pair<>("CM", "DCCCC")
-    );
     private int romanToInt(@NotNull String roman) {
-        for (Pair<String, String> pair : toReplace) {
-            roman = roman.replace(pair.getFirst(), pair.getSecond());
-        }
+        roman = roman.replace("IV", "IIII");
+        roman = roman.replace("IX", "VIIII");
+        roman = roman.replace("XL", "XXXX");
+        roman = roman.replace("XC", "LXXXX");
+        roman = roman.replace("CD", "CCCC");
+        roman = roman.replace("CM", "DCCCC");
+
         int result = 0;
         for (int i = 0; i < roman.length(); i++) {
             Integer integer = romanToInt.get(String.valueOf(roman.charAt(i)));
@@ -47,21 +44,17 @@ public class RomanCounting implements IChannelHandler {
         return result;
     }
 
+    //Integer to roman number
     private final List<Pair<Integer, String>> intToRoman = Arrays.asList(
             new Pair<>(1000, "M"),
-            new Pair<>(900, "CM"),
             new Pair<>(500, "D"),
-            new Pair<>(400, "CD"),
             new Pair<>(100, "C"),
-            new Pair<>(90, "XC"),
             new Pair<>(50, "L"),
-            new Pair<>(40, "XL"),
             new Pair<>(10, "X"),
-            new Pair<>(9, "IX"),
             new Pair<>(5, "V"),
-            new Pair<>(4, "IV"),
             new Pair<>(1, "I")
     );
+    @SuppressWarnings("SpellCheckingInspection")
     private @NotNull String intToRoman(@Range(from = 1, to = 3999) int integer) {
         StringBuilder roman = new StringBuilder();
         while (integer > 0) {
@@ -69,10 +62,18 @@ public class RomanCounting implements IChannelHandler {
                 if (integer >= pair.getFirst()) {
                     integer -= pair.getFirst();
                     roman.append(pair.getSecond());
+                    break;
                 }
             }
         }
-        return roman.toString();
+        String result = roman.toString();
+        result = result.replace("VIIII", "IX");
+        result = result.replace("IIII", "IV");
+        result = result.replace("LXXXX", "XC");
+        result = result.replace("XXXX", "XL");
+        result = result.replace("DCCCC", "CM");
+        result = result.replace("CCCC", "CD");
+        return result;
     }
 
     /**
