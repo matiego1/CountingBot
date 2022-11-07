@@ -51,9 +51,9 @@ public class DeleteMessageCommand implements ICommandHandler {
         }
         messages.put(event.getUser().getIdLong(), event.getTarget().getIdLong());
         event.replyModal(
-                Modal.create("delete-msg-modal", "Confirm your permissions!")
+                Modal.create("delete-msg-modal", Translation.COMMANDS__DELETE_MESSAGE__MODAL__NAME.toString())
                         .addActionRows(
-                                ActionRow.of(TextInput.create("admin-key", "Enter an admin-key here:", TextInputStyle.SHORT)
+                                ActionRow.of(TextInput.create("admin-key", Translation.COMMANDS__DELETE_MESSAGE__MODAL__OPTION.toString(), TextInputStyle.SHORT)
                                         .setRequired(true)
                                         .build())
                         )

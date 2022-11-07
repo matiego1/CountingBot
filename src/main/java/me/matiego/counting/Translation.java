@@ -104,6 +104,8 @@ public enum Translation {
     COMMANDS__SELECT_MENU__FAILURE("An error occurred. Try again."),
     //delete message
     COMMANDS__DELETE_MESSAGE__NAME("delete this message"),
+    COMMANDS__DELETE_MESSAGE__MODAL__NAME("Confirm your permissions!"),
+    COMMANDS__DELETE_MESSAGE__MODAL__OPTION("Enter an admin-key here:"),
     COMMANDS__DELETE_MESSAGE__FAILURE__NO_PERMISSION("You cannot delete this message."),
     COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE("An error occurred while retrieving the message to delete."),
     COMMANDS__DELETE_MESSAGE__SUCCESS("Success!"),

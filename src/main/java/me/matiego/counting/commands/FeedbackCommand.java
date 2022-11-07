@@ -54,11 +54,11 @@ public class FeedbackCommand implements ICommandHandler {
                 Modal.create("feedback-modal", Translation.COMMANDS__FEEDBACK__TITLE.toString())
                         .addActionRows(
                                 ActionRow.of(TextInput.create("subject", Translation.COMMANDS__FEEDBACK__SUBJECT.toString(), TextInputStyle.SHORT)
-                                        .setRequiredRange(10, 100)
+                                        .setRequired(true)
                                         .setPlaceholder(Translation.COMMANDS__FEEDBACK__SUBJECT_PLACEHOLDER.toString())
                                         .build()),
                                 ActionRow.of(TextInput.create("description", Translation.COMMANDS__FEEDBACK__MODAL_DESCRIPTION.toString(), TextInputStyle.PARAGRAPH)
-                                        .setRequiredRange(30, 4000)
+                                        .setRequired(true)
                                         .build())
                         )
                         .build()
