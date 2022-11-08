@@ -17,11 +17,6 @@ public class Dictionary {
         GERMAN,
         SPANISH;
 
-        @Override
-        public String toString() {
-            return  "";
-        }
-
         public @NotNull String getTranslation() {
             return Translation.valueOf("COMMANDS__DICTIONARY__TYPES__" + name()).toString();
         }
