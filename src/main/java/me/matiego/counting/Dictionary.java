@@ -23,7 +23,7 @@ public class Dictionary {
 
         static public @Nullable Type parseTranslation(@NotNull String string) {
             for (Type type : values()) {
-                if (type.toString().equalsIgnoreCase(string)) {
+                if (type.getTranslation().equalsIgnoreCase(string)) {
                     return type;
                 }
             }
