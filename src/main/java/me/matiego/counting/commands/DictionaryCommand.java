@@ -41,7 +41,7 @@ public class DictionaryCommand implements ICommandHandler {
                         Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION)
                 .addChoices(
                         Arrays.stream(Dictionary.Type.values())
-                                .map(Enum::toString)
+                                .map(Dictionary.Type::getTranslation)
                                 .map(value -> new Command.Choice(value, value))
                                 .toList()
                 );
@@ -120,7 +120,7 @@ public class DictionaryCommand implements ICommandHandler {
             return;
         }
 
-        Dictionary.Type type = Dictionary.Type.parseString(event.getOption("language", "null", OptionMapping::getAsString).toUpperCase());
+        Dictionary.Type type = Dictionary.Type.parseTranslation(event.getOption("language", "null", OptionMapping::getAsString).toUpperCase());
         if (type == null) {
             hook.sendMessage(Translation.GENERAL__UNKNOWN_LANGUAGE.toString()).queue();
             return;

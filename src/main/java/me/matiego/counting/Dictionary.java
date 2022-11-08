@@ -18,11 +18,15 @@ public class Dictionary {
         SPANISH;
 
         @Override
-        public @NotNull String toString() {
+        public String toString() {
+            return  "";
+        }
+
+        public @NotNull String getTranslation() {
             return Translation.valueOf("COMMANDS__DICTIONARY__TYPES__" + name()).toString();
         }
 
-        static public @Nullable Type parseString(@NotNull String string) {
+        static public @Nullable Type parseTranslation(@NotNull String string) {
             for (Type type : values()) {
                 if (type.toString().equalsIgnoreCase(string)) {
                     return type;
