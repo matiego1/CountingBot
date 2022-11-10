@@ -40,6 +40,18 @@ public class RomanCounting implements IChannelHandler {
         return result;
     }
 
+    private boolean isCorrect(@NotNull String roman) {
+        int index = 0;
+        //noinspection SpellCheckingInspection
+        String chars = "MDCLXVI";
+        for (int i = 0; i < chars.length(); i++) {
+            while (index < roman.length() && roman.charAt(index) == chars.charAt(i)) {
+                index++;
+            }
+        }
+        return index == roman.length();
+    }
+
     /**
      * Checks if the sent message is correct.
      *
@@ -50,6 +62,7 @@ public class RomanCounting implements IChannelHandler {
     @Override
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
         String content = message.getContentDisplay().toUpperCase();
+        if (!isCorrect(content)) return null;
         if (history.isEmpty()) return content.equals("I") ? "I" : null;
         int a = romanToInt(history.get(0).getContentDisplay()), b = romanToInt(content);
         if (a <= 0 || b <= 0 || a >= 3999) return content.equals("I") ? "I" : null;
