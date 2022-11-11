@@ -23,6 +23,10 @@ public class MessageHandler extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         Utils.async(() -> {
             long time = System.currentTimeMillis();
+
+            ChannelData data = Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong());
+            if (data == null) return;
+
             User user = event.getAuthor();
             Message message = event.getMessage();
             if (user.isBot()) {
@@ -32,10 +36,6 @@ public class MessageHandler extends ListenerAdapter {
                 return;
             }
 
-            ChannelData data = Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong());
-            if (data == null) return;
-            IChannelHandler handler = data.getHandler();
-
             int minTime = Main.getInstance().getConfig().getInt("anti-spam.time"), maxCount = Main.getInstance().getConfig().getInt("anti-spam.count");
             if (!check(user, event.getChannel().getIdLong(), time, minTime * 1000, maxCount)) {
                 message.delete().queue();
@@ -43,6 +43,7 @@ public class MessageHandler extends ListenerAdapter {
                 return;
             }
 
+            IChannelHandler handler = data.getHandler();
             int amount = handler.getAmountOfMessages();
             List<Message> history = amount == 0 ? new ArrayList<>() : event.getChannel().getHistory().retrievePast(amount + 1).complete();
             try {
