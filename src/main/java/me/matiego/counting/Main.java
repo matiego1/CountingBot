@@ -140,9 +140,9 @@ public final class Main extends JavaPlugin {
             }
         });
         //Check channels
-        List<Pair<Long, ChannelData>> channels = getStorage().getChannels();
+        List<ChannelData> channels = getStorage().getChannels();
         int removed = (int) channels.stream()
-                .map(Pair::getFirst)
+                .map(ChannelData::getChannelId)
                 .filter(id -> jda.getTextChannelById(id) == null)
                 .map(id -> getStorage().removeChannel(id))
                 .filter(response -> response == Response.SUCCESS)
@@ -150,14 +150,14 @@ public final class Main extends JavaPlugin {
         if (removed > 0) Logs.info("Successfully removed " + removed + " unknown counting channel(s).");
         //Check webhooks
         int refreshedWebhooks = (int) channels.stream()
-                .filter(pair -> {
+                .filter(data -> {
                     try {
-                        jda.retrieveWebhookById(pair.getSecond().getWebhookId()).complete();
+                        jda.retrieveWebhookById(data.getWebhookId()).complete();
                         return false;
                     } catch (ErrorResponseException ignored) {}
                     return true;
                 })
-                .map(pair -> refreshWebhook(pair.getFirst(), pair.getSecond().getType()))
+                .map(this::refreshWebhook)
                 .filter(Boolean::booleanValue)
                 .count();
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
@@ -185,7 +185,8 @@ public final class Main extends JavaPlugin {
         Logs.info("Plugin enabled in " + (System.currentTimeMillis() - time) + "ms.");
     }
 
-    private boolean refreshWebhook(long id, @NotNull ChannelData.Type type) {
+    private boolean refreshWebhook(@NotNull ChannelData data) {
+        long id = data.getChannelId();
         if (getStorage().removeChannel(id) == Response.FAILURE) return false;
 
         TextChannel chn = jda.getTextChannelById(id);
@@ -193,7 +194,7 @@ public final class Main extends JavaPlugin {
         List<Webhook> webhooks = chn.retrieveWebhooks().complete();
         Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
 
-        if (getStorage().addChannel(id, new ChannelData(type, webhook)) != Response.FAILURE) return true;
+        if (getStorage().addChannel(new ChannelData(id, data.getGuildId(), data.getType(), webhook)) != Response.FAILURE) return true;
         Logs.warning("An error occurred while refreshing an unknown webhook. The counting channel has been removed.");
         getStorage().removeChannel(id);
         return false;
@@ -206,33 +207,34 @@ public final class Main extends JavaPlugin {
     public void onDisable() {
         long time = System.currentTimeMillis();
         //shut down JDA
-        jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
+        if (jda != null) {
+            jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
 
-        EmbedBuilder eb = new EmbedBuilder();
-        eb.setDescription("Bot has been disabled!");
-        eb.setTimestamp(Instant.now());
-        eb.setColor(Color.RED);
-        TextChannel chn = jda.getTextChannelById(getConfig().getLong("logs-channel-id"));
-        if (chn != null) chn.sendMessageEmbeds(eb.build()).complete();
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.setDescription("Bot has been disabled!");
+            eb.setTimestamp(Instant.now());
+            eb.setColor(Color.RED);
+            TextChannel chn = jda.getTextChannelById(getConfig().getLong("logs-channel-id"));
+            if (chn != null) chn.sendMessageEmbeds(eb.build()).complete();
 
-        if (jda == null) return;
-        CompletableFuture<Void> shutdownTask = new CompletableFuture<>();
-        jda.addEventListener(new ListenerAdapter() {
-            @Override
-            public void onShutdown(@NotNull ShutdownEvent event) {
-                shutdownTask.complete(null);
+            CompletableFuture<Void> shutdownTask = new CompletableFuture<>();
+            jda.addEventListener(new ListenerAdapter() {
+                @Override
+                public void onShutdown(@NotNull ShutdownEvent event) {
+                    shutdownTask.complete(null);
+                }
+            });
+            jda.shutdown();
+            try {
+                shutdownTask.get(5, TimeUnit.SECONDS);
+                Logs.info("Successfully shut down the Discord bot.");
+            } catch (Exception e) {
+                Logs.warning("Discord bot took too long to shut down, skipping. Ignore any errors from this point.");
             }
-        });
-        jda.shutdown();
-        try {
-            shutdownTask.get(5, TimeUnit.SECONDS);
-            Logs.info("Successfully shut down the Discord bot.");
-        } catch (Exception e) {
-            Logs.warning("Discord bot took too long to shut down, skipping. Ignore any errors from this point.");
+            jda = null;
+            if (callbackThreadPool != null) callbackThreadPool.shutdownNow();
+            callbackThreadPool = null;
         }
-        jda = null;
-        if (callbackThreadPool != null) callbackThreadPool.shutdownNow();
-        callbackThreadPool = null;
         //close MySQL connection
         if (mySQL != null) mySQL.close();
         Logs.info("Plugin disabled in " + (System.currentTimeMillis() - time) + "ms.");

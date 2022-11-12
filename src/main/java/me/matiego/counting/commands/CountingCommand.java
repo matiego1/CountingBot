@@ -4,7 +4,6 @@ import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.utils.ICommandHandler;
-import me.matiego.counting.utils.Pair;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -121,14 +120,14 @@ public class CountingCommand implements ICommandHandler {
                     JDA jda = event.getJDA();
                     long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
-                    for (Pair<Long, ChannelData> pair : plugin.getStorage().getChannels()) {
-                        GuildChannel chn = jda.getGuildChannelById(pair.getFirst());
+                    for (ChannelData data : plugin.getStorage().getChannels()) {
+                        GuildChannel chn = jda.getGuildChannelById(data.getChannelId());
                         if (chn != null && chn.getGuild().getIdLong() == guildId) {
-                            msg.append(chn.getAsMention()).append(": ").append(pair.getSecond().getType()).append("\n");
+                            msg.append(chn.getAsMention()).append(": ").append(data.getType()).append("\n");
                         } else if (plugin.getConfig().getLong("main-guild-id") == guildId) {
-                            msg.append(chn == null ? "`" + pair.getFirst() + "`" : chn.getAsMention()).append(": ").append(pair.getSecond().getType());
+                            msg.append(chn == null ? "`" + data.getChannelId() + "`" : chn.getAsMention()).append(": ").append(data.getType());
                             if (chn != null) {
-                                msg.append("; Guild: `[").append(chn.getGuild().getName()).append("]`");
+                                msg.append(" `[").append(chn.getGuild().getName()).append("]`");
                             }
                             msg.append("\n");
                         }
@@ -171,7 +170,7 @@ public class CountingCommand implements ICommandHandler {
                 List<Webhook> webhooks = chn.retrieveWebhooks().complete();
                 Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
 
-                switch (plugin.getStorage().addChannel(chn.getIdLong(), new ChannelData(type, webhook))) {
+                switch (plugin.getStorage().addChannel(new ChannelData(chn.getIdLong(), chn.getGuild().getIdLong(), type, webhook))) {
                     case SUCCESS -> {
                         reply(event, Translation.COMMANDS__SELECT_MENU__SUCCESS.toString());
                         EmbedBuilder eb = new EmbedBuilder();

@@ -1,7 +1,6 @@
 package me.matiego.counting;
 
 import me.matiego.counting.utils.Logs;
-import me.matiego.counting.utils.Pair;
 import me.matiego.counting.utils.Response;
 import net.dv8tion.jda.api.entities.Webhook;
 import org.jetbrains.annotations.NotNull;
@@ -11,7 +10,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -34,21 +32,24 @@ public class Storage {
 
     /**
      * Adds a new counting channel.
-     * @param id id of the channel
      * @param data the channel data
      * @return {@code Response.SUCCESS} if the channel was added successfully, otherwise {@code Response.FAILURE}
      */
-    public synchronized @NotNull Response addChannel(long id, @NotNull ChannelData data) {
-        if (cache.containsKey(id)) return Response.NO_CHANGES;
+    public synchronized @NotNull Response addChannel(@NotNull ChannelData data) {
+        if (cache.containsKey(data.getChannelId())) return Response.NO_CHANGES;
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_channels(chn, type, url) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE chn = chn, type = ?, url = ?")) {
-            stmt.setString(1, String.valueOf(id));
-            stmt.setString(2, data.getType().name());
-            stmt.setString(3, data.getWebhookUrl());
-            stmt.setString(4, data.getType().name());
-            stmt.setString(5, data.getWebhookUrl());
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_channels(chn, guild, type, url) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE chn = chn, guild = ?, type = ?, url = ?")) {
+            stmt.setString(1, String.valueOf(data.getChannelId()));
+            stmt.setString(2, String.valueOf(data.getGuildId()));
+            stmt.setString(3, data.getType().name());
+            stmt.setString(4, data.getWebhookUrl());
+
+            stmt.setString(5, String.valueOf(data.getGuildId()));
+            stmt.setString(6, data.getType().name());
+            stmt.setString(7, data.getWebhookUrl());
             stmt.execute();
-            cache.put(id, data);
+
+            cache.put(data.getChannelId(), data);
             return Response.SUCCESS;
         } catch (SQLException e) {
             Logs.error("An error occurred while saving the channel to the storage", e);
@@ -88,10 +89,8 @@ public class Storage {
      * Returns a list of all added channels.
      * @return the list of all added channels
      */
-    public synchronized @NotNull List<Pair<Long, ChannelData>> getChannels() {
-        List<Pair<Long, ChannelData>> result = new ArrayList<>();
-        cache.forEach((id, data) -> result.add(new Pair<>(id, data)));
-        return result;
+    public synchronized @NotNull List<ChannelData> getChannels() {
+        return cache.values().stream().toList();
     }
 
     /**
@@ -100,7 +99,7 @@ public class Storage {
      */
     public static @Nullable Storage load() {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT chn, type, url FROM counting_channels")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT chn, guild, type, url FROM counting_channels")) {
             ResultSet result = stmt.executeQuery();
             HashMap<Long, ChannelData> cache = new HashMap<>();
             while (result.next()) {
@@ -111,6 +110,8 @@ public class Storage {
                     cache.put(
                             Long.parseLong(result.getString("chn")),
                             new ChannelData(
+                                    Long.parseLong(result.getString("chn")),
+                                    Long.parseLong(result.getString("guild")),
                                     ChannelData.Type.valueOf(result.getString("type")),
                                     Long.parseLong(matcher.group(1)),
                                     url

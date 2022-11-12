@@ -111,7 +111,7 @@ public class FeedbackCommand implements ICommandHandler {
             List<Webhook> webhooks = chn.retrieveWebhooks().complete();
             Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
 
-            if (plugin.getStorage().addChannel(chn.getIdLong(), new ChannelData(type, webhook)) == Response.SUCCESS) {
+            if (plugin.getStorage().addChannel(new ChannelData(chn.getIdLong(), chn.getGuild().getIdLong(), type, webhook)) == Response.SUCCESS) {
                 EmbedBuilder eb = new EmbedBuilder();
                 eb.setTitle(Translation.GENERAL__OPEN_EMBED__TITLE.toString());
                 eb.setDescription(Translation.GENERAL__OPEN_EMBED__DESCRIPTION.getFormatted(type, type.getDescription()));

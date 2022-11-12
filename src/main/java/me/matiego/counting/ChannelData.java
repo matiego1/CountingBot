@@ -17,19 +17,31 @@ public class ChannelData {
         throw new IllegalAccessException();
     }
 
-    public ChannelData(@NotNull Type type, long webhookId, @NotNull String webhookUrl) {
+    public ChannelData(long chn, long guild, @NotNull Type type, long webhookId, @NotNull String webhookUrl) {
+        this.chn = chn;
+        this.guild = guild;
         this.type = type;
         this.webhookId = webhookId;
         this.webhookUrl = webhookUrl;
     }
 
-    public ChannelData(@NotNull Type type, @NotNull Webhook webhook) {
-        this(type, webhook.getIdLong(), webhook.getUrl());
+    public ChannelData(long chn, long guild, @NotNull Type type, @NotNull Webhook webhook) {
+        this(chn, guild, type, webhook.getIdLong(), webhook.getUrl());
     }
 
+    private final long chn;
+    private final long guild;
     private final Type type;
     private final long webhookId;
     private final String webhookUrl;
+
+    public long getChannelId() {
+        return chn;
+    }
+
+    public long getGuildId() {
+        return guild;
+    }
 
     public @NotNull Type getType() {
         return type;
@@ -70,8 +82,16 @@ public class ChannelData {
         private final String emojiUnicode;
         private final IChannelHandler handler;
         Type(@NotNull String emojiUnicode, @NotNull IChannelHandler handler) {
-            this.name = Translation.valueOf("TYPE__" + name() + "__NAME").toString();
-            this.description = Translation.valueOf("TYPE__" + name() + "__DESCRIPTION").toString();
+            String description, name;
+            try {
+                name = Translation.valueOf("TYPE__" + name() + "__NAME").toString();
+                description = Translation.valueOf("TYPE__" + name() + "__DESCRIPTION").toString();
+            } catch (IllegalArgumentException e) {
+                name = "TYPE__" + name() + "__NAME";
+                description = "TYPE__" + name() + "__DESCRIPTION";
+            }
+            this.description = description;
+            this.name = name;
             this.emojiUnicode = emojiUnicode;
             this.handler = handler;
         }

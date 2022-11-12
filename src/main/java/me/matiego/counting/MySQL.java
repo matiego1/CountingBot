@@ -67,7 +67,7 @@ public class MySQL {
      */
     public boolean createTable() {
         try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_channels(chn VARCHAR(20) NOT NULL, type VARCHAR(30) NOT NULL, url VARCHAR(200) NOT NULL, PRIMARY KEY (chn))")) {
+             PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_channels(chn VARCHAR(20) NOT NULL, guild VARCHAR(20) NOT NULL, type VARCHAR(30) NOT NULL, url VARCHAR(200) NOT NULL, PRIMARY KEY (chn))")) {
             stmt.execute();
         } catch (SQLException e) {
             Logs.error("An error occurred while creating the database table.", e);
