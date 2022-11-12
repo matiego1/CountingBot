@@ -43,6 +43,7 @@ public final class Main extends JavaPlugin {
     private Storage storage;
     private Dictionary dictionary;
     private CommandHandler commandHandler;
+    private UserRanking userRanking;
 
     private JDA jda;
     private ExecutorService callbackThreadPool;
@@ -93,6 +94,7 @@ public final class Main extends JavaPlugin {
             return;
         }
         dictionary = new Dictionary();
+        userRanking = new UserRanking();
         //Enable Discord bot
         Logs.info("Enabling the Discord bot...");
         if (jda != null) {
@@ -284,5 +286,9 @@ public final class Main extends JavaPlugin {
 
     public CommandHandler getCommandHandler() {
         return commandHandler;
+    }
+
+    public UserRanking getUserRanking() {
+        return userRanking;
     }
 }

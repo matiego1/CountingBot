@@ -66,21 +66,21 @@ public class MySQL {
      * @return {@code true} if the tables creation was successful otherwise {@code false}
      */
     public boolean createTable() {
-        try (Connection conn = getConnection();
-             PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_channels(chn VARCHAR(20) NOT NULL, guild VARCHAR(20) NOT NULL, type VARCHAR(30) NOT NULL, url VARCHAR(200) NOT NULL, PRIMARY KEY (chn))")) {
-            stmt.execute();
-        } catch (SQLException e) {
-            Logs.error("An error occurred while creating the database table.", e);
-            return false;
-        }
-        for (Dictionary.Type value : Dictionary.Type.values()) {
-            try (Connection conn = getConnection();
-                 PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_" + value.toString().toLowerCase() + "(word VARCHAR(50) NOT NULL, used BOOL, PRIMARY KEY (word))")) {
+        try (Connection conn = getConnection()) {
+            try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_channels(chn VARCHAR(20) NOT NULL, guild VARCHAR(20) NOT NULL, type VARCHAR(30) NOT NULL, url VARCHAR(200) NOT NULL, PRIMARY KEY (chn))")) {
                 stmt.execute();
-            } catch (SQLException e) {
-                Logs.error("An error occurred while creating the database table (" + value.toString().toLowerCase() + ").");
-                return false;
             }
+            try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_user_ranking(id VARCHAR(20) NOT NULL, guild VARCHAR(20) NOT NULL, amount INT NOT NULL, CONSTRAINT counting_user_ranking_const UNIQUE (id, guild))")) {
+                stmt.execute();
+            }
+            for (Dictionary.Type value : Dictionary.Type.values()) {
+                try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_" + value.toString().toLowerCase() + "(word VARCHAR(50) NOT NULL, used BOOL, PRIMARY KEY (word))")) {
+                    stmt.execute();
+                }
+            }
+        } catch (SQLException e) {
+            Logs.error("An error occurred while creating the database tables.", e);
+            return false;
         }
         return true;
     }
