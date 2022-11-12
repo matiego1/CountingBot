@@ -4,6 +4,7 @@ import net.dv8tion.jda.api.interactions.ModalInteraction;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.context.MessageContextInteraction;
+import net.dv8tion.jda.api.interactions.commands.context.UserContextInteraction;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenuInteraction;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,4 +22,6 @@ public interface ICommandHandler {
     default void onSelectMenuInteraction(@NotNull SelectMenuInteraction event) {}
 
     default void onMessageContextInteraction(@NotNull MessageContextInteraction event) {}
+
+    default void onUserContextInteraction(@NotNull UserContextInteraction event) {}
 }
