@@ -1,6 +1,8 @@
-package me.matiego.counting.utils;
+package me.matiego.counting;
 
-import me.matiego.counting.Main;
+import me.matiego.counting.utils.Logs;
+import me.matiego.counting.utils.Pair;
+import me.matiego.counting.utils.Response;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -52,6 +54,11 @@ public class UserRanking {
         } catch (SQLException e) {
             Logs.error("An error occurred while modifying user ranking.", e);
         }
+        return -1;
+    }
+
+    public int getPosition(long user, long guild) {
+        //TODO: UserRanking#getPosition
         return -1;
     }
 

@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +24,8 @@ public class MessageHandler extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         Utils.async(() -> {
             long time = System.currentTimeMillis();
+
+            if (!event.isFromType(ChannelType.TEXT)) return;
 
             ChannelData data = Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong());
             if (data == null) return;
@@ -57,7 +60,9 @@ public class MessageHandler extends ListenerAdapter {
             if (correctMsg == null) return;
 
             Member member = event.getMember();
-            if (!Utils.sendWebhook(data.getWebhookUrl(), Utils.getAvatar(user, member), Utils.getName(user, member), correctMsg)) {
+            if (Utils.sendWebhook(data.getWebhookUrl(), Utils.getAvatar(user, member), Utils.getName(user, member), correctMsg)) {
+                Main.getInstance().getUserRanking().add(user.getIdLong(), event.getGuild().getIdLong());
+            } else {
                 Utils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());
             }
 
