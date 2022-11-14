@@ -118,7 +118,7 @@ public class FeedbackCommand implements ICommandHandler {
                 eb.setColor(Color.GREEN);
                 eb.setTimestamp(Instant.now());
                 eb.setFooter(footer, footerUrl);
-                chn.sendMessageEmbeds(eb.build()).queue();
+                chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
                 success++;
             }
         }
