@@ -38,7 +38,7 @@ public class RankingCommand implements ICommandHandler {
                                 .setDescriptionLocalizations(Utils.getAllLocalizations("whether this message should only be visible to you"))
                                 .addChoice("YES", "True")
                                 .addChoice("NO", "False"),
-                        new OptionData(OptionType.NUMBER, "amount", "number of top places")
+                        new OptionData(OptionType.INTEGER, "amount", "number of top places")
                                 .setNameLocalizations(Utils.getAllLocalizations("amount"))
                                 .setDescriptionLocalizations(Utils.getAllLocalizations("number of top places"))
                                 .setRequiredRange(1, 15)

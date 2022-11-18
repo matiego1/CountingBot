@@ -1,9 +1,6 @@
 package me.matiego.counting;
 
-import me.matiego.counting.utils.FixedSizeMap;
-import me.matiego.counting.utils.ICommandHandler;
-import me.matiego.counting.utils.Pair;
-import me.matiego.counting.utils.Utils;
+import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
@@ -65,6 +62,7 @@ public class CommandHandler extends ListenerAdapter {
             handler.onSlashCommandInteraction(event.getInteraction());
         } catch (Exception e) {
             event.reply(Translation.COMMANDS__ERROR.toString()).setEphemeral(true).queue(success -> {}, failure -> {});
+            Logs.error("An error occurred while executing a command.", e);
         }
     }
 
