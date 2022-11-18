@@ -174,7 +174,8 @@ public class Utils {
                 Permission.VIEW_CHANNEL,
                 Permission.MESSAGE_SEND,
                 Permission.MANAGE_CHANNEL,
-                Permission.MESSAGE_HISTORY
+                Permission.MESSAGE_HISTORY,
+                Permission.MANAGE_ROLES
         );
     }
 
