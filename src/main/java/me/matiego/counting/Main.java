@@ -167,12 +167,12 @@ public final class Main extends JavaPlugin {
                 .filter(Boolean::booleanValue)
                 .count();
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
-        //modify permissions
+        //Modify permissions
         getStorage().getChannels().stream()
                 .map(ChannelData::getChannelId)
                 .map(id -> jda.getTextChannelById(id))
                 .filter(Objects::nonNull)
-                .forEach(chn -> chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).clear(Permission.MESSAGE_SEND).complete());
+                .forEach(chn -> chn.getManager().sync().complete());
         //Add event listeners
         commandHandler = new CommandHandler(Arrays.asList(
                 new PingCommand(),
@@ -226,6 +226,7 @@ public final class Main extends JavaPlugin {
                     .map(ChannelData::getChannelId)
                     .map(id -> jda.getTextChannelById(id))
                     .filter(Objects::nonNull)
+                    .peek(chn -> chn.upsertPermissionOverride(chn.getGuild().getSelfMember()).grant(Permission.MESSAGE_SEND).complete())
                     .forEach(chn -> chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).deny(Permission.MESSAGE_SEND).complete());
 
             EmbedBuilder eb = new EmbedBuilder();
