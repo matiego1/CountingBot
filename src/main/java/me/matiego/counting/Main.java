@@ -129,7 +129,7 @@ public final class Main extends JavaPlugin {
                     .setEnableShutdownHook(false)
                     .setContextEnabled(false)
                     .disableCache(Utils.getDisabledCacheFlag())
-                    .setActivity(Activity.competing(Translation.GENERAL__STATUS.toString()))
+                    .setActivity(Activity.playing(Translation.GENERAL__STATUS.toString()))
                     .build();
             jda.awaitReady(); //Yes I know, this will block the thread.
         } catch (Exception e) {
