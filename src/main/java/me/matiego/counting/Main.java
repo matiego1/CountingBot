@@ -8,6 +8,7 @@ import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
@@ -28,6 +29,7 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 /**
@@ -165,6 +167,12 @@ public final class Main extends JavaPlugin {
                 .filter(Boolean::booleanValue)
                 .count();
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
+        //modify permissions
+        getStorage().getChannels().stream()
+                .map(ChannelData::getChannelId)
+                .map(id -> jda.getTextChannelById(id))
+                .filter(Objects::nonNull)
+                .forEach(chn -> chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).clear(Permission.MESSAGE_SEND).complete());
         //Add event listeners
         commandHandler = new CommandHandler(Arrays.asList(
                 new PingCommand(),
@@ -213,6 +221,12 @@ public final class Main extends JavaPlugin {
         //shut down JDA
         if (jda != null) {
             jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
+
+            getStorage().getChannels().stream()
+                    .map(ChannelData::getChannelId)
+                    .map(id -> jda.getTextChannelById(id))
+                    .filter(Objects::nonNull)
+                    .forEach(chn -> chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).deny(Permission.MESSAGE_SEND).complete());
 
             EmbedBuilder eb = new EmbedBuilder();
             eb.setDescription("Bot has been disabled!");
