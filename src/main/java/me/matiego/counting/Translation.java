@@ -19,6 +19,7 @@ public enum Translation {
     GENERAL__STATUS("counting channels"),
     GENERAL__DO_NOT_SPAM("Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each."),
     GENERAL__INCORRECT_ADMIN_KEY("Incorrect administrator key!"),
+    GENERAL__NO_PERMISSION("I don't have all required permissions in this channel."),
     /*--- Commands ---*/
     COMMANDS__UNKNOWN("Unknown command."),
     COMMANDS__COOLDOWN("You can use this command again in %s seconds."),

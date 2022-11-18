@@ -42,6 +42,11 @@ public class CommandHandler extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         User user = event.getUser();
         String command = event.getName();
+        //check permissions
+        if (!Utils.hasRequiredPermissions(event.getChannel())) {
+            event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__NO_PERMISSION.toString()).setEphemeral(true).queue();
+            return;
+        }
         //check cooldown
         long time = System.currentTimeMillis();
         long cooldownTime = cooldown.getOrDefault(new Pair<>(user.getId(), command).toString(), 0L);

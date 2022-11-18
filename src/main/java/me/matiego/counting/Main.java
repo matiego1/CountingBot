@@ -15,6 +15,7 @@ import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -96,6 +97,7 @@ public final class Main extends JavaPlugin {
         dictionary = new Dictionary();
         userRanking = new UserRanking();
         //Enable Discord bot
+        RestAction.setDefaultFailure(throwable -> Logs.error("An error occurred!", throwable));
         Logs.info("Enabling the Discord bot...");
         if (jda != null) {
             try {

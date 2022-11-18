@@ -9,6 +9,8 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
 import net.dv8tion.jda.api.requests.GatewayIntent;
@@ -278,5 +280,11 @@ public class Utils {
             if (value != DiscordLocale.UNKNOWN) result.put(value, string);
         }
         return result;
+    }
+
+    public static boolean hasRequiredPermissions(@NotNull MessageChannelUnion union) {
+        if (!union.getType().isGuild()) union.canTalk();
+        GuildChannel chn = union.asGuildMessageChannel();
+        return chn.getGuild().getSelfMember().hasPermission(chn, getRequiredPermissions());
     }
 }
