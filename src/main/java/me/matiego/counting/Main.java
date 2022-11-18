@@ -180,6 +180,7 @@ public final class Main extends JavaPlugin {
                 new FeedbackCommand(this),
                 new CountingCommand(this),
                 new DictionaryCommand(this),
+                new RankingCommand(),
                 new DeleteMessageCommand()
         ));
         jda.addEventListener(

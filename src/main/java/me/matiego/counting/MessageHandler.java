@@ -61,7 +61,7 @@ public class MessageHandler extends ListenerAdapter {
 
             Member member = event.getMember();
             if (Utils.sendWebhook(data.getWebhookUrl(), Utils.getAvatar(user, member), Utils.getName(user, member), correctMsg)) {
-                Main.getInstance().getUserRanking().add(user.getIdLong(), event.getGuild().getIdLong());
+                Main.getInstance().getUserRanking().add(user, event.getGuild().getIdLong());
             } else {
                 Utils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());
             }
