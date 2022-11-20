@@ -73,7 +73,10 @@ public class RankingCommand implements ICommandHandler {
 
             for (Pair<Integer, String> pair : top) {
                 if (pair.getSecond().contains(user.getId())) isUserInTop = true;
-                if (pair.getFirst() != lastPoints) currentPlace++;
+                if (pair.getFirst() != lastPoints) {
+                    lastPoints = pair.getFirst();
+                    currentPlace++;
+                }
                 builder.append("**");
                 builder.append(
                         switch (currentPlace) {
