@@ -67,7 +67,7 @@ public class UserRanking {
             if (result.next()) {
                 return result.getInt("pos");
             }
-            return 0;
+            return -1;
         } catch (SQLException e) {
             Logs.error("An error occurred while modifying user ranking.", e);
         }
