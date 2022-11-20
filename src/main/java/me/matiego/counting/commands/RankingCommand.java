@@ -92,11 +92,11 @@ public class RankingCommand implements ICommandHandler {
                     if (currentPlace + 1 != pos) builder.append("...\n");
                     builder.append("**");
                     builder.append(
-                            switch (currentPlace) {
+                            switch (pos) {
                                 case 1 -> ":first_place:";
                                 case 2 -> ":second_place:";
                                 case 3 -> ":third_place:";
-                                default -> currentPlace + ".";
+                                default -> pos + ".";
                             }
                     );
                     builder.append("** <@").append(user.getId()).append("> - ").append(amount).append(" messages").append("\n");
