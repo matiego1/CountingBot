@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEven
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.ModalInteraction;
+import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.context.MessageContextInteraction;
 import net.dv8tion.jda.api.interactions.commands.context.UserContextInteraction;
@@ -25,7 +26,11 @@ public class CommandHandler extends ListenerAdapter {
         List<CommandData> commandsData = new ArrayList<>();
         handlers.forEach(handler -> {
             CommandData data = handler.getCommand();
-            commands.put(data.getName(), handler);
+            if (data.getType() == Command.Type.SLASH) {
+                commands.put(data.getName(), handler);
+            } else {
+                commands.put("#" + data.getName(), handler);
+            }
             commandsData.add(data);
         });
         Main.getInstance().getJda().updateCommands().addCommands(commandsData).queue();

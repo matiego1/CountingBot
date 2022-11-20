@@ -20,14 +20,14 @@ public class RankingContextCommand implements ICommandHandler {
      */
     @Override
     public @NotNull CommandData getCommand() {
-        return Commands.user("ranking")
+        return Commands.user("get number of sent messages")
                 .setNameLocalizations(Utils.getAllLocalizations("ranking"))
                 .setGuildOnly(true);
     }
 
     @Override
     public void onUserContextInteraction(@NotNull UserContextInteraction event) {
-        if (!event.getName().equals("ranking")) return;
+        if (!event.getName().equals("get number of sent messages")) return;
         event.deferReply(true).queue();
 
         User target = event.getTarget();
