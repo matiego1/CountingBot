@@ -52,10 +52,12 @@ public class RankingCommand implements ICommandHandler {
         if (Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
         event.deferReply(ephemeral).queue();
 
-        int option = event.getOption("amount", 10, OptionMapping::getAsInt);
-        User user = event.getOption("user", event.getUser(), OptionMapping::getAsUser);
+        User user = event.getUser();
         long guild = Objects.requireNonNull(event.getGuild()).getIdLong();
         UserRanking ranking = Main.getInstance().getUserRanking();
+
+        int option = event.getOption("amount", 10, OptionMapping::getAsInt);
+        User userOption = event.getOption("user", user, OptionMapping::getAsUser);
 
         Utils.async(() -> {
             EmbedBuilder eb = new EmbedBuilder();
@@ -72,7 +74,7 @@ public class RankingCommand implements ICommandHandler {
             boolean isUserInTop = false;
 
             for (Pair<Integer, String> pair : top) {
-                if (pair.getSecond().contains(user.getId())) isUserInTop = true;
+                if (pair.getSecond().contains(userOption.getId())) isUserInTop = true;
                 if (pair.getFirst() != lastPoints) {
                     lastPoints = pair.getFirst();
                     currentPlace++;
@@ -90,9 +92,9 @@ public class RankingCommand implements ICommandHandler {
             }
 
             if (!isUserInTop) {
-                int pos = ranking.getPosition(user, guild), amount = ranking.get(user, guild);
+                int pos = ranking.getPosition(userOption, guild) - 1, amount = ranking.get(userOption, guild);
                 if (pos > 0 && amount > 0) {
-                    if (currentPlace + 1 != pos) builder.append("...\n");
+                    if (pos > currentPlace + 1) builder.append("...\n");
                     builder.append("**");
                     builder.append(
                             switch (pos) {
@@ -102,7 +104,7 @@ public class RankingCommand implements ICommandHandler {
                                 default -> pos + ".";
                             }
                     );
-                    builder.append("** <@").append(user.getId()).append("> - ").append(amount).append(" messages").append("\n");
+                    builder.append("** <@").append(userOption.getId()).append("> - ").append(amount).append(" messages").append("\n");
                 }
             }
 
