@@ -41,7 +41,8 @@ public class RankingCommand implements ICommandHandler {
                         new OptionData(OptionType.INTEGER, "amount", "number of top places")
                                 .setNameLocalizations(Utils.getAllLocalizations("amount"))
                                 .setDescriptionLocalizations(Utils.getAllLocalizations("number of top places"))
-                                .setRequiredRange(1, 15)
+                                .setRequiredRange(1, 15),
+                        new OptionData(OptionType.USER, "user", "executes the command as this user [debug-only]")
                 );
     }
 
@@ -49,11 +50,10 @@ public class RankingCommand implements ICommandHandler {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         boolean ephemeral = event.getOption("ephemeral", "False", OptionMapping::getAsString).equals("True");
         if (Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
+        event.deferReply(ephemeral).queue();
 
         int option = event.getOption("amount", 10, OptionMapping::getAsInt);
-
-        event.deferReply(ephemeral).queue();
-        User user = event.getUser();
+        User user = event.getOption("user", event.getUser(), OptionMapping::getAsUser);
         long guild = Objects.requireNonNull(event.getGuild()).getIdLong();
         UserRanking ranking = Main.getInstance().getUserRanking();
 
