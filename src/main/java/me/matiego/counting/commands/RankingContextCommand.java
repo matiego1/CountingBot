@@ -37,9 +37,9 @@ public class RankingContextCommand implements ICommandHandler {
         int pos = ranking.getPosition(target, guild);
         int amount = ranking.get(target, guild);
         if (pos <= 0) {
-            event.reply("This user never sent any message, or an error was encountered.").queue();
+            event.getHook().sendMessage("This user never sent any message, or an error was encountered.").queue();
             return;
         }
-        event.reply(target.getAsMention() + " has sent " + amount + "message(s) - " + pos + " place in ranking.").queue();
+        event.getHook().sendMessage(target.getAsMention() + " has sent " + amount + "message(s) - " + pos + " place in ranking.").queue();
     }
 }
