@@ -10,6 +10,7 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ShutdownEvent;
@@ -168,11 +169,25 @@ public final class Main extends JavaPlugin {
                 .count();
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
         //Modify permissions
-        getStorage().getChannels().stream()
+        Logs.info("Unblocking the counting channels...");
+        List<Pair<CompletableFuture<Void>, String>> futures = getStorage().getChannels().stream()
                 .map(ChannelData::getChannelId)
                 .map(id -> jda.getTextChannelById(id))
                 .filter(Objects::nonNull)
-                .forEach(chn -> chn.getManager().sync().complete());
+                .map(chn ->
+                        new Pair<>(
+                                chn.getManager().sync().submit(),
+                                "[ID: " + chn.getIdLong() + "; Name: " + chn.getName() + "]"
+                        )
+                )
+                .toList();
+        for (Pair<CompletableFuture<Void>, String> future : futures) {
+            try {
+                future.getFirst().get();
+            } catch (Exception e) {
+                Logs.error("An error occurred while unblocking the counting channel. " + future.getSecond());
+            }
+        }
         //Add event listeners
         commandHandler = new CommandHandler(Arrays.asList(
                 new PingCommand(),
@@ -219,16 +234,31 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         long time = System.currentTimeMillis();
+        Logs.info("Disabling the Discord bot...");
         //shut down JDA
         if (jda != null) {
             jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
 
-            getStorage().getChannels().stream()
+            Logs.info("Blocking the counting channels...");
+            List<Pair<CompletableFuture<PermissionOverride>, String>> futures = getStorage().getChannels().stream()
                     .map(ChannelData::getChannelId)
                     .map(id -> jda.getTextChannelById(id))
                     .filter(Objects::nonNull)
-                    .peek(chn -> chn.upsertPermissionOverride(chn.getGuild().getSelfMember()).grant(Permission.MESSAGE_SEND).complete())
-                    .forEach(chn -> chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).deny(Permission.MESSAGE_SEND).complete());
+                    .map(chn ->
+                            new Pair<>(
+                                    chn.upsertPermissionOverride(chn.getGuild().getSelfMember()).grant(Permission.MESSAGE_SEND).submit()
+                                            .thenCompose(v -> chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).deny(Permission.MESSAGE_SEND).submit()),
+                                    "[ID: " + chn.getIdLong() + "; Name: " + chn.getName() + "]"
+                            )
+                    )
+                    .toList();
+            for (Pair<CompletableFuture<PermissionOverride>, String> future : futures) {
+                try {
+                    future.getFirst().get();
+                } catch (Exception e) {
+                    Logs.error("An error occurred while blocking the counting channel. " + future.getSecond());
+                }
+            }
 
             EmbedBuilder eb = new EmbedBuilder();
             eb.setDescription("Bot has been disabled!");
