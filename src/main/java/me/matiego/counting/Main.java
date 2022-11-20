@@ -14,7 +14,6 @@ import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ShutdownEvent;
-import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -156,32 +155,35 @@ public final class Main extends JavaPlugin {
                 .count();
         if (removed > 0) Logs.info("Successfully removed " + removed + " unknown counting channel(s).");
         //Check webhooks
-        int refreshedWebhooks = (int) channels.stream()
-                .filter(data -> {
-                    try {
-                        jda.retrieveWebhookById(data.getWebhookId()).complete();
-                        return false;
-                    } catch (ErrorResponseException ignored) {}
-                    return true;
-                })
-                .map(this::refreshWebhook)
-                .filter(Boolean::booleanValue)
-                .count();
+        List<Pair<CompletableFuture<Webhook>, ChannelData>> futures1 = channels.stream()
+                .map(data -> new Pair<>(jda.retrieveWebhookById(data.getWebhookId()).submit(), data))
+                .toList();
+        int refreshedWebhooks = 0;
+        for (Pair<CompletableFuture<Webhook>, ChannelData> future : futures1) {
+            try {
+                future.getFirst().get();
+            } catch (Exception e) {
+                if (refreshWebhook(future.getSecond())) refreshedWebhooks++;
+            }
+        }
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
         //Modify permissions
         Logs.info("Unblocking the counting channels...");
-        List<Pair<CompletableFuture<Void>, String>> futures = getStorage().getChannels().stream()
+        List<Pair<CompletableFuture<Void>, String>> futures2 = getStorage().getChannels().stream()
                 .map(ChannelData::getChannelId)
                 .map(id -> jda.getTextChannelById(id))
                 .filter(Objects::nonNull)
-                .map(chn ->
-                        new Pair<>(
-                                chn.getManager().sync().submit(),
-                                "[ID: " + chn.getIdLong() + "; Name: " + chn.getName() + "]"
-                        )
-                )
+                .map(chn -> {
+                    Pair<CompletableFuture<Void>, String> result = new Pair<>(null, "[ID: " + chn.getIdLong() + "; Name: " + chn.getName() + "]");
+                    try {
+                        result.setFirst(chn.getManager().sync().submit());
+                    } catch (Exception e) {
+                        Logs.error("An error occurred while unblocking the counting channel. " + result.getSecond(), e);
+                    }
+                    return result;
+                })
                 .toList();
-        for (Pair<CompletableFuture<Void>, String> future : futures) {
+        for (Pair<CompletableFuture<Void>, String> future : futures2) {
             try {
                 future.getFirst().get();
             } catch (Exception e) {
@@ -196,7 +198,8 @@ public final class Main extends JavaPlugin {
                 new CountingCommand(this),
                 new DictionaryCommand(this),
                 new RankingCommand(),
-                new DeleteMessageCommand()
+                new DeleteMessageCommand(),
+                new RankingContextCommand()
         ));
         jda.addEventListener(
                 new MessageHandler(),
@@ -234,23 +237,27 @@ public final class Main extends JavaPlugin {
     @Override
     public void onDisable() {
         long time = System.currentTimeMillis();
-        Logs.info("Disabling the Discord bot...");
         //shut down JDA
         if (jda != null) {
             jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
 
-            Logs.info("Blocking the counting channels...");
             List<Pair<CompletableFuture<PermissionOverride>, String>> futures = getStorage().getChannels().stream()
                     .map(ChannelData::getChannelId)
                     .map(id -> jda.getTextChannelById(id))
                     .filter(Objects::nonNull)
-                    .map(chn ->
-                            new Pair<>(
+                    .map(chn -> {
+                        Pair<CompletableFuture<PermissionOverride>, String> result = new Pair<>(null, "[ID: " + chn.getIdLong() + "; Name: " + chn.getName() + "]");
+                        try {
+                            result.setFirst(
                                     chn.upsertPermissionOverride(chn.getGuild().getSelfMember()).grant(Permission.MESSAGE_SEND).submit()
-                                            .thenCompose(v -> chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).deny(Permission.MESSAGE_SEND).submit()),
-                                    "[ID: " + chn.getIdLong() + "; Name: " + chn.getName() + "]"
-                            )
-                    )
+                                            .thenCompose(v -> chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).deny(Permission.MESSAGE_SEND).submit())
+                            );
+                        } catch (Exception e) {
+                            Logs.error("An error occurred while blocking the counting channel. " + result.getSecond(), e);
+                        }
+                        return result;
+                    })
+                    .filter(pair -> pair.getFirst() != null)
                     .toList();
             for (Pair<CompletableFuture<PermissionOverride>, String> future : futures) {
                 try {
