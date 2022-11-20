@@ -72,7 +72,7 @@ public class RankingCommand implements ICommandHandler {
             boolean isUserInTop = false;
 
             for (Pair<Integer, String> pair : top) {
-                if (pair.getSecond().equals("<@" + user.getId() + ">")) isUserInTop = true;
+                if (pair.getSecond().contains(user.getId())) isUserInTop = true;
                 if (pair.getFirst() != lastPoints) currentPlace++;
                 builder.append("**");
                 builder.append(
@@ -80,17 +80,26 @@ public class RankingCommand implements ICommandHandler {
                             case 1 -> ":first_place:";
                             case 2 -> ":second_place:";
                             case 3 -> ":third_place:";
-                            default -> currentPlace;
+                            default -> currentPlace + ".";
                         }
                 );
-                builder.append(".** ").append(pair.getSecond()).append(" - ").append(pair.getFirst()).append(" messages").append("\n");
+                builder.append("** ").append(pair.getSecond()).append(" - ").append(pair.getFirst()).append(" messages").append("\n");
             }
 
             if (!isUserInTop) {
                 int pos = ranking.getPosition(user, guild), amount = ranking.get(user, guild);
                 if (pos > 0 && amount > 0) {
-                    builder.append("...\n");
-                    builder.append("**").append(ranking.getPosition(user, guild)).append(".** <@").append(user.getId()).append("> - ").append(amount).append(" messages").append("\n");
+                    if (currentPlace + 1 != pos) builder.append("...\n");
+                    builder.append("**");
+                    builder.append(
+                            switch (currentPlace) {
+                                case 1 -> ":first_place:";
+                                case 2 -> ":second_place:";
+                                case 3 -> ":third_place:";
+                                default -> currentPlace + ".";
+                            }
+                    );
+                    builder.append("** <@").append(user.getId()).append("> - ").append(amount).append(" messages").append("\n");
                 }
             }
 
