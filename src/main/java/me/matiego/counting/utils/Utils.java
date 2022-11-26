@@ -284,7 +284,7 @@ public class Utils {
     }
 
     public static boolean hasRequiredPermissions(@NotNull MessageChannelUnion union) {
-        if (!union.getType().isGuild()) union.canTalk();
+        if (!union.getType().isGuild()) return union.canTalk();
         GuildChannel chn = union.asGuildMessageChannel();
         return chn.getGuild().getSelfMember().hasPermission(chn, getRequiredPermissions());
     }
