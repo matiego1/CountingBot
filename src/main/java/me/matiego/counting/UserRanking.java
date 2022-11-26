@@ -49,11 +49,10 @@ public class UserRanking {
             stmt.setString(2, String.valueOf(guild));
             ResultSet result = stmt.executeQuery();
             if (result.next()) {
-                return new Data(
-                        user,
-                        result.getInt("score"),
-                        result.getInt("pos")
-                );
+                int score = result.getInt("score");
+                int rank = result.getInt("pos");
+                if (score == 0 || rank == 0) return null;
+                return new Data(user, score, rank);
             }
             return null;
         } catch (SQLException e) {
