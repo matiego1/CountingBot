@@ -178,7 +178,7 @@ public final class Main extends JavaPlugin {
                     try {
                         result.setFirst(chn.getManager().sync().submit());
                     } catch (Exception e) {
-                        Logs.error("An error occurred while unblocking the counting channel. " + result.getSecond(), e);
+                        Logs.error("An error occurred while unblocking the counting channel. Is this channel in any category? " + result.getSecond(), e);
                     }
                     return result;
                 })
