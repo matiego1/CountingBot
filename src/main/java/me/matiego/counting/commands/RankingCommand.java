@@ -5,7 +5,9 @@ import me.matiego.counting.UserRanking;
 import me.matiego.counting.utils.ICommandHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
@@ -53,6 +55,7 @@ public class RankingCommand implements ICommandHandler {
         User user = event.getUser();
         long guild = Objects.requireNonNull(event.getGuild()).getIdLong();
         UserRanking ranking = Main.getInstance().getUserRanking();
+        InteractionHook hook = event.getHook();
 
         int option = event.getOption("amount", 10, OptionMapping::getAsInt);
 
@@ -79,8 +82,17 @@ public class RankingCommand implements ICommandHandler {
                 builder.append("** ").append(data.getUser().getAsMention()).append(" - ").append(data.getScore()).append(" message(s)").append("\n");
             }
 
-            eb.setDescription(builder.toString());
-            event.getHook().sendMessageEmbeds(eb.build()).queue();
+            String description = builder.toString();
+            if (description.isBlank()) {
+                System.out.println("The ranking is currently empty.");
+                return;
+            }
+            description = Utils.checkLength(description, MessageEmbed.DESCRIPTION_MAX_LENGTH);
+            if (description.endsWith("...")) {
+                description = description.substring(0, description.lastIndexOf("\n") + 1) + "...";
+            }
+            eb.setDescription(description);
+            hook.sendMessageEmbeds(eb.build()).queue();
         });
     }
 }
