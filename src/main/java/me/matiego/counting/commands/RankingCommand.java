@@ -69,16 +69,13 @@ public class RankingCommand implements ICommandHandler {
             StringBuilder builder = new StringBuilder();
 
             for (UserRanking.Data data : top) {
-                builder.append("**");
-                builder.append(
-                        switch (data.getRank()) {
-                            case 1 -> ":first_place:";
-                            case 2 -> ":second_place:";
-                            case 3 -> ":third_place:";
-                            default -> data.getRank() + ".";
-                        }
-                );
-                builder.append("** ").append(data.getUser().getAsMention()).append(" - ").append(data.getScore()).append(" message(s)").append("\n");
+                String place = switch (data.getRank()) {
+                    case 1 -> ":first_place:";
+                    case 2 -> ":second_place:";
+                    case 3 -> ":third_place:";
+                    default -> data.getRank() + ".";
+                };
+                builder.append(Translation.COMMANDS__RANKING__ROW.getFormatted("**" + place + "**", data.getScore())).append("\n");
             }
 
             String description = builder.toString();
