@@ -66,7 +66,7 @@ public enum Translation {
     COMMANDS__RANKING__OPTIONS__AMOUNT__NAME("amount"),
     COMMANDS__RANKING__OPTIONS__AMOUNT__DESCRIPTION("description"),
     COMMANDS__RANKING__TITLE("**Top %s places**"),
-    COMMANDS__RANKING__ROW("%s - %s message(s)"),
+    COMMANDS__RANKING__ROW("%s %s - %s message(s)"),
     COMMANDS__RANKING__EMPTY("The ranking is currently empty or an error occurred."),
     COMMANDS__RANKING_CONTEXT__NAME("ranking"),
     COMMANDS__RANKING_CONTEXT__EMPTY("This user never sent any message or an error occurred."),
