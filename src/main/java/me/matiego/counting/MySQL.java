@@ -70,7 +70,7 @@ public class MySQL {
             try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_channels(chn VARCHAR(20) NOT NULL, guild VARCHAR(20) NOT NULL, type VARCHAR(30) NOT NULL, url VARCHAR(200) NOT NULL, PRIMARY KEY (chn))")) {
                 stmt.execute();
             }
-            try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_user_ranking(id VARCHAR(20) NOT NULL, guild VARCHAR(20) NOT NULL, amount INT NOT NULL, CONSTRAINT counting_user_ranking_const UNIQUE (id, guild))")) {
+            try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_user_ranking(id VARCHAR(20) NOT NULL, guild VARCHAR(20) NOT NULL, score INT NOT NULL, CONSTRAINT counting_user_ranking_const UNIQUE (id, guild))")) {
                 stmt.execute();
             }
             for (Dictionary.Type value : Dictionary.Type.values()) {

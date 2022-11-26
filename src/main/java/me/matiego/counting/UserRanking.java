@@ -1,10 +1,10 @@
 package me.matiego.counting;
 
 import me.matiego.counting.utils.Logs;
-import me.matiego.counting.utils.Pair;
 import me.matiego.counting.utils.Response;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.sql.Connection;
@@ -18,7 +18,7 @@ public class UserRanking {
 
     public @NotNull Response add(@NotNull UserSnowflake user, long guild) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_user_ranking(id, guild, amount) VALUES(?, ?, 1) ON DUPLICATE KEY UPDATE id = id, guild = guild, amount = amount + 1")) {
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_user_ranking(id, guild, score) VALUES(?, ?, 1) ON DUPLICATE KEY UPDATE id = id, guild = guild, score = score + 1")) {
             stmt.setString(1, user.getId());
             stmt.setString(2, String.valueOf(guild));
             stmt.execute();
@@ -31,7 +31,7 @@ public class UserRanking {
 
     public @NotNull Response remove(@NotNull UserSnowflake user, long guild) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("UPDATE counting_user_ranking SET amount = amount - 1 WHERE id = ? AND guild = ? AND amount > 0;")) {
+             PreparedStatement stmt = conn.prepareStatement("UPDATE counting_user_ranking SET score = score - 1 WHERE id = ? AND guild = ? AND score > 0;")) {
             stmt.setString(1, user.getId());
             stmt.setString(2, String.valueOf(guild));
             stmt.execute();
@@ -42,49 +42,40 @@ public class UserRanking {
         return Response.FAILURE;
     }
 
-    public int get(@NotNull UserSnowflake user, long guild) {
+    public @Nullable Data get(@NotNull UserSnowflake user, long guild) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT amount FROM counting_user_ranking WHERE id = ? AND guild = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT score, 1 + COUNT(*) AS pos FROM counting_user_ranking WHERE score > (SELECT score FROM counting_user_ranking WHERE id = ? AND guild = ?)")) {
             stmt.setString(1, user.getId());
             stmt.setString(2, String.valueOf(guild));
             ResultSet result = stmt.executeQuery();
             if (result.next()) {
-                return result.getInt("amount");
+                return new Data(
+                        user,
+                        result.getInt("score"),
+                        result.getInt("pos")
+                );
             }
-            return 0;
+            return null;
         } catch (SQLException e) {
             Logs.error("An error occurred while modifying user ranking.", e);
         }
-        return -1;
+        return null;
     }
 
-    public int getPosition(@NotNull UserSnowflake user, long guild) {
+    public @NotNull List<Data> getTop(long guild, @Range(from = 1, to = Integer.MAX_VALUE) int amount) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT 1 + COUNT(*) AS pos FROM counting_user_ranking WHERE amount > (SELECT amount FROM counting_user_ranking WHERE id = ? AND guild = ?)")) {
-            stmt.setString(1, user.getId());
-            stmt.setString(2, String.valueOf(guild));
-            ResultSet result = stmt.executeQuery();
-            if (result.next()) {
-                return result.getInt("pos");
-            }
-            return -1;
-        } catch (SQLException e) {
-            Logs.error("An error occurred while modifying user ranking.", e);
-        }
-        return -1;
-    }
-
-    public @NotNull List<Pair<Long, Integer>> getTop(long guild, @Range(from = 1, to = Integer.MAX_VALUE) int amount) {
-        try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT id, amount FROM counting_user_ranking WHERE guild = ? ORDER BY amount DESC LIMIT ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT id, score, RANK() OVER(ORDER BY score DESC) pos FROM ranking")) {
             stmt.setString(1, String.valueOf(guild));
             stmt.setInt(2, amount);
             ResultSet resultSet = stmt.executeQuery();
-            List<Pair<Long, Integer>> result = new ArrayList<>();
+            List<Data> result = new ArrayList<>();
             while (resultSet.next()) {
-                result.add(new Pair<>(
-                        resultSet.getLong("id"),
-                        resultSet.getInt("amount")
+                int rank = resultSet.getInt("pos");
+                if (rank > amount) return result;
+                result.add(new Data(
+                        UserSnowflake.fromId(resultSet.getLong("id")),
+                        resultSet.getInt("score"),
+                        rank
                 ));
             }
             return result;
@@ -92,5 +83,27 @@ public class UserRanking {
             Logs.error("An error occurred while modifying user ranking.", e);
         }
         return new ArrayList<>();
+    }
+
+    public static class Data {
+        private final UserSnowflake user;
+        private final int score;
+        private final int rank;
+
+        public Data(@NotNull UserSnowflake user, int score, int rank) {
+            this.user = user;
+            this.score = score;
+            this.rank = rank;
+        }
+
+        public @NotNull UserSnowflake getUser() {
+            return user;
+        }
+        public int getScore() {
+            return score;
+        }
+        public int getRank() {
+            return rank;
+        }
     }
 }
