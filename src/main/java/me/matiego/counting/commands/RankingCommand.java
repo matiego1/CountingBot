@@ -75,7 +75,7 @@ public class RankingCommand implements ICommandHandler {
                     case 3 -> ":third_place:";
                     default -> data.getRank() + ".";
                 };
-                builder.append(Translation.COMMANDS__RANKING__ROW.getFormatted("**" + place + "**", data.getScore())).append("\n");
+                builder.append(Translation.COMMANDS__RANKING__ROW.getFormatted("**" + place + "**", data.getUser().getAsMention(), data.getScore())).append("\n");
             }
 
             String description = builder.toString();
