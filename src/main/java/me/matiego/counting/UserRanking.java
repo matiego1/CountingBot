@@ -64,7 +64,7 @@ public class UserRanking {
 
     public @NotNull List<Data> getTop(long guild, @Range(from = 1, to = Integer.MAX_VALUE) int amount) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT id, score, RANK() OVER(ORDER BY score DESC) pos FROM ranking WHERE guild = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT id, score, RANK() OVER(ORDER BY score DESC) pos FROM counting_user_ranking WHERE guild = ?")) {
             stmt.setString(1, String.valueOf(guild));
             ResultSet resultSet = stmt.executeQuery();
             List<Data> result = new ArrayList<>();
