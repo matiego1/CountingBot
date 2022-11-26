@@ -40,11 +40,9 @@ public class RankingContextCommand implements ICommandHandler {
 
         User target = event.getTarget();
         User user = event.getUser();
-        long guild = Objects.requireNonNull(event.getGuild()).getIdLong();
-        UserRanking ranking = Main.getInstance().getUserRanking();
         InteractionHook hook = event.getHook();
 
-        UserRanking.Data data = ranking.get(target, guild);
+        UserRanking.Data data = Main.getInstance().getUserRanking().get(target, Objects.requireNonNull(event.getGuild()).getIdLong());
         if (data == null) {
             hook.sendMessage(Translation.COMMANDS__RANKING_CONTEXT__EMPTY.toString()).queue();
             return;

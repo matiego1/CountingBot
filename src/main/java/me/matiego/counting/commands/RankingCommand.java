@@ -54,8 +54,6 @@ public class RankingCommand implements ICommandHandler {
         event.deferReply(ephemeral).queue();
 
         User user = event.getUser();
-        long guild = Objects.requireNonNull(event.getGuild()).getIdLong();
-        UserRanking ranking = Main.getInstance().getUserRanking();
         InteractionHook hook = event.getHook();
 
         int option = event.getOption("amount", 10, OptionMapping::getAsInt);
@@ -67,7 +65,7 @@ public class RankingCommand implements ICommandHandler {
             eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
             eb.setColor(Color.YELLOW);
 
-            List<UserRanking.Data> top = ranking.getTop(guild, option);
+            List<UserRanking.Data> top = Main.getInstance().getUserRanking().getTop(Objects.requireNonNull(event.getGuild()).getIdLong(), option);
             StringBuilder builder = new StringBuilder();
 
             for (UserRanking.Data data : top) {

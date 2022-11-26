@@ -44,7 +44,7 @@ public class UserRanking {
 
     public @Nullable Data get(@NotNull UserSnowflake user, long guild) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT score, 1 + COUNT(*) AS pos FROM counting_user_ranking WHERE score > (SELECT score FROM counting_user_ranking WHERE id = ? AND guild = ?)")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT score, 1 + COUNT(*) AS pos FROM counting_user_ranking WHERE score > (SELECT score FROM counting_user_ranking WHERE id = ? AND GUILD = ?)")) {
             stmt.setString(1, user.getId());
             stmt.setString(2, String.valueOf(guild));
             ResultSet result = stmt.executeQuery();
@@ -64,9 +64,8 @@ public class UserRanking {
 
     public @NotNull List<Data> getTop(long guild, @Range(from = 1, to = Integer.MAX_VALUE) int amount) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT id, score, RANK() OVER(ORDER BY score DESC) pos FROM ranking")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT id, score, RANK() OVER(ORDER BY score DESC) pos FROM ranking WHERE guild = ?")) {
             stmt.setString(1, String.valueOf(guild));
-            stmt.setInt(2, amount);
             ResultSet resultSet = stmt.executeQuery();
             List<Data> result = new ArrayList<>();
             while (resultSet.next()) {
