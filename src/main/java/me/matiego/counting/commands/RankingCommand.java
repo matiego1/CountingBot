@@ -1,6 +1,7 @@
 package me.matiego.counting.commands;
 
 import me.matiego.counting.Main;
+import me.matiego.counting.Translation;
 import me.matiego.counting.UserRanking;
 import me.matiego.counting.utils.ICommandHandler;
 import me.matiego.counting.utils.Utils;
@@ -29,19 +30,19 @@ public class RankingCommand implements ICommandHandler {
      */
     @Override
     public @NotNull CommandData getCommand() {
-        return Commands.slash("ranking", "Shows user ranking.")
-                .setNameLocalizations(Utils.getAllLocalizations("ranking"))
-                .setDescriptionLocalizations(Utils.getAllLocalizations("Shows user ranking."))
+        return Commands.slash("ranking", Translation.COMMANDS__RANKING__DESCRIPTION.getDefault())
+                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__NAME.toString()))
+                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__DESCRIPTION.toString()))
                 .setGuildOnly(true)
                 .addOptions(
-                        new OptionData(OptionType.STRING, "ephemeral", "whether this message should only be visible to you", false)
-                                .setNameLocalizations(Utils.getAllLocalizations("ephemeral"))
-                                .setDescriptionLocalizations(Utils.getAllLocalizations("whether this message should only be visible to you"))
-                                .addChoice("YES", "True")
-                                .addChoice("NO", "False"),
-                        new OptionData(OptionType.INTEGER, "amount", "number of top places")
-                                .setNameLocalizations(Utils.getAllLocalizations("amount"))
-                                .setDescriptionLocalizations(Utils.getAllLocalizations("number of top places"))
+                        new OptionData(OptionType.STRING, "ephemeral", Translation.COMMANDS__RANKING__OPTIONS__EPHEMERAL__DESCRIPTION.getDefault(), false)
+                                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__OPTIONS__EPHEMERAL__NAME.toString()))
+                                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__OPTIONS__EPHEMERAL__DESCRIPTION.toString()))
+                                .addChoice(Translation.COMMANDS__RANKING__OPTIONS__EPHEMERAL__TRUE.toString(), "True")
+                                .addChoice(Translation.COMMANDS__RANKING__OPTIONS__EPHEMERAL__FALSE.toString(), "False"),
+                        new OptionData(OptionType.INTEGER, "amount", Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__DESCRIPTION.getDefault(), false)
+                                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__NAME.toString()))
+                                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__DESCRIPTION.toString()))
                                 .setRequiredRange(1, 15)
                 );
     }
@@ -61,7 +62,7 @@ public class RankingCommand implements ICommandHandler {
 
         Utils.async(() -> {
             EmbedBuilder eb = new EmbedBuilder();
-            eb.setTitle("**Top " + option + " places**");
+            eb.setTitle(Translation.COMMANDS__RANKING__TITLE.getFormatted(option));
             eb.setTimestamp(Instant.now());
             eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
             eb.setColor(Color.YELLOW);
@@ -84,7 +85,7 @@ public class RankingCommand implements ICommandHandler {
 
             String description = builder.toString();
             if (description.isBlank()) {
-                System.out.println("The ranking is currently empty.");
+                hook.sendMessage(Translation.COMMANDS__RANKING__EMPTY.toString()).queue();
                 return;
             }
             description = Utils.checkLength(description, MessageEmbed.DESCRIPTION_MAX_LENGTH);

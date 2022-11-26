@@ -1,12 +1,14 @@
 package me.matiego.counting.commands;
 
 import me.matiego.counting.Main;
+import me.matiego.counting.Translation;
 import me.matiego.counting.UserRanking;
 import me.matiego.counting.utils.ICommandHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.context.UserContextInteraction;
@@ -27,7 +29,7 @@ public class RankingContextCommand implements ICommandHandler {
     @Override
     public @NotNull CommandData getCommand() {
         return Commands.user("get number of sent messages")
-                .setNameLocalizations(Utils.getAllLocalizations("ranking"))
+                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING_CONTEXT__NAME.toString()))
                 .setGuildOnly(true);
     }
 
@@ -40,20 +42,21 @@ public class RankingContextCommand implements ICommandHandler {
         User user = event.getUser();
         long guild = Objects.requireNonNull(event.getGuild()).getIdLong();
         UserRanking ranking = Main.getInstance().getUserRanking();
+        InteractionHook hook = event.getHook();
 
         UserRanking.Data data = ranking.get(target, guild);
         if (data == null) {
-            event.getHook().sendMessage("This user never sent any message or an error occurred.").queue();
+            hook.sendMessage(Translation.COMMANDS__RANKING_CONTEXT__EMPTY.toString()).queue();
             return;
         }
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTimestamp(Instant.now());
         eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
         eb.setColor(Color.YELLOW);
-        eb.setDescription(target.getAsMention() + " has sent `" + data.getScore() + "` message(s) - `" + data.getRank() + "` place in ranking.");
-        event.getHook().sendMessageEmbeds(eb.build())
+        eb.setDescription(Translation.COMMANDS__RANKING_CONTEXT__MESSAGE.getFormatted(target.getAsMention(), data.getScore(), data.getRank()));
+        hook.sendMessageEmbeds(eb.build())
                 .addActionRow(
-                        Button.success("not-ephemeral", "Send me as not ephemeral")
+                        Button.success("not-ephemeral", Translation.COMMANDS__RANKING_CONTEXT__BUTTON.toString())
                 ).queue();
     }
 
