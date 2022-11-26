@@ -72,6 +72,8 @@ public enum Translation {
     COMMANDS__RANKING_CONTEXT__EMPTY("This user never sent any message or an error occurred."),
     COMMANDS__RANKING_CONTEXT__MESSAGE("%s has sent `%s` message(s) - `%s` place in ranking."),
     COMMANDS__RANKING_CONTEXT__BUTTON("Send me as not ephemeral"),
+    COMMANDS__RANKING_CONTEXT__SUCCESS("Success!"),
+    COMMANDS__RANKING_CONTEXT__FAILURE("An error occurred."),
     //counting
     COMMANDS__COUNTING__NAME("counting"),
     COMMANDS__COUNTING__DESCRIPTION("Manages the counting channels"),

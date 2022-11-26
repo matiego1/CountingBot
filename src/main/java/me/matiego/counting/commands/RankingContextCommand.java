@@ -8,6 +8,7 @@ import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -61,7 +62,17 @@ public class RankingContextCommand implements ICommandHandler {
     @Override
     public void onButtonInteraction(@NotNull ButtonInteraction event) {
         if (!event.getComponentId().equals("not-ephemeral")) return;
+
+        MessageChannel chn = event.getChannel();
         Message message = event.getMessage();
-        event.reply(message.getContentDisplay()).setEmbeds(message.getEmbeds()).queue();
+        event.deferReply(true).queue();
+        event.editButton(event.getButton().asDisabled()).queue();
+
+        if (Main.getInstance().getStorage().getChannel(chn.getIdLong()) == null && chn.canTalk()) {
+            chn.sendMessage(message.getContentDisplay()).setEmbeds(message.getEmbeds()).queue();
+            event.getHook().sendMessage(Translation.COMMANDS__RANKING_CONTEXT__SUCCESS.toString()).queue();
+        } else {
+            event.getHook().sendMessage(Translation.COMMANDS__RANKING_CONTEXT__FAILURE.toString()).queue();
+        }
     }
 }
