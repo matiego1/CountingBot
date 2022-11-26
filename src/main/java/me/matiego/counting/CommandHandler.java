@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.ModalInteraction;
@@ -14,6 +15,7 @@ import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.context.MessageContextInteraction;
 import net.dv8tion.jda.api.interactions.commands.context.UserContextInteraction;
+import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
 import net.dv8tion.jda.api.interactions.components.selections.SelectMenuInteraction;
 import org.jetbrains.annotations.NotNull;
 
@@ -113,6 +115,18 @@ public class CommandHandler extends ListenerAdapter {
         for (ICommandHandler handler : commands.values()) {
             try {
                 handler.onUserContextInteraction(interaction);
+            } catch (Exception ignored) {}
+            if (interaction.isAcknowledged()) return;
+        }
+        event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+    }
+
+    @Override
+    public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
+        ButtonInteraction interaction = event.getInteraction();
+        for (ICommandHandler handler : commands.values()) {
+            try {
+                handler.onButtonInteraction(interaction);
             } catch (Exception ignored) {}
             if (interaction.isAcknowledged()) return;
         }
