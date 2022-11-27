@@ -18,16 +18,23 @@ translations:
     unknown_channel_type: 'Unknown channel type. Try again.'
     status: 'counting channels'
     do_not_spam: 'Do not spam on the counting channel! You can only send %s messages with less than %s seconds between each.'
-    command_cooldown: 'You can use this command again in %s seconds.'
+    incorrect_admin_key: 'Incorrect administrator key!'
+    no_permission: 'I don\0027t have all required permissions in this channel.'
   ##### Commands #####
-  #ping
   commands:
+    unknown: 'Unknown command.'
+    cooldown: 'You can use this command again in %s seconds.'
+    error: 'An error occurred. Try again.'
+    #ping
     ping:
       name: 'ping'
       description: 'Shows the current ping of the bot'
       option:
         name: 'ephemeral'
         description: 'whether this message should only be visible to you'
+        values:
+          true: 'True'
+          false: 'False'
     #about
     about:
       name: 'about'
@@ -35,7 +42,10 @@ translations:
       option:
         name: 'ephemeral'
         description: 'whether this message should only be visible to you'
-      message: '**__Counting bot__**\nCounts in different ways and have a lot of fun!\n\n**Author**: `Matiego#8675`\n**Source code**: https://github.com/matiego1/CountingBot\n**Version**: `%s`'
+        values:
+          true: 'True'
+          false: 'False'
+      message: 'TODO'
     #feedback
     feedback:
       name: 'feedback'
@@ -47,6 +57,29 @@ translations:
       success: 'Thank you for your feedback!'
       failure: 'An error occurred. Try again.'
       open_channels: 'Opened %s channels out of %s!'
+    #ranking
+    ranking:
+      name: 'ranking'
+      description: 'Shows users ranking'
+      options:
+        ephemeral:
+          name: 'ephemeral'
+          description: 'whether this message should only be visible to you'
+          true: 'True'
+          false: 'False'
+        amount:
+          name: 'amount'
+          description: 'description'
+      title: '**Top %s places**'
+      row: '%s %s - %s message(s)'
+      empty: 'The ranking is currently empty or an error occurred.'
+    ranking_context:
+      name: 'ranking'
+      empty: 'This user never sent any message or an error occurred.'
+      message: '%s has sent `%s` message(s) - `%s` place in ranking.'
+      button: 'Send me as not ephemeral'
+      success: 'Success!'
+      failure: 'This message cannot be sent in this channel.'
     #counting
     counting:
       name: 'counting'
@@ -73,6 +106,11 @@ translations:
     dictionary:
       name: 'dictionary'
       description: 'Manages dictionaries'
+      types:
+        polish: 'Polish'
+        english: 'English'
+        german: 'German'
+        spanish: 'Spanish'
       options:
         add:
           name: 'add'
@@ -102,7 +140,6 @@ translations:
         success: 'This word has been successfully removed from the dictionary in %s ms.'
         failure: 'An error occurred. Try again.'
       load:
-        incorrect_key: 'Incorrect administrator key!\nThe admin-key can be found in the configuration file. This is to prevent uploading random files by people who do not have access to them.'
         success: 'Success! (%s ms)'
         no_changes: 'This file does not exist.'
         failure: 'An error occurred. Try again.'
@@ -111,6 +148,16 @@ translations:
       success: 'The channel has been successfully opened!'
       no_changes: 'This channel is already opened!'
       failure: 'An error occurred. Try again.'
+    #delete message
+    delete_message:
+      name: 'delete this message'
+      modal:
+        name: 'Confirm your permissions!'
+        option: 'Enter an admin-key here:'
+      failure:
+        no_permission: 'You cannot delete this message.'
+        retrieve_message: 'An error occurred while retrieving the message to delete.'
+      success: 'Success!'
   ##### Handlers #####
   handlers:
     last_letter:
@@ -152,6 +199,9 @@ translations:
     palindromic_numbers:
       name: 'Palindromic numbers'
       description: 'Write next palindromic numbers'
+    roman_counting:
+      name: 'Roman counting'
+      description: 'Write next roman numbers'
     alphabet:
       name: 'Alphabet'
       description: 'Write next letters in english alphabet'
