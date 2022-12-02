@@ -44,9 +44,10 @@ public class UserRanking {
 
     public @Nullable Data get(@NotNull UserSnowflake user, long guild) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT score, (SELECT 1 + COUNT(*) FROM counting_user_ranking WHERE score > x.score) AS pos FROM counting_user_ranking x WHERE id = ? AND guild = ?")) {
-            stmt.setString(1, user.getId());
-            stmt.setString(2, String.valueOf(guild));
+             PreparedStatement stmt = conn.prepareStatement("SELECT score, (SELECT 1 + COUNT(*) FROM counting_user_ranking WHERE score > x.score AND guild = ?) AS pos FROM counting_user_ranking x WHERE id = ? AND guild = ?")) {
+            stmt.setString(1, String.valueOf(guild));
+            stmt.setString(2, user.getId());
+            stmt.setString(3, String.valueOf(guild));
             ResultSet result = stmt.executeQuery();
             if (result.next()) {
                 int score = result.getInt("score");
