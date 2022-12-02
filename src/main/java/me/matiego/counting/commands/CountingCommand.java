@@ -21,8 +21,8 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenu;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenuInteraction;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectInteraction;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -94,7 +94,7 @@ public class CountingCommand implements ICommandHandler {
             switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
                 case "add" -> hook.sendMessage(Translation.COMMANDS__COUNTING__ADD.toString())
                         .addActionRow(
-                                SelectMenu.create("counting-type")
+                                StringSelectMenu.create("counting-type")
                                         .addOptions(ChannelData.getSelectMenuOptions())
                                         .setRequiredRange(1, 1)
                                         .build())
@@ -144,7 +144,7 @@ public class CountingCommand implements ICommandHandler {
     }
 
     @Override
-    public void onSelectMenuInteraction(@NotNull SelectMenuInteraction event) {
+    public void onStringSelectInteraction(@NotNull StringSelectInteraction event) {
         User user = event.getUser();
         if (event.getComponentId().equals("counting-type")) {
             event.deferReply(true).queue();
@@ -188,7 +188,7 @@ public class CountingCommand implements ICommandHandler {
         }
     }
 
-    private void reply(@NotNull SelectMenuInteraction event, @NotNull String msg) {
+    private void reply(@NotNull StringSelectInteraction event, @NotNull String msg) {
         event.getHook().sendMessage(msg).queue();
         event.editSelectMenu(event.getSelectMenu().asDisabled()).queue();
     }

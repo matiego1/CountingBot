@@ -186,7 +186,11 @@ public class Utils {
     public static void async(@NotNull Runnable task) {
         try {
             Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), task);
-        } catch (IllegalPluginAccessException ignored) {}
+        } catch (IllegalPluginAccessException e) {
+            Logs.warning("An error occurred while running an async task. The task will be run synchronously.");
+            e.printStackTrace();
+            task.run();
+        }
     }
 
     /**
@@ -241,6 +245,8 @@ public class Utils {
                         failure -> {
                             if (failure instanceof ErrorResponseException e && e.getErrorCode() == 50007) {
                                 Logs.warning("User " + user.getAsTag() + " doesn't allow private messages.");
+                            } else {
+                                Logs.error("An error occurred while sending a private message.", failure);
                             }
                         })
         );

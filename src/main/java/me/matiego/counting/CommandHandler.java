@@ -8,15 +8,15 @@ import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionE
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.UserContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.component.ButtonInteractionEvent;
-import net.dv8tion.jda.api.events.interaction.component.SelectMenuInteractionEvent;
+import net.dv8tion.jda.api.events.interaction.component.StringSelectInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.ModalInteraction;
 import net.dv8tion.jda.api.interactions.commands.Command;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.context.MessageContextInteraction;
 import net.dv8tion.jda.api.interactions.commands.context.UserContextInteraction;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
-import net.dv8tion.jda.api.interactions.components.selections.SelectMenuInteraction;
+import net.dv8tion.jda.api.interactions.components.selections.StringSelectInteraction;
+import net.dv8tion.jda.api.interactions.modals.ModalInteraction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -74,11 +74,11 @@ public class CommandHandler extends ListenerAdapter {
     }
 
     @Override
-    public void onSelectMenuInteraction(@NotNull SelectMenuInteractionEvent event) {
-        SelectMenuInteraction interaction = event.getInteraction();
+    public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
+        StringSelectInteraction interaction = event.getInteraction();
         for (ICommandHandler handler : commands.values()) {
             try {
-                handler.onSelectMenuInteraction(interaction);
+                handler.onStringSelectInteraction(interaction);
             } catch (Exception ignored) {}
             if (interaction.isAcknowledged()) return;
         }
