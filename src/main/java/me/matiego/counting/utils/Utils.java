@@ -163,7 +163,8 @@ public class Utils {
                 CacheFlag.EMOJI,
                 CacheFlag.STICKER,
                 CacheFlag.CLIENT_STATUS,
-                CacheFlag.ONLINE_STATUS
+                CacheFlag.ONLINE_STATUS,
+                CacheFlag.SCHEDULED_EVENTS
         );
     }
 
