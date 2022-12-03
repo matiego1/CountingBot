@@ -143,6 +143,7 @@ public final class Main extends JavaPlugin {
                         @Override
                         public void onReady(@NotNull ReadyEvent event) {
                             Main.getInstance().onDiscordBotReady();
+                            Main.getInstance().getJda().removeEventListener(this);
                         }
                     })
                     .build();
@@ -222,7 +223,6 @@ public final class Main extends JavaPlugin {
         }
 
         //Add event listeners
-        jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
         commandHandler = new CommandHandler(Arrays.asList(
                 new PingCommand(),
                 new AboutCommand(),

@@ -189,7 +189,6 @@ public class Utils {
             Bukkit.getScheduler().runTaskAsynchronously(Main.getInstance(), task);
         } catch (IllegalPluginAccessException e) {
             Logs.warning("An error occurred while running an async task. The task will be run synchronously.");
-            e.printStackTrace();
             task.run();
         }
     }
