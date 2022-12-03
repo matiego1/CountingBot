@@ -13,6 +13,7 @@ import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -59,14 +60,17 @@ public final class Main extends JavaPlugin {
         long time = System.currentTimeMillis();
         //noinspection ResultOfMethodCallIgnored - generating prime numbers
         Primes.isPrime(2);
-        //Checks
+
+        //Implementation checks
         if (ChannelData.Type.values().length > 25 || ChannelData.Type.values().length == 0) {
             Logs.error("Zero or too many types of the counting channels are implemented. Please contact the developer");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        //Save default config
+
+        //Save config file
         saveDefaultConfig();
+
         //Add console command
         PluginCommand command = getCommand("counting");
         if (command != null) command.setExecutor((sender, cmd, label, args) -> {
@@ -74,6 +78,7 @@ public final class Main extends JavaPlugin {
             sender.sendRichMessage("<green>Successfully reloaded config.");
             return true;
         });
+
         //Open MySQL connection
         Logs.info("Opening the MySQL connection...");
         String username = getConfig().getString("database.username", "");
@@ -89,7 +94,8 @@ public final class Main extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        //Load storage
+
+        //Load storages
         Logs.info("Loading saved channels...");
         storage = Storage.load();
         if (storage == null) {
@@ -98,6 +104,7 @@ public final class Main extends JavaPlugin {
         }
         dictionary = new Dictionary();
         userRanking = new UserRanking();
+
         //Enable Discord bot
         RestAction.setDefaultFailure(throwable -> Logs.error("An error occurred!", throwable));
         Logs.info("Enabling the Discord bot...");
@@ -132,19 +139,40 @@ public final class Main extends JavaPlugin {
                     .setContextEnabled(false)
                     .disableCache(Utils.getDisabledCacheFlag())
                     .setActivity(Activity.playing(Translation.GENERAL__STATUS.toString()))
+                    .addEventListeners(new ListenerAdapter() {
+                        @Override
+                        public void onReady(@NotNull ReadyEvent event) {
+                            Main.getInstance().onDiscordBotReady();
+                        }
+                    })
                     .build();
-            jda.awaitReady(); //Yes I know, this will block the thread.
         } catch (Exception e) {
             Logs.error("An error occurred while enabling the Discord bot." + (e instanceof InvalidTokenException ? " Is the provided bot token correct?" : ""), e);
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
+
+        Logs.info("Plugin enabled in " + (System.currentTimeMillis() - time) + "ms.");
+    }
+
+    public void onDiscordBotReady() {
+        long time = System.currentTimeMillis();
+        Logs.info("Discord bot enabled!");
+
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setDescription("Bot has been enabled!");
+        eb.setTimestamp(Instant.now());
+        eb.setColor(Color.GREEN);
+        TextChannel logsChn = jda.getTextChannelById(getConfig().getLong("logs-channel-id"));
+        if (logsChn != null) logsChn.sendMessageEmbeds(eb.build()).queue();
+
         //Check permissions
         jda.getGuilds().forEach(guild -> {
             if (!guild.getSelfMember().hasPermission(Utils.getRequiredPermissions())) {
                 Logs.warning("The Discord bot does not have all the required permissions in the " + guild.getName() + " guild. Add the bot to it again.");
             }
         });
+
         //Check channels
         List<ChannelData> channels = getStorage().getChannels();
         int removed = (int) channels.stream()
@@ -154,6 +182,7 @@ public final class Main extends JavaPlugin {
                 .filter(response -> response == Response.SUCCESS)
                 .count();
         if (removed > 0) Logs.info("Successfully removed " + removed + " unknown counting channel(s).");
+
         //Check webhooks
         List<Pair<CompletableFuture<Webhook>, ChannelData>> futures1 = channels.stream()
                 .map(data -> new Pair<>(jda.retrieveWebhookById(data.getWebhookId()).submit(), data))
@@ -167,6 +196,7 @@ public final class Main extends JavaPlugin {
             }
         }
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
+
         //Modify permissions
         Logs.info("Unblocking the counting channels...");
         List<Pair<CompletableFuture<Void>, String>> futures2 = getStorage().getChannels().stream()
@@ -190,7 +220,9 @@ public final class Main extends JavaPlugin {
                 Logs.error("An error occurred while unblocking the counting channel. " + future.getSecond());
             }
         }
+
         //Add event listeners
+        jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
         commandHandler = new CommandHandler(Arrays.asList(
                 new PingCommand(),
                 new AboutCommand(),
@@ -206,14 +238,7 @@ public final class Main extends JavaPlugin {
                 commandHandler
         );
 
-        EmbedBuilder eb = new EmbedBuilder();
-        eb.setDescription("Bot has been enabled!");
-        eb.setTimestamp(Instant.now());
-        eb.setColor(Color.GREEN);
-        TextChannel chn = jda.getTextChannelById(getConfig().getLong("logs-channel-id"));
-        if (chn != null) chn.sendMessageEmbeds(eb.build()).queue();
-
-        Logs.info("Plugin enabled in " + (System.currentTimeMillis() - time) + "ms.");
+        Logs.info("Checks performed in " + (System.currentTimeMillis() - time) + "ms.");
     }
 
     private boolean refreshWebhook(@NotNull ChannelData data) {
