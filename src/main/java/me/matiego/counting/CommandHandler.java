@@ -46,6 +46,9 @@ public class CommandHandler extends ListenerAdapter {
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         User user = event.getUser();
         String command = event.getName();
+
+        Logs.info("User " + user.getAsTag() + " has used the /" + command + " command!");
+
         //check permissions
         if (!Utils.hasRequiredPermissions(event.getChannel())) {
             event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__NO_PERMISSION.toString()).setEphemeral(true).queue();
