@@ -8,9 +8,7 @@ import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.entities.PermissionOverride;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
@@ -30,7 +28,6 @@ import java.sql.SQLException;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.*;
 
 /**
@@ -198,30 +195,6 @@ public final class Main extends JavaPlugin {
         }
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
 
-        //Modify permissions
-        Logs.info("Unblocking the counting channels...");
-        List<Pair<CompletableFuture<Void>, String>> futures2 = getStorage().getChannels().stream()
-                .map(ChannelData::getChannelId)
-                .map(id -> jda.getTextChannelById(id))
-                .filter(Objects::nonNull)
-                .map(chn -> {
-                    Pair<CompletableFuture<Void>, String> result = new Pair<>(null, "[ID: " + chn.getIdLong() + "; Name: " + chn.getName() + "]");
-                    try {
-                        result.setFirst(chn.getManager().sync().submit());
-                    } catch (Exception e) {
-                        Logs.error("An error occurred while unblocking the counting channel. Is this channel in any category? " + result.getSecond(), e);
-                    }
-                    return result;
-                })
-                .toList();
-        for (Pair<CompletableFuture<Void>, String> future : futures2) {
-            try {
-                future.getFirst().get();
-            } catch (Exception e) {
-                Logs.error("An error occurred while unblocking the counting channel. " + future.getSecond());
-            }
-        }
-
         //Add event listeners
         commandHandler = new CommandHandler(Arrays.asList(
                 new PingCommand(),
@@ -231,7 +204,9 @@ public final class Main extends JavaPlugin {
                 new DictionaryCommand(this),
                 new RankingCommand(),
                 new DeleteMessageCommand(),
-                new RankingContextCommand()
+                new RankingContextCommand(),
+                new BlockCommand(this),
+                new UnblockCommand(this)
         ));
         jda.addEventListener(
                 new MessageHandler(),
@@ -265,32 +240,6 @@ public final class Main extends JavaPlugin {
         //shut down JDA
         if (jda != null) {
             jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
-
-            List<Pair<CompletableFuture<PermissionOverride>, String>> futures = getStorage().getChannels().stream()
-                    .map(ChannelData::getChannelId)
-                    .map(id -> jda.getTextChannelById(id))
-                    .filter(Objects::nonNull)
-                    .map(chn -> {
-                        Pair<CompletableFuture<PermissionOverride>, String> result = new Pair<>(null, "[ID: " + chn.getIdLong() + "; Name: " + chn.getName() + "]");
-                        try {
-                            result.setFirst(
-                                    chn.upsertPermissionOverride(chn.getGuild().getSelfMember()).grant(Permission.MESSAGE_SEND).submit()
-                                            .thenCompose(v -> chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).deny(Permission.MESSAGE_SEND).submit())
-                            );
-                        } catch (Exception e) {
-                            Logs.error("An error occurred while blocking the counting channel. " + result.getSecond(), e);
-                        }
-                        return result;
-                    })
-                    .filter(pair -> pair.getFirst() != null)
-                    .toList();
-            for (Pair<CompletableFuture<PermissionOverride>, String> future : futures) {
-                try {
-                    future.getFirst().get();
-                } catch (Exception e) {
-                    Logs.error("An error occurred while blocking the counting channel. " + future.getSecond());
-                }
-            }
 
             EmbedBuilder eb = new EmbedBuilder();
             eb.setDescription("Bot has been disabled!");

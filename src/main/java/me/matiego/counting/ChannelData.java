@@ -2,13 +2,18 @@ package me.matiego.counting;
 
 import me.matiego.counting.handlers.*;
 import me.matiego.counting.utils.IChannelHandler;
+import me.matiego.counting.utils.Logs;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.emoji.Emoji;
 import net.dv8tion.jda.api.interactions.components.selections.SelectOption;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class ChannelData {
 
@@ -130,4 +135,32 @@ public class ChannelData {
                 .toList();
     }
 
+    public boolean block(@NotNull JDA jda) {
+        try {
+            TextChannel chn = jda.getTextChannelById(getChannelId());
+            if (chn == null) return false;
+            chn.upsertPermissionOverride(chn.getGuild().getSelfMember()).grant(Permission.MESSAGE_SEND).submit()
+                    .thenCompose(v -> chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).deny(Permission.MESSAGE_SEND).submit())
+                    .get(10, TimeUnit.SECONDS);
+            return true;
+        } catch (Exception e) {
+            Logs.error("An error occurred while blocking the counting channel (ID: `" + getChannelId() + "`)", e);
+        }
+        return false;
+    }
+
+    public boolean unblock(@NotNull JDA jda) {
+        try {
+            TextChannel chn = jda.getTextChannelById(getChannelId());
+            if (chn == null) return false;
+            try {
+                chn.getManager().sync().submit().get(10, TimeUnit.SECONDS);
+            } catch (IllegalStateException e) {
+                chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).clear(Permission.MESSAGE_SEND).submit().get(10, TimeUnit.SECONDS);
+            }
+        } catch (Exception e) {
+            Logs.error("An error occurred while unblock the counting channel (ID: `" + getChannelId() + "`)", e);
+        }
+        return false;
+    }
 }
