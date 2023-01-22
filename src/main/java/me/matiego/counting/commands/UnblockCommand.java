@@ -34,7 +34,7 @@ public class UnblockCommand implements ICommandHandler {
      */
     @Override
     public @NotNull CommandData getCommand() {
-        return Commands.slash("block", Translation.COMMANDS__UNBLOCK__DESCRIPTION.getDefault())
+        return Commands.slash("unblock", Translation.COMMANDS__UNBLOCK__DESCRIPTION.getDefault())
                 .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__UNBLOCK__NAME.toString()))
                 .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__UNBLOCK__DESCRIPTION.toString()))
                 .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
