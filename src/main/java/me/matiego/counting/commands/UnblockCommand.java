@@ -70,9 +70,9 @@ public class UnblockCommand implements ICommandHandler {
                 return;
             }
             if (data.unblock(jda)) {
-                hook.sendMessage(Translation.COMMANDS__UNBLOCK__FAILURE.toString()).queue();
-            } else {
                 hook.sendMessage(Translation.COMMANDS__UNBLOCK__SUCCESS.toString()).queue();
+            } else {
+                hook.sendMessage(Translation.COMMANDS__UNBLOCK__FAILURE.toString()).queue();
             }
         });
     }

@@ -70,9 +70,9 @@ public class BlockCommand implements ICommandHandler {
                 return;
             }
             if (data.block(jda)) {
-                hook.sendMessage(Translation.COMMANDS__BLOCK__FAILURE.toString()).queue();
-            } else {
                 hook.sendMessage(Translation.COMMANDS__BLOCK__SUCCESS.toString()).queue();
+            } else {
+                hook.sendMessage(Translation.COMMANDS__BLOCK__FAILURE.toString()).queue();
             }
         });
     }

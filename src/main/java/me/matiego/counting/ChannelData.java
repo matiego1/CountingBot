@@ -158,6 +158,7 @@ public class ChannelData {
             } catch (IllegalStateException e) {
                 chn.upsertPermissionOverride(chn.getGuild().getPublicRole()).clear(Permission.MESSAGE_SEND).submit().get(10, TimeUnit.SECONDS);
             }
+            return true;
         } catch (Exception e) {
             Logs.error("An error occurred while unblock the counting channel (ID: `" + getChannelId() + "`)", e);
         }
