@@ -64,7 +64,7 @@ public class BlockCommand implements ICommandHandler {
                 hook.sendMessage(Translation.COMMANDS__BLOCK__MESSAGE.getFormatted(success, channels.size())).queue();
                 return;
             }
-            ChannelData data = plugin.getStorage().getChannel(event.getChannel().getIdLong());
+            ChannelData data = plugin.getStorage().getChannel(chn.getIdLong());
             if (data == null) {
                 hook.sendMessage(Translation.COMMANDS__BLOCK__NOT_COUNTING_CHANNEL.toString()).queue();
                 return;
