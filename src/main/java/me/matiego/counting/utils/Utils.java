@@ -233,6 +233,7 @@ public class Utils {
         return string.length() > maxLength - 3 ? string.substring(0, maxLength - 3) + "..." : string;
     }
 
+    private static final HashMap<Long, Long> privateMessages = new HashMap<>();
     /**
      * Sends a private message to the user.
      * @param user the user
@@ -244,7 +245,11 @@ public class Utils {
                         success -> {},
                         failure -> {
                             if (failure instanceof ErrorResponseException e && e.getErrorCode() == 50007) {
-                                Logs.warning("User " + user.getAsTag() + " doesn't allow private messages.");
+                                long now = System.currentTimeMillis();
+                                if (now - privateMessages.getOrDefault(user.getIdLong(), 0L) >= 15 * 60 * 1000L) {
+                                    Logs.warning("User " + user.getAsTag() + " doesn't allow private messages.");
+                                    privateMessages.put(user.getIdLong(), now);
+                                }
                             } else {
                                 Logs.error("An error occurred while sending a private message.", failure);
                             }
