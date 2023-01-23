@@ -30,7 +30,7 @@ public class GermanLastLetter implements IChannelHandler {
         String msgContent = message.getContentDisplay().toLowerCase();
         if (!history.isEmpty()) {
             String lastContent = history.get(0).getContentDisplay().toLowerCase();
-            if (lastContent.charAt(lastContent.length() - 1) != msgContent.charAt(0)) {
+            if (lastContent.isEmpty() || msgContent.isEmpty() || lastContent.charAt(lastContent.length() - 1) != msgContent.charAt(0)) {
                 Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__INCORRECT_START_CHAR.toString());
                 return null;
             }
