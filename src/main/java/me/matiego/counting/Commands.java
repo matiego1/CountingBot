@@ -47,7 +47,7 @@ public class Commands extends ListenerAdapter {
 
         //check permissions
         if (!Utils.hasRequiredPermissions(event.getChannel())) {
-            event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__NO_PERMISSION.toString()).setEphemeral(true).queue();
+            event.reply(Translation.GENERAL__NO_PERMISSION.toString()).setEphemeral(true).queue();
             return;
         }
         //check cooldown
