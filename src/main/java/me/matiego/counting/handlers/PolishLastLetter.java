@@ -3,7 +3,7 @@ package me.matiego.counting.handlers;
 import me.matiego.counting.Dictionary;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
-import me.matiego.counting.utils.IChannelHandler;
+import me.matiego.counting.utils.ChannelHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -12,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class PolishLastLetter implements IChannelHandler {
+public class PolishLastLetter implements ChannelHandler {
 
     private final List<String> ALPHABET = List.of("a,ą,b,c,ć,d,e,ę,f,g,h,i,j,k,l,ł,m,n,ń,o,ó,p,q,r,s,ś,t,u,v,w,x,y,z,ź,ż".split(","));
 

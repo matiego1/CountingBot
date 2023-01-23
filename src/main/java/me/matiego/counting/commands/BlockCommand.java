@@ -3,7 +3,7 @@ package me.matiego.counting.commands;
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
-import me.matiego.counting.utils.ICommandHandler;
+import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class BlockCommand implements ICommandHandler {
+public class BlockCommand implements CommandHandler {
     public BlockCommand(@NotNull Main plugin) {
         this.plugin = plugin;
     }

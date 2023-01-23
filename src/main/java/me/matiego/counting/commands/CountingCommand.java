@@ -3,7 +3,7 @@ package me.matiego.counting.commands;
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
-import me.matiego.counting.utils.ICommandHandler;
+import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class CountingCommand implements ICommandHandler {
+public class CountingCommand implements CommandHandler {
     private final Main plugin;
 
     public CountingCommand(@NotNull Main plugin) {

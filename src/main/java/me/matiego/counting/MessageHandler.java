@@ -46,7 +46,7 @@ public class MessageHandler extends ListenerAdapter {
                 return;
             }
 
-            IChannelHandler handler = data.getHandler();
+            ChannelHandler handler = data.getHandler();
             int amount = handler.getAmountOfMessages();
             List<Message> history = amount == 0 ? new ArrayList<>() : event.getChannel().getHistory().retrievePast(amount + 1).complete();
             try {

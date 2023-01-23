@@ -1,30 +1,30 @@
 package me.matiego.counting.utils;
 
 @SuppressWarnings("unused")
-public class Pair<FIRST, SECOND> {
+public class Pair<F, S> {
 
-    public Pair(FIRST first, SECOND second) {
-        this.first = first;
-        this.second = second;
+    public Pair(F F, S S) {
+        this.F = F;
+        this.S = S;
     }
 
-    private FIRST first;
-    private SECOND second;
+    private F F;
+    private S S;
 
-    public FIRST getFirst() {
-        return first;
+    public F getFirst() {
+        return F;
     }
 
-    public void setFirst(FIRST first) {
-        this.first = first;
+    public void setFirst(F F) {
+        this.F = F;
     }
 
-    public SECOND getSecond() {
-        return second;
+    public S getSecond() {
+        return S;
     }
 
-    public void setSecond(SECOND second) {
-        this.second = second;
+    public void setSecond(S S) {
+        this.S = S;
     }
 
     @Override

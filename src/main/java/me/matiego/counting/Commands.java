@@ -23,16 +23,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-public class CommandHandler extends ListenerAdapter {
-    public CommandHandler(@NotNull List<ICommandHandler> handlers) {
+public class Commands extends ListenerAdapter {
+    public Commands(@NotNull List<me.matiego.counting.utils.CommandHandler> handlers) {
         List<CommandData> commandsData = new ArrayList<>();
         handlers.forEach(handler -> {
             CommandData data = handler.getCommand();
-            if (data.getType() == Command.Type.SLASH) {
-                commands.put(data.getName(), handler);
-            } else {
-                commands.put("#" + data.getName(), handler);
-            }
+            commands.put(getCommandName(data), handler);
             commandsData.add(data);
         });
         Main.getInstance().getJda().updateCommands().addCommands(commandsData).queue();
@@ -40,14 +36,14 @@ public class CommandHandler extends ListenerAdapter {
 
 
     private final FixedSizeMap<String, Long> cooldown = new FixedSizeMap<>(1000);
-    private final HashMap<String, ICommandHandler> commands = new HashMap<>();
+    private final HashMap<String, me.matiego.counting.utils.CommandHandler> commands = new HashMap<>();
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         User user = event.getUser();
         String command = event.getName();
 
-        Logs.info("User " + user.getAsTag() + " has used the /" + command + " command!");
+        Logs.info("User " + user.getAsTag() + " used the /" + command + " command!");
 
         //check permissions
         if (!Utils.hasRequiredPermissions(event.getChannel())) {
@@ -62,7 +58,7 @@ public class CommandHandler extends ListenerAdapter {
             return;
         }
         //get handler
-        ICommandHandler handler = commands.get(command);
+        CommandHandler handler = commands.get(command);
         if (handler == null) {
             event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
             return;
@@ -79,7 +75,7 @@ public class CommandHandler extends ListenerAdapter {
     @Override
     public void onStringSelectInteraction(@NotNull StringSelectInteractionEvent event) {
         StringSelectInteraction interaction = event.getInteraction();
-        for (ICommandHandler handler : commands.values()) {
+        for (me.matiego.counting.utils.CommandHandler handler : commands.values()) {
             try {
                 handler.onStringSelectInteraction(interaction);
             } catch (Exception ignored) {}
@@ -91,7 +87,7 @@ public class CommandHandler extends ListenerAdapter {
     @Override
     public void onModalInteraction(@NotNull ModalInteractionEvent event) {
         ModalInteraction interaction = event.getInteraction();
-        for (ICommandHandler handler : commands.values()) {
+        for (me.matiego.counting.utils.CommandHandler handler : commands.values()) {
             try {
                 handler.onModalInteraction(interaction);
             } catch (Exception ignored) {}
@@ -103,7 +99,7 @@ public class CommandHandler extends ListenerAdapter {
     @Override
     public void onMessageContextInteraction(@NotNull MessageContextInteractionEvent event) {
         MessageContextInteraction interaction = event.getInteraction();
-        for (ICommandHandler handler : commands.values()) {
+        for (me.matiego.counting.utils.CommandHandler handler : commands.values()) {
             try {
                 handler.onMessageContextInteraction(interaction);
             } catch (Exception ignored) {}
@@ -115,7 +111,7 @@ public class CommandHandler extends ListenerAdapter {
     @Override
     public void onUserContextInteraction(@NotNull UserContextInteractionEvent event) {
         UserContextInteraction interaction = event.getInteraction();
-        for (ICommandHandler handler : commands.values()) {
+        for (me.matiego.counting.utils.CommandHandler handler : commands.values()) {
             try {
                 handler.onUserContextInteraction(interaction);
             } catch (Exception ignored) {}
@@ -127,7 +123,7 @@ public class CommandHandler extends ListenerAdapter {
     @Override
     public void onButtonInteraction(@NotNull ButtonInteractionEvent event) {
         ButtonInteraction interaction = event.getInteraction();
-        for (ICommandHandler handler : commands.values()) {
+        for (me.matiego.counting.utils.CommandHandler handler : commands.values()) {
             try {
                 handler.onButtonInteraction(interaction);
             } catch (Exception ignored) {}
@@ -138,5 +134,12 @@ public class CommandHandler extends ListenerAdapter {
 
     public synchronized void putSlowdown(@NotNull UserSnowflake user, @NotNull String command, long time) {
         cooldown.put(new Pair<>(user.getId(), command).toString(), System.currentTimeMillis() + time);
+    }
+
+    private @NotNull String getCommandName(@NotNull CommandData data) {
+        if (data.getType() == Command.Type.SLASH) {
+            return data.getName();
+        }
+        return data.getType().name() + "#" + data.getName();
     }
 }

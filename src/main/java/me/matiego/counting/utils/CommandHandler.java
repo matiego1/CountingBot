@@ -9,7 +9,7 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectIntera
 import net.dv8tion.jda.api.interactions.modals.ModalInteraction;
 import org.jetbrains.annotations.NotNull;
 
-public interface ICommandHandler {
+public interface CommandHandler {
     /**
      * Returns the slash command.
      * @return the slash command

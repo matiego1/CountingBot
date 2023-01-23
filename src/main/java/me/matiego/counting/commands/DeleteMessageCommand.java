@@ -3,7 +3,7 @@ package me.matiego.counting.commands;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.utils.FixedSizeMap;
-import me.matiego.counting.utils.ICommandHandler;
+import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
@@ -20,7 +20,7 @@ import net.dv8tion.jda.api.interactions.modals.ModalInteraction;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import org.jetbrains.annotations.NotNull;
 
-public class DeleteMessageCommand implements ICommandHandler {
+public class DeleteMessageCommand implements CommandHandler {
 
     private final FixedSizeMap<Long, Long> messages = new FixedSizeMap<>(1000);
 

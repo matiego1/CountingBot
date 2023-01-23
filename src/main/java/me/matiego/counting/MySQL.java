@@ -65,7 +65,7 @@ public class MySQL {
      * Creates the database tables.
      * @return {@code true} if the tables creation was successful otherwise {@code false}
      */
-    public boolean createTable() {
+    public boolean createTables() {
         try (Connection conn = getConnection()) {
             try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_channels(chn VARCHAR(20) NOT NULL, guild VARCHAR(20) NOT NULL, type VARCHAR(30) NOT NULL, url VARCHAR(200) NOT NULL, PRIMARY KEY (chn))")) {
                 stmt.execute();

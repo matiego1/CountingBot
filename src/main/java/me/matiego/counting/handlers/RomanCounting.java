@@ -1,6 +1,6 @@
 package me.matiego.counting.handlers;
 
-import me.matiego.counting.utils.IChannelHandler;
+import me.matiego.counting.utils.ChannelHandler;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-public class RomanCounting implements IChannelHandler {
+public class RomanCounting implements ChannelHandler {
 
     public RomanCounting() {
         romanToInt.put("I", 1);

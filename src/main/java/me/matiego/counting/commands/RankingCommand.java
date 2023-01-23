@@ -3,7 +3,7 @@ package me.matiego.counting.commands;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.UserRanking;
-import me.matiego.counting.utils.ICommandHandler;
+import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -22,7 +22,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-public class RankingCommand implements ICommandHandler {
+public class RankingCommand implements CommandHandler {
     /**
      * Returns the slash command.
      *

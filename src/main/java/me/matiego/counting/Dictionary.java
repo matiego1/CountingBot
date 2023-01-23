@@ -18,10 +18,13 @@ public class Dictionary {
         SPANISH;
 
         public @NotNull String getTranslation() {
-            return Translation.valueOf("COMMANDS__DICTIONARY__TYPES__" + name()).toString();
+            try {
+                return Translation.valueOf("COMMANDS__DICTIONARY__TYPES__" + name()).toString();
+            } catch (IllegalArgumentException ignored) {}
+            return "COMMANDS__DICTIONARY__TYPES__" + name();
         }
 
-        static public @Nullable Type parseTranslation(@NotNull String string) {
+        static public @Nullable Type getByTranslation(@NotNull String string) {
             for (Type type : values()) {
                 if (type.getTranslation().equalsIgnoreCase(string)) {
                     return type;
@@ -40,6 +43,7 @@ public class Dictionary {
      */
     public @NotNull Response loadDictionaryFromFile(@NotNull File file, @NotNull Type type) {
         if (!file.exists()) return Response.NO_CHANGES;
+
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("TRUNCATE counting_" + type.toString().toLowerCase())) {
             stmt.execute();
@@ -47,10 +51,12 @@ public class Dictionary {
             Logs.error("An error occurred while loading the dictionary (" + type.toString().toLowerCase() + ").", e);
             return Response.FAILURE;
         }
+
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("SET GLOBAL local_infile=1")) {
             stmt.execute();
-        }catch (SQLException ignored) {} //maybe it will work without it
+        } catch (SQLException ignored) {} //maybe it will work without it
+
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("LOAD DATA LOCAL INFILE ? REPLACE INTO TABLE counting_" + type.toString().toLowerCase() + "  COLUMNS TERMINATED BY ','")) {
             stmt.setString(1, file.getAbsolutePath());

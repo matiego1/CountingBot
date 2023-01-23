@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Range;
 
 import java.util.List;
 
-public interface IChannelHandler {
+public interface ChannelHandler {
 
     /**
      * Returns the amount of messages retrieved from the channel history.

@@ -233,7 +233,7 @@ public class Utils {
         return string.length() > maxLength - 3 ? string.substring(0, maxLength - 3) + "..." : string;
     }
 
-    private static final HashMap<Long, Long> privateMessages = new HashMap<>();
+    private static final FixedSizeMap<Long, Long> privateMessages = new FixedSizeMap<>(1000);
     /**
      * Sends a private message to the user.
      * @param user the user

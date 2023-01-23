@@ -3,7 +3,7 @@ package me.matiego.counting.commands;
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
-import me.matiego.counting.utils.ICommandHandler;
+import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.Response;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -29,7 +29,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-public class FeedbackCommand implements ICommandHandler {
+public class FeedbackCommand implements CommandHandler {
     private final Main plugin;
 
     public FeedbackCommand(@NotNull Main plugin) {

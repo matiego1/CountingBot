@@ -43,7 +43,7 @@ public final class Main extends JavaPlugin {
     private MySQL mySQL;
     private Storage storage;
     private Dictionary dictionary;
-    private CommandHandler commandHandler;
+    private Commands commands;
     private UserRanking userRanking;
 
     private JDA jda;
@@ -87,7 +87,7 @@ public final class Main extends JavaPlugin {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
-        if (!mySQL.createTable()) {
+        if (!mySQL.createTables()) {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
@@ -196,7 +196,7 @@ public final class Main extends JavaPlugin {
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
 
         //Add event listeners
-        commandHandler = new CommandHandler(Arrays.asList(
+        commands = new Commands(Arrays.asList(
                 new PingCommand(),
                 new AboutCommand(),
                 new FeedbackCommand(this),
@@ -210,7 +210,7 @@ public final class Main extends JavaPlugin {
         ));
         jda.addEventListener(
                 new MessageHandler(),
-                commandHandler
+                commands
         );
 
         Logs.info("Checks performed in " + (System.currentTimeMillis() - time) + "ms.");
@@ -313,8 +313,8 @@ public final class Main extends JavaPlugin {
         return dictionary;
     }
 
-    public CommandHandler getCommandHandler() {
-        return commandHandler;
+    public Commands getCommandHandler() {
+        return commands;
     }
 
     public UserRanking getUserRanking() {

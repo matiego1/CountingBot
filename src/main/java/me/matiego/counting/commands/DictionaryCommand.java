@@ -3,7 +3,7 @@ package me.matiego.counting.commands;
 import me.matiego.counting.Dictionary;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
-import me.matiego.counting.utils.ICommandHandler;
+import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
@@ -19,7 +19,7 @@ import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class DictionaryCommand implements ICommandHandler {
+public class DictionaryCommand implements CommandHandler {
     private final Main plugin;
 
     public DictionaryCommand(@NotNull Main plugin) {
@@ -120,7 +120,7 @@ public class DictionaryCommand implements ICommandHandler {
             return;
         }
 
-        Dictionary.Type type = Dictionary.Type.parseTranslation(event.getOption("language", "null", OptionMapping::getAsString).toUpperCase());
+        Dictionary.Type type = Dictionary.Type.getByTranslation(event.getOption("language", "null", OptionMapping::getAsString).toUpperCase());
         if (type == null) {
             hook.sendMessage(Translation.GENERAL__UNKNOWN_LANGUAGE.toString()).queue();
             return;

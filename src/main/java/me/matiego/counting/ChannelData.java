@@ -1,7 +1,7 @@
 package me.matiego.counting;
 
 import me.matiego.counting.handlers.*;
-import me.matiego.counting.utils.IChannelHandler;
+import me.matiego.counting.utils.ChannelHandler;
 import me.matiego.counting.utils.Logs;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -52,7 +52,7 @@ public class ChannelData {
         return type;
     }
 
-    public @NotNull IChannelHandler getHandler() {
+    public @NotNull ChannelHandler getHandler() {
         return type.getHandler();
     }
 
@@ -85,8 +85,8 @@ public class ChannelData {
         private final String name;
         private final String description;
         private final String emojiUnicode;
-        private final IChannelHandler handler;
-        Type(@NotNull String emojiUnicode, @NotNull IChannelHandler handler) {
+        private final ChannelHandler handler;
+        Type(@NotNull String emojiUnicode, @NotNull ChannelHandler handler) {
             String description, name;
             try {
                 name = Translation.valueOf("TYPE__" + name() + "__NAME").toString();
@@ -118,7 +118,7 @@ public class ChannelData {
          * Returns the channel type handler.
          * @return the handler
          */
-        private @NotNull IChannelHandler getHandler() {
+        private @NotNull ChannelHandler getHandler() {
             return handler;
         }
     }

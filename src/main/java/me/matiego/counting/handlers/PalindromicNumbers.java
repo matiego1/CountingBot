@@ -1,6 +1,6 @@
 package me.matiego.counting.handlers;
 
-import me.matiego.counting.utils.IChannelHandler;
+import me.matiego.counting.utils.ChannelHandler;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.math.BigInteger;
 import java.util.List;
 
-public class PalindromicNumbers implements IChannelHandler {
+public class PalindromicNumbers implements ChannelHandler {
     /**
      * Checks if the sent message is correct.
      *
