@@ -20,7 +20,8 @@ Discord bot for counting in many ways.
 - Lucas numbers
 - Trangular numbers
 - Palindromic numbers
-- Aplhabet
+- Roman numbers
+- Alphabet
 - Polish last letter
 - English last letter
 - German last letter
