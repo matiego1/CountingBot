@@ -8,6 +8,7 @@ import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -58,6 +59,10 @@ public class MessageHandler extends ListenerAdapter {
 
             String correctMsg = handler.check(message, history);
             if (correctMsg == null) return;
+
+            MessageSendEvent messageSendEvent = new MessageSendEvent(data, user, correctMsg);
+            Bukkit.getPluginManager().callEvent(messageSendEvent);
+            if (messageSendEvent.isCancelled()) return;
 
             Member member = event.getMember();
             if (Utils.sendWebhook(data.getWebhookUrl(), Utils.getAvatar(user, member), Utils.getName(user, member), correctMsg)) {
