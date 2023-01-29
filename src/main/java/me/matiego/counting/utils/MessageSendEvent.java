@@ -24,7 +24,7 @@ public class MessageSendEvent extends Event implements Cancellable {
     private final String messageContent;
 
     public MessageSendEvent(@NotNull ChannelData channel, @NotNull UserSnowflake user, @NotNull String messageContent) {
-        super();
+        super(true);
         this.channel = channel;
         this.user = user;
         this.messageContent = messageContent;
@@ -34,8 +34,8 @@ public class MessageSendEvent extends Event implements Cancellable {
         return channel;
     }
 
-    public @NotNull UserSnowflake getUserId() {
-        return user;
+    public long getUserId() {
+        return user.getIdLong();
     }
 
     public @NotNull String getMessageContent() {
