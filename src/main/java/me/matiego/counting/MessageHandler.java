@@ -60,12 +60,12 @@ public class MessageHandler extends ListenerAdapter {
             String correctMsg = handler.check(message, history);
             if (correctMsg == null) return;
 
-            MessageSendEvent messageSendEvent = new MessageSendEvent(data, user, correctMsg);
-            Bukkit.getPluginManager().callEvent(messageSendEvent);
-            if (messageSendEvent.isCancelled()) return;
-
             Member member = event.getMember();
-            if (Utils.sendWebhook(data.getWebhookUrl(), Utils.getAvatar(user, member), Utils.getName(user, member), correctMsg)) {
+            CountingMessageSendEvent countingMessageSendEvent = new CountingMessageSendEvent(data, user, Utils.getName(user, member));
+            Bukkit.getPluginManager().callEvent(countingMessageSendEvent);
+            if (countingMessageSendEvent.isCancelled()) return;
+
+            if (Utils.sendWebhook(data.getWebhookUrl(), Utils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg)) {
                 Main.getInstance().getUserRanking().add(user, event.getGuild().getIdLong());
             } else {
                 Utils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());

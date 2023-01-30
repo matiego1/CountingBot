@@ -7,7 +7,8 @@ import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
-public class MessageSendEvent extends Event implements Cancellable {
+@SuppressWarnings("unused")
+public class CountingMessageSendEvent extends Event implements Cancellable {
     private static final HandlerList HANDLERS = new HandlerList();
 
     public static @NotNull HandlerList getHandlerList() {
@@ -21,13 +22,13 @@ public class MessageSendEvent extends Event implements Cancellable {
 
     private final ChannelData channel;
     private final UserSnowflake user;
-    private final String messageContent;
+    private String displayName;
 
-    public MessageSendEvent(@NotNull ChannelData channel, @NotNull UserSnowflake user, @NotNull String messageContent) {
+    public CountingMessageSendEvent(@NotNull ChannelData channel, @NotNull UserSnowflake user, @NotNull String displayName) {
         super(true);
         this.channel = channel;
         this.user = user;
-        this.messageContent = messageContent;
+        this.displayName = displayName;
     }
 
     public @NotNull ChannelData getChannel() {
@@ -38,8 +39,12 @@ public class MessageSendEvent extends Event implements Cancellable {
         return user.getIdLong();
     }
 
-    public @NotNull String getMessageContent() {
-        return messageContent;
+    public @NotNull String getDisplayName() {
+        return displayName;
+    }
+
+    public void setDisplayName(@NotNull String displayName) {
+        this.displayName = displayName;
     }
 
     private boolean cancelled = false;
