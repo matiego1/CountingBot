@@ -61,7 +61,7 @@ public class MessageHandler extends ListenerAdapter {
             if (correctMsg == null) return;
 
             Member member = event.getMember();
-            CountingMessageSendEvent countingMessageSendEvent = new CountingMessageSendEvent(data, user, Utils.getName(user, member));
+            CountingMessageSendEvent countingMessageSendEvent = new CountingMessageSendEvent(data, user, Utils.getName(user, member), history.isEmpty() ? null : history.get(0).getIdLong());
             Bukkit.getPluginManager().callEvent(countingMessageSendEvent);
             if (countingMessageSendEvent.isCancelled()) return;
 

@@ -6,6 +6,7 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public class CountingMessageSendEvent extends Event implements Cancellable {
@@ -22,13 +23,18 @@ public class CountingMessageSendEvent extends Event implements Cancellable {
 
     private final ChannelData channel;
     private final UserSnowflake user;
+    private final Long previousMessage;
     private String displayName;
 
     public CountingMessageSendEvent(@NotNull ChannelData channel, @NotNull UserSnowflake user, @NotNull String displayName) {
+        this(channel, user, displayName, null);
+    }
+    public CountingMessageSendEvent(@NotNull ChannelData channel, @NotNull UserSnowflake user, @NotNull String displayName, @Nullable Long previousMessageId) {
         super(true);
         this.channel = channel;
         this.user = user;
         this.displayName = displayName;
+        this.previousMessage = previousMessageId;
     }
 
     public @NotNull ChannelData getChannel() {
@@ -41,6 +47,10 @@ public class CountingMessageSendEvent extends Event implements Cancellable {
 
     public @NotNull String getDisplayName() {
         return displayName;
+    }
+
+    public @Nullable Long getPreviousMessageId() {
+        return previousMessage;
     }
 
     public void setDisplayName(@NotNull String displayName) {
