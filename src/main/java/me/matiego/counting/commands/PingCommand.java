@@ -37,10 +37,10 @@ public class PingCommand implements CommandHandler {
         boolean ephemeral = event.getOption("ephemeral", "False", OptionMapping::getAsString).equals("True");
         if (Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
 
-        long time = System.currentTimeMillis();
+        long time = Utils.now();
         event.reply("Pong!")
                 .setEphemeral(ephemeral)
-                .flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", System.currentTimeMillis() - time))
+                .flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", Utils.now() - time))
                 .queue();
     }
 }

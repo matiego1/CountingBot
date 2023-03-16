@@ -245,7 +245,7 @@ public class Utils {
                         success -> {},
                         failure -> {
                             if (failure instanceof ErrorResponseException e && e.getErrorCode() == 50007) {
-                                long now = System.currentTimeMillis();
+                                long now = Utils.now();
                                 if (now - privateMessages.getOrDefault(user.getIdLong(), 0L) >= 15 * 60 * 1000L) {
                                     Logs.warning("User " + user.getAsTag() + " doesn't allow private messages.");
                                     privateMessages.put(user.getIdLong(), now);
@@ -298,5 +298,9 @@ public class Utils {
         if (!union.getType().isGuild()) return union.canTalk();
         GuildChannel chn = union.asGuildMessageChannel();
         return chn.getGuild().getSelfMember().hasPermission(chn, getRequiredPermissions());
+    }
+
+    public static long now() {
+        return System.currentTimeMillis();
     }
 }

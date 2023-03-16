@@ -109,7 +109,7 @@ public class DictionaryCommand implements CommandHandler {
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
-        long time = System.currentTimeMillis();
+        long time = Utils.now();
         event.deferReply(true).queue();
         InteractionHook hook = event.getHook();
         User user = event.getUser();
@@ -130,23 +130,23 @@ public class DictionaryCommand implements CommandHandler {
             switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
                 case "add" -> {
                     if (plugin.getDictionary().addWord(type, event.getOption("word", "null", OptionMapping::getAsString))) {
-                        reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__SUCCESS.getFormatted(System.currentTimeMillis() - time));
+                        reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__SUCCESS.getFormatted(Utils.now() - time));
                     } else {
                         reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__FAILURE.toString());
                     }
                 }
                 case "remove" -> {
                     if (plugin.getDictionary().removeWord(type, event.getOption("word", "null", OptionMapping::getAsString))) {
-                        reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__SUCCESS.getFormatted(System.currentTimeMillis() - time));
+                        reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__SUCCESS.getFormatted(Utils.now() - time));
                     } else {
                         reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__FAILURE.toString());
                     }
                 }
                 case "load" -> {
                     switch (plugin.getDictionary().loadDictionaryFromFile(new File(plugin.getDataFolder() + File.separator + event.getOption("file", "null", OptionMapping::getAsString)), type)) {
-                        case SUCCESS -> reply(hook, user, event.getName(), 5 * 60 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(System.currentTimeMillis() - time));
-                        case NO_CHANGES -> reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.getFormatted(System.currentTimeMillis() - time));
-                        case FAILURE -> reply(hook, user, event.getName(), 30 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.getFormatted(System.currentTimeMillis() - time));
+                        case SUCCESS -> reply(hook, user, event.getName(), 5 * 60 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(Utils.now() - time));
+                        case NO_CHANGES -> reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.getFormatted(Utils.now() - time));
+                        case FAILURE -> reply(hook, user, event.getName(), 30 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.getFormatted(Utils.now() - time));
                     }
                 }
             }

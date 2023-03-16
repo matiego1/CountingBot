@@ -51,7 +51,7 @@ public class Commands extends ListenerAdapter {
             return;
         }
         //check cooldown
-        long time = System.currentTimeMillis();
+        long time = Utils.now();
         long cooldownTime = cooldown.getOrDefault(new Pair<>(user.getId(), command).toString(), 0L);
         if (cooldownTime >= time) {
             event.reply(Translation.COMMANDS__COOLDOWN.getFormatted((cooldownTime - time) / Utils.SECOND)).setEphemeral(true).queue();
@@ -133,7 +133,7 @@ public class Commands extends ListenerAdapter {
     }
 
     public synchronized void putSlowdown(@NotNull UserSnowflake user, @NotNull String command, long time) {
-        cooldown.put(new Pair<>(user.getId(), command).toString(), System.currentTimeMillis() + time);
+        cooldown.put(new Pair<>(user.getId(), command).toString(), Utils.now() + time);
     }
 
     private @NotNull String getCommandName(@NotNull CommandData data) {

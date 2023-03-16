@@ -5,14 +5,12 @@ import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import me.matiego.counting.commands.*;
 import me.matiego.counting.utils.*;
-import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
-import net.dv8tion.jda.api.events.session.ShutdownEvent;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
@@ -22,10 +20,8 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
@@ -54,7 +50,7 @@ public final class Main extends JavaPlugin {
      */
     @Override
     public void onEnable() {
-        long time = System.currentTimeMillis();
+        long time = Utils.now();
         //noinspection ResultOfMethodCallIgnored - generating prime numbers
         Primes.isPrime(2);
 
@@ -150,19 +146,11 @@ public final class Main extends JavaPlugin {
             return;
         }
 
-        Logs.info("Plugin enabled in " + (System.currentTimeMillis() - time) + "ms.");
+        Logs.quietInfo("Plugin enabled in " + (Utils.now() - time) + "ms.");
     }
 
     public void onDiscordBotReady() {
-        long time = System.currentTimeMillis();
-        Logs.info("Discord bot enabled!");
-
-        EmbedBuilder eb = new EmbedBuilder();
-        eb.setDescription("Bot has been enabled!");
-        eb.setTimestamp(Instant.now());
-        eb.setColor(Color.GREEN);
-        TextChannel logsChn = jda.getTextChannelById(getConfig().getLong("logs-channel-id"));
-        if (logsChn != null) logsChn.sendMessageEmbeds(eb.build()).queue();
+        long time = Utils.now();
 
         //Check permissions
         jda.getGuilds().forEach(guild -> {
@@ -213,7 +201,7 @@ public final class Main extends JavaPlugin {
                 commands
         );
 
-        Logs.info("Checks performed in " + (System.currentTimeMillis() - time) + "ms.");
+        Logs.info("Checks performed in " + (Utils.now() - time) + "ms.");
     }
 
     private boolean refreshWebhook(@NotNull ChannelData data) {
@@ -236,39 +224,36 @@ public final class Main extends JavaPlugin {
      */
     @Override
     public void onDisable() {
-        long time = System.currentTimeMillis();
+        long time = Utils.now();
         //shut down JDA
         if (jda != null) {
             jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
 
-            EmbedBuilder eb = new EmbedBuilder();
-            eb.setDescription("Bot has been disabled!");
-            eb.setTimestamp(Instant.now());
-            eb.setColor(Color.RED);
-            TextChannel chn = jda.getTextChannelById(getConfig().getLong("logs-channel-id"));
-            if (chn != null) chn.sendMessageEmbeds(eb.build()).complete();
+            Logs.infoWithBlock("Shutting down Discord bot...");
 
-            CompletableFuture<Void> shutdownTask = new CompletableFuture<>();
-            jda.addEventListener(new ListenerAdapter() {
-                @Override
-                public void onShutdown(@NotNull ShutdownEvent event) {
-                    shutdownTask.complete(null);
-                }
-            });
-            jda.shutdown();
             try {
-                shutdownTask.get(5, TimeUnit.SECONDS);
-                Logs.info("Successfully shut down the Discord bot.");
+                disableDiscordBot();
             } catch (Exception e) {
-                Logs.warning("Discord bot took too long to shut down, skipping. Ignore any errors from this point.");
+                Logs.error("An error occurred while shutting down Discord bot.", e);
             }
-            jda = null;
-            if (callbackThreadPool != null) callbackThreadPool.shutdownNow();
-            callbackThreadPool = null;
         }
         //close MySQL connection
         if (mySQL != null) mySQL.close();
-        Logs.info("Plugin disabled in " + (System.currentTimeMillis() - time) + "ms.");
+        Logs.info("Plugin disabled in " + (Utils.now() - time) + "ms.");
+    }
+
+    private void disableDiscordBot() throws Exception {
+        if (jda == null) return;
+        jda.shutdown();
+        if (jda.awaitShutdown(5, TimeUnit.SECONDS)) return;
+        Logs.warning("Discord bot took too long to shut down, skipping.");
+        jda.shutdownNow();
+        if (jda.awaitShutdown(3, TimeUnit.SECONDS)) return;
+        jda = null;
+
+        if (callbackThreadPool == null) return;
+        callbackThreadPool.shutdownNow();
+        callbackThreadPool = null;
     }
 
     /**

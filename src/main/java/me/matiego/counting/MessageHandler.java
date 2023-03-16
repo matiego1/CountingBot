@@ -24,7 +24,7 @@ public class MessageHandler extends ListenerAdapter {
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         Utils.async(() -> {
-            long time = System.currentTimeMillis();
+            long time = Utils.now();
 
             if (!event.isFromType(ChannelType.TEXT)) return;
 
@@ -71,7 +71,7 @@ public class MessageHandler extends ListenerAdapter {
                 Utils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());
             }
 
-            time = System.currentTimeMillis() - time;
+            time = Utils.now() - time;
             if (time >= 1000) {
                 Logs.warning("The message verification time exceeded 1 second! (Time: " + time + "ms; Channel: " + event.getChannel().getName() + "; ID: " + event.getChannel().getId() + ")");
             }
