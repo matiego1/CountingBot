@@ -43,6 +43,7 @@ public final class Main extends JavaPlugin {
     private UserRanking userRanking;
 
     private JDA jda;
+    private boolean isJdaEnabled = false;
     private ExecutorService callbackThreadPool;
 
     /**
@@ -136,7 +137,7 @@ public final class Main extends JavaPlugin {
                         @Override
                         public void onReady(@NotNull ReadyEvent event) {
                             Main.getInstance().onDiscordBotReady();
-                            Main.getInstance().getJda().removeEventListener(this);
+                            event.getJDA().removeEventListener(this);
                         }
                     })
                     .build();
@@ -151,6 +152,9 @@ public final class Main extends JavaPlugin {
 
     public void onDiscordBotReady() {
         long time = Utils.now();
+
+        isJdaEnabled = true;
+        Logs.info("Discord bot enabled!");
 
         //Check permissions
         jda.getGuilds().forEach(guild -> {
@@ -231,6 +235,7 @@ public final class Main extends JavaPlugin {
 
             Logs.infoWithBlock("Shutting down Discord bot...");
 
+            isJdaEnabled = false;
             try {
                 disableDiscordBot();
             } catch (Exception e) {
@@ -287,7 +292,7 @@ public final class Main extends JavaPlugin {
      * @return the Discord bot instance
      */
     public synchronized JDA getJda() {
-        return jda;
+        return isJdaEnabled ? jda : null;
     }
 
     /**
