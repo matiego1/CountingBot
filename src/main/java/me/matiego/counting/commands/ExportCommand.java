@@ -20,10 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class ExportCommand implements CommandHandler {
     public ExportCommand(@NotNull Main plugin) {
@@ -106,14 +103,21 @@ public class ExportCommand implements CommandHandler {
             while (result.next()) {
                 int columns = result.getMetaData().getColumnCount();
                 for (int i = 1; i < columns; i++) {
-                    writer.print("'" + result.getObject(i) + "',");
+                    writer.print(parseObject(result.getObject(i)) + ",");
                 }
-                writer.println("'" + result.getObject(columns) + "'");
+                writer.println(parseObject(result.getObject(columns)));
             }
             return new File(path);
         } catch (Exception e) {
             Logs.error("An error occurred while exporting a table", e);
         }
         return null;
+    }
+
+    private @NotNull String parseObject(@Nullable Object object) {
+        if (object == null) return "\"null\"";
+        if (object instanceof Number number) return number.toString();
+        if (object instanceof Boolean bool) return bool ? "1" : "0";
+        return "\"" + object + "\"";
     }
 }
