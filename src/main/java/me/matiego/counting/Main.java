@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
@@ -188,7 +187,7 @@ public final class Main extends JavaPlugin {
         if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
 
         //Add event listeners
-        commands = new Commands(Arrays.asList(
+        commands = new Commands(this,
                 new PingCommand(),
                 new AboutCommand(),
                 new FeedbackCommand(this),
@@ -198,8 +197,9 @@ public final class Main extends JavaPlugin {
                 new DeleteMessageCommand(),
                 new RankingContextCommand(),
                 new BlockCommand(this),
-                new UnblockCommand(this)
-        ));
+                new UnblockCommand(this),
+                new ExportCommand(this)
+        );
         jda.addEventListener(
                 new MessageHandler(),
                 commands
