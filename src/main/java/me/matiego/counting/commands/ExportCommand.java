@@ -13,7 +13,6 @@ import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
-import net.dv8tion.jda.api.utils.FileUpload;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -78,12 +77,7 @@ public class ExportCommand implements CommandHandler {
                 return;
             }
 
-            try {
-                hook.sendFiles(FileUpload.fromData(file)).queue();
-            } catch (Exception e) {
-                Logs.error("An error occurred while exporting a table", e);
-                hook.sendMessage("An error occurred: `" + e.getMessage() + "`").queue();
-            }
+            hook.sendMessage("The file is saved to disk in the following location: `" + file.getAbsolutePath() + "`").queue();
         });
     }
 
@@ -99,6 +93,14 @@ public class ExportCommand implements CommandHandler {
 
     private @Nullable File writeToFile(@NotNull String tableName, @NotNull ResultSet result) {
         String path = plugin.getDataFolder().getAbsolutePath() + File.separator + "export" + File.separator + "export_" + tableName + "_" + (Utils.now() / 1000) + "_" + RandomStringUtils.randomAlphabetic(4) + ".csv";
+
+        File file = new File(path);
+
+        File dir = file.getParentFile();
+        if (dir != null && !dir.exists()) {
+            //noinspection ResultOfMethodCallIgnored
+            dir.mkdirs();
+        }
 
         try (PrintWriter writer = new PrintWriter(path, StandardCharsets.UTF_8)) {
             while (result.next()) {
