@@ -98,7 +98,7 @@ public class ExportCommand implements CommandHandler {
     }
 
     private @Nullable File writeToFile(@NotNull String tableName, @NotNull ResultSet result) {
-        String path = plugin.getDataFolder().getAbsolutePath() + File.pathSeparator + "export" + File.pathSeparator + "export_" + tableName + "_" + (Utils.now() / 1000) + "_" + RandomStringUtils.randomAlphabetic(4) + ".csv";
+        String path = plugin.getDataFolder().getAbsolutePath() + File.separator + "export" + File.separator + "export_" + tableName + "_" + (Utils.now() / 1000) + "_" + RandomStringUtils.randomAlphabetic(4) + ".csv";
 
         try (PrintWriter writer = new PrintWriter(path, StandardCharsets.UTF_8)) {
             while (result.next()) {
