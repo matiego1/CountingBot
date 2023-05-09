@@ -7,21 +7,17 @@ import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class UnblockCommand implements CommandHandler {
+public class UnblockCommand extends CommandHandler {
     public UnblockCommand(@NotNull Main plugin) {
         this.plugin = plugin;
     }
@@ -34,17 +30,14 @@ public class UnblockCommand implements CommandHandler {
      */
     @Override
     public @NotNull CommandData getCommand() {
-        return Commands.slash("unblock", Translation.COMMANDS__UNBLOCK__DESCRIPTION.getDefault())
-                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__UNBLOCK__NAME.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__UNBLOCK__DESCRIPTION.toString()))
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
-                .setGuildOnly(true)
-                .addOptions(
-                        new OptionData(OptionType.CHANNEL, "channel", Translation.COMMANDS__UNBLOCK__OPTION__DESCRIPTION.getDefault(), false)
-                                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__UNBLOCK__OPTION__NAME.toString()))
-                                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__UNBLOCK__OPTION__DESCRIPTION.toString()))
-                                .setChannelTypes(ChannelType.TEXT)
-                );
+        return CommandHandler.createSlashCommand("unblock", true, Permission.MANAGE_CHANNEL)
+                .addOptions(CommandHandler.createOption(
+                        "channel",
+                        OptionType.CHANNEL,
+                        false,
+                        Translation.COMMANDS__UNBLOCK__OPTION__NAME,
+                        Translation.COMMANDS__UNBLOCK__OPTION__DESCRIPTION
+                ));
     }
 
     @Override

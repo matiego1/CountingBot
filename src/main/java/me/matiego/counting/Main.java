@@ -189,7 +189,7 @@ public final class Main extends JavaPlugin {
         //Add event listeners
         commands = new Commands(this,
                 new PingCommand(),
-                new AboutCommand(),
+                new AboutCommand(this),
                 new FeedbackCommand(this),
                 new CountingCommand(this),
                 new DictionaryCommand(this),
@@ -197,8 +197,7 @@ public final class Main extends JavaPlugin {
                 new DeleteMessageCommand(),
                 new RankingContextCommand(),
                 new BlockCommand(this),
-                new UnblockCommand(this),
-                new ExportCommand(this)
+                new UnblockCommand(this)
         );
         jda.addEventListener(
                 new MessageHandler(),

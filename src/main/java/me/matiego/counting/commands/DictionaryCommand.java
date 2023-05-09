@@ -8,18 +8,19 @@ import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.*;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
+import net.dv8tion.jda.api.interactions.commands.Command;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class DictionaryCommand implements CommandHandler {
+public class DictionaryCommand extends CommandHandler {
     private final Main plugin;
 
     public DictionaryCommand(@NotNull Main plugin) {
@@ -34,77 +35,62 @@ public class DictionaryCommand implements CommandHandler {
      */
     @Override
     public @NotNull SlashCommandData getCommand() {
-        OptionData languageOption =
-                getOption(
-                        "language",
-                        Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__NAME,
-                        Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION)
-                .addChoices(
-                        Arrays.stream(Dictionary.Type.values())
-                                .map(Dictionary.Type::getTranslation)
-                                .map(value -> new Command.Choice(value, value))
-                                .toList()
-                );
-        OptionData wordOption =
-                getOption(
-                        "word", Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__NAME,
-                        Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION
-                );
-        OptionData adminKeyOption =
-                getOption(
-                        "admin-key",
-                        Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__NAME,
-                        Translation.COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__DESCRIPTION
-                );
+        OptionData languageOption = CommandHandler.createOption(
+                "language",
+                OptionType.STRING,
+                true,
+                Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__NAME,
+                Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION
+        ).addChoices(
+                Arrays.stream(Dictionary.Type.values())
+                        .map(Dictionary.Type::getTranslation)
+                        .map(value -> new Command.Choice(value, value))
+                        .toList()
+        );
+        OptionData wordOption = CommandHandler.createOption(
+                "word",
+                OptionType.STRING,
+                true,
+                Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__NAME,
+                Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION
+        );
 
-        return Commands.slash("dictionary", Translation.COMMANDS__DICTIONARY__DESCRIPTION.getDefault())
-                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__NAME.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__DICTIONARY__DESCRIPTION.toString()))
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
-                .setGuildOnly(true)
+        return CommandHandler.createSlashCommand("dictionary", true, Permission.MANAGE_CHANNEL)
                 .addSubcommands(
-                        getSubcommand(
+                        CommandHandler.createSubcommand(
                                 "add",
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__NAME,
-                                Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION,
+                                Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION
+                        ).addOptions(
                                 languageOption,
-                                adminKeyOption,
+                                CommandHandler.ADMIN_KEY_OPTION,
                                 wordOption
                         ),
-                        getSubcommand(
+                        CommandHandler.createSubcommand(
                                 "remove",
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__NAME,
-                                Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__DESCRIPTION,
+                                Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__DESCRIPTION
+                        ).addOptions(
                                 languageOption,
-                                adminKeyOption,
+                                CommandHandler.ADMIN_KEY_OPTION,
                                 wordOption
                         ),
-                        getSubcommand(
+                        CommandHandler.createSubcommand(
                                 "load",
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__NAME,
-                                Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__DESCRIPTION,
+                                Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__DESCRIPTION
+                        ).addOptions(
                                 languageOption,
-                                adminKeyOption,
-                                getOption(
+                                CommandHandler.ADMIN_KEY_OPTION,
+                                CommandHandler.createOption(
                                         "file",
+                                        OptionType.STRING,
+                                        true,
                                         Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__NAME,
                                         Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__DESCRIPTION
                                 )
                         )
                 );
-    }
-
-    private @NotNull OptionData getOption(@NotNull String name, @NotNull Translation nameLoc, @NotNull Translation descriptionLoc) {
-        return new OptionData(OptionType.STRING, name, descriptionLoc.getDefault(), true)
-                .setNameLocalizations(Utils.getAllLocalizations(nameLoc.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(descriptionLoc.toString()));
-    }
-
-    private @NotNull SubcommandData getSubcommand(@NotNull String name, @NotNull Translation nameLoc, @NotNull Translation descriptionLoc, @NotNull OptionData... options) {
-        return new SubcommandData(name, descriptionLoc.getDefault())
-                .setNameLocalizations(Utils.getAllLocalizations(nameLoc.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(descriptionLoc.toString()))
-                .addOptions(options);
     }
 
     @Override

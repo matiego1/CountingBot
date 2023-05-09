@@ -76,6 +76,7 @@ public class ChannelData {
         TRIANGULAR_NUMBERS("U+1F4D0", new TriangularNumbers()),
         PALINDROMIC_NUMBERS("U+1FA9E", new PalindromicNumbers()),
         ROMAN_COUNTING("U+1F531", new RomanCounting()),
+        FACTORIAL_COUNTING("U+2757", new FactorialCounting()),
         ALPHABET("U+1F18E", new Alphabet()),
         POLISH_LAST_LETTER("U+1F524", new PolishLastLetter()),
         ENGLISH_LAST_LETTER("U+1F445", new EnglishLastLetter()),

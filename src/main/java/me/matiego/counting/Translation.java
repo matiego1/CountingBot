@@ -24,20 +24,18 @@ public enum Translation {
     COMMANDS__UNKNOWN("Unknown command."),
     COMMANDS__COOLDOWN("You can use this command again in %s seconds."),
     COMMANDS__ERROR("An error occurred. Try again."),
+    COMMANDS__OPTIONS__ADMIN_KEY__NAME("admin-key"),
+    COMMANDS__OPTIONS__ADMIN_KEY__DESCRIPTION("The secret administrator key"),
+    COMMANDS__OPTIONS__EPHEMERAL__NAME("ephemeral"),
+    COMMANDS__OPTIONS__EPHEMERAL__DESCRIPTION("whether this message should only be visible to you"),
+    COMMANDS__OPTIONS__EPHEMERAL__TRUE("True"),
+    COMMANDS__OPTIONS__EPHEMERAL__FALSE("False"),
     //ping
     COMMANDS__PING__NAME("ping"),
     COMMANDS__PING__DESCRIPTION("Shows the current ping of the bot"),
-    COMMANDS__PING__OPTION__NAME("ephemeral"),
-    COMMANDS__PING__OPTION__DESCRIPTION("whether this message should only be visible to you"),
-    COMMANDS__PING__OPTION__VALUES__TRUE("True"),
-    COMMANDS__PING__OPTION__VALUES__FALSE("False"),
     //about
     COMMANDS__ABOUT__NAME("about"),
     COMMANDS__ABOUT__DESCRIPTION("Shows some basic information about this bot."),
-    COMMANDS__ABOUT__OPTION__NAME("ephemeral"),
-    COMMANDS__ABOUT__OPTION__DESCRIPTION("whether this message should only be visible to you"),
-    COMMANDS__ABOUT__OPTION__VALUES__TRUE("True"),
-    COMMANDS__ABOUT__OPTION__VALUES__FALSE("False"),
     COMMANDS__ABOUT__MESSAGE("""
             **__Counting bot__**
             Counts in different ways and have a lot of fun!
@@ -59,10 +57,6 @@ public enum Translation {
     //ranking
     COMMANDS__RANKING__NAME("ranking"),
     COMMANDS__RANKING__DESCRIPTION("Shows users ranking"),
-    COMMANDS__RANKING__OPTIONS__EPHEMERAL__NAME("ephemeral"),
-    COMMANDS__RANKING__OPTIONS__EPHEMERAL__DESCRIPTION("whether this message should only be visible to you"),
-    COMMANDS__RANKING__OPTIONS__EPHEMERAL__TRUE("True"),
-    COMMANDS__RANKING__OPTIONS__EPHEMERAL__FALSE("False"),
     COMMANDS__RANKING__OPTIONS__AMOUNT__NAME("amount"),
     COMMANDS__RANKING__OPTIONS__AMOUNT__DESCRIPTION("amount of places to show"),
     COMMANDS__RANKING__TITLE("**Top %s places**"),
@@ -106,8 +100,6 @@ public enum Translation {
     COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION("The dictionary's type"),
     COMMANDS__DICTIONARY__OPTIONS__WORD__NAME("word"),
     COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION("A word to add/remove"),
-    COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__NAME("admin-key"),
-    COMMANDS__DICTIONARY__OPTIONS__ADMIN_KEY__DESCRIPTION("The secret administrator key"),
     COMMANDS__DICTIONARY__OPTIONS__FILE__NAME("file"),
     COMMANDS__DICTIONARY__OPTIONS__FILE__DESCRIPTION("The dictionary file"),
     COMMANDS__DICTIONARY__ADD__SUCCESS("This word has been successfully added to the dictionary in %s ms."),

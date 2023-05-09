@@ -21,7 +21,7 @@ import java.awt.*;
 import java.time.Instant;
 import java.util.Objects;
 
-public class RankingContextCommand implements CommandHandler {
+public class RankingContextCommand extends CommandHandler {
     /**
      * Returns the slash command.
      *

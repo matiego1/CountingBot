@@ -20,7 +20,7 @@ import net.dv8tion.jda.api.interactions.modals.ModalInteraction;
 import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import org.jetbrains.annotations.NotNull;
 
-public class DeleteMessageCommand implements CommandHandler {
+public class DeleteMessageCommand extends CommandHandler {
 
     private final FixedSizeMap<Long, Long> messages = new FixedSizeMap<>(1000);
 
@@ -52,7 +52,7 @@ public class DeleteMessageCommand implements CommandHandler {
         messages.put(event.getUser().getIdLong(), event.getTarget().getIdLong());
         event.replyModal(
                 Modal.create("delete-msg-modal", Translation.COMMANDS__DELETE_MESSAGE__MODAL__NAME.toString())
-                        .addActionRows(
+                        .addComponents(
                                 ActionRow.of(TextInput.create("admin-key", Translation.COMMANDS__DELETE_MESSAGE__MODAL__OPTION.toString(), TextInputStyle.SHORT)
                                         .setRequired(true)
                                         .build())

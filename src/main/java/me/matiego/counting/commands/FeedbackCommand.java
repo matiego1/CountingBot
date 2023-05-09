@@ -7,6 +7,7 @@ import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.Response;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -15,7 +16,6 @@ import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.ActionRow;
 import net.dv8tion.jda.api.interactions.components.text.TextInput;
@@ -29,7 +29,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-public class FeedbackCommand implements CommandHandler {
+public class FeedbackCommand extends CommandHandler {
     private final Main plugin;
 
     public FeedbackCommand(@NotNull Main plugin) {
@@ -43,16 +43,14 @@ public class FeedbackCommand implements CommandHandler {
      */
     @Override
     public @NotNull SlashCommandData getCommand() {
-        return Commands.slash("feedback", Translation.COMMANDS__FEEDBACK__DESCRIPTION.getDefault())
-                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__FEEDBACK__NAME.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__FEEDBACK__DESCRIPTION.toString()));
+        return CommandHandler.createSlashCommand("feedback", false);
     }
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         event.replyModal(
                 Modal.create("feedback-modal", Translation.COMMANDS__FEEDBACK__TITLE.toString())
-                        .addActionRows(
+                        .addComponents(
                                 ActionRow.of(TextInput.create("subject", Translation.COMMANDS__FEEDBACK__SUBJECT.toString(), TextInputStyle.SHORT)
                                         .setRequired(true)
                                         .setPlaceholder(Translation.COMMANDS__FEEDBACK__SUBJECT_PLACEHOLDER.toString())
@@ -91,7 +89,13 @@ public class FeedbackCommand implements CommandHandler {
             eb.setColor(Color.BLUE);
             eb.setFooter(event.getUser().getAsTag());
 
-            TextChannel chn = plugin.getJda().getTextChannelById(plugin.getConfig().getLong("logs-channel-id"));
+            JDA jda = plugin.getJda();
+            if (jda == null) {
+                event.reply(Translation.COMMANDS__FEEDBACK__FAILURE.toString()).setEphemeral(true).queue();
+                return;
+            }
+
+            TextChannel chn = jda.getTextChannelById(plugin.getConfig().getLong("logs-channel-id"));
             if (chn != null) {
                 chn.sendMessageEmbeds(eb.build()).queue();
                 event.reply(Translation.COMMANDS__FEEDBACK__SUCCESS.toString()).setEphemeral(true).queue();

@@ -13,8 +13,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -22,7 +20,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-public class RankingCommand implements CommandHandler {
+public class RankingCommand extends CommandHandler {
     /**
      * Returns the slash command.
      *
@@ -30,20 +28,16 @@ public class RankingCommand implements CommandHandler {
      */
     @Override
     public @NotNull CommandData getCommand() {
-        return Commands.slash("ranking", Translation.COMMANDS__RANKING__DESCRIPTION.getDefault())
-                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__NAME.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__DESCRIPTION.toString()))
-                .setGuildOnly(true)
+        return CommandHandler.createSlashCommand("ping", false)
                 .addOptions(
-                        new OptionData(OptionType.STRING, "ephemeral", Translation.COMMANDS__RANKING__OPTIONS__EPHEMERAL__DESCRIPTION.getDefault(), false)
-                                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__OPTIONS__EPHEMERAL__NAME.toString()))
-                                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__OPTIONS__EPHEMERAL__DESCRIPTION.toString()))
-                                .addChoice(Translation.COMMANDS__RANKING__OPTIONS__EPHEMERAL__TRUE.toString(), "True")
-                                .addChoice(Translation.COMMANDS__RANKING__OPTIONS__EPHEMERAL__FALSE.toString(), "False"),
-                        new OptionData(OptionType.INTEGER, "amount", Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__DESCRIPTION.getDefault(), false)
-                                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__NAME.toString()))
-                                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__DESCRIPTION.toString()))
-                                .setRequiredRange(1, 15)
+                        CommandHandler.EPHEMERAL_OPTION,
+                        CommandHandler.createOption(
+                                "amount",
+                                OptionType.INTEGER,
+                                false,
+                                Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__NAME,
+                                Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__DESCRIPTION
+                        )
                 );
     }
 

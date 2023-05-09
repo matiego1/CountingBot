@@ -10,18 +10,15 @@ import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
-public class BlockCommand implements CommandHandler {
+public class BlockCommand extends CommandHandler {
     public BlockCommand(@NotNull Main plugin) {
         this.plugin = plugin;
     }
@@ -34,15 +31,15 @@ public class BlockCommand implements CommandHandler {
      */
     @Override
     public @NotNull CommandData getCommand() {
-        return Commands.slash("block", Translation.COMMANDS__BLOCK__DESCRIPTION.getDefault())
-                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__BLOCK__NAME.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__BLOCK__DESCRIPTION.toString()))
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
-                .setGuildOnly(true)
+        return CommandHandler.createSlashCommand("block", true, Permission.MANAGE_CHANNEL)
                 .addOptions(
-                        new OptionData(OptionType.CHANNEL, "channel", Translation.COMMANDS__BLOCK__OPTION__DESCRIPTION.getDefault(), false)
-                                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__BLOCK__OPTION__NAME.toString()))
-                                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__BLOCK__OPTION__DESCRIPTION.toString()))
+                        createOption(
+                                "channel",
+                                OptionType.CHANNEL,
+                                false,
+                                Translation.COMMANDS__BLOCK__OPTION__NAME,
+                                Translation.COMMANDS__BLOCK__OPTION__DESCRIPTION
+                        )
                                 .setChannelTypes(ChannelType.TEXT)
                 );
     }

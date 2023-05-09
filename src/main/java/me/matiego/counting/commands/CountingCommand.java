@@ -15,12 +15,8 @@ import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.interactions.InteractionHook;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectInteraction;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-public class CountingCommand implements CommandHandler {
+public class CountingCommand extends CommandHandler {
     private final Main plugin;
 
     public CountingCommand(@NotNull Main plugin) {
@@ -46,35 +42,24 @@ public class CountingCommand implements CommandHandler {
      */
     @Override
     public @NotNull SlashCommandData getCommand() {
-        return Commands.slash("counting", Translation.COMMANDS__COUNTING__DESCRIPTION.getDefault())
-                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__NAME.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__COUNTING__DESCRIPTION.toString()))
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
-                .setGuildOnly(true)
+        return CommandHandler.createSlashCommand("counting", true, Permission.MANAGE_CHANNEL)
                 .addSubcommands(
-                        getSubcommand(
+                        CommandHandler.createSubcommand(
                                 "add",
                                 Translation.COMMANDS__COUNTING__OPTIONS__ADD__NAME,
                                 Translation.COMMANDS__COUNTING__OPTIONS__ADD__DESCRIPTION
                         ),
-                        getSubcommand(
+                        CommandHandler.createSubcommand(
                                 "remove",
                                 Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__NAME,
                                 Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__DESCRIPTION
                         ),
-                        getSubcommand(
+                        CommandHandler.createSubcommand(
                                 "list",
                                 Translation.COMMANDS__COUNTING__OPTIONS__LIST__NAME,
                                 Translation.COMMANDS__COUNTING__OPTIONS__LIST__DESCRIPTION
                         )
                 );
-    }
-
-    private @NotNull SubcommandData getSubcommand(@NotNull String name, @NotNull Translation nameLoc, @NotNull Translation descriptionLoc, @NotNull OptionData... options) {
-        return new SubcommandData(name, descriptionLoc.getDefault())
-                .setNameLocalizations(Utils.getAllLocalizations(nameLoc.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(descriptionLoc.toString()))
-                .addOptions(options);
     }
 
     @Override
@@ -125,11 +110,7 @@ public class CountingCommand implements CommandHandler {
                         if (chn != null && chn.getGuild().getIdLong() == guildId) {
                             msg.append(chn.getAsMention()).append(": ").append(data.getType()).append("\n");
                         } else if (plugin.getConfig().getLong("main-guild-id") == guildId) {
-                            msg.append(chn == null ? "`" + data.getChannelId() + "`" : chn.getAsMention()).append(": ").append(data.getType());
-                            if (chn != null) {
-                                msg.append(" `[").append(chn.getGuild().getName()).append("]`");
-                            }
-                            msg.append("\n");
+                            msg.append(chn == null ? "`" + data.getChannelId() + "`" : chn.getAsMention()).append(": ").append(data.getType()).append("\n");
                         }
                     }
 
