@@ -28,7 +28,7 @@ public class RankingCommand extends CommandHandler {
      */
     @Override
     public @NotNull CommandData getCommand() {
-        return CommandHandler.createSlashCommand("ranking", false)
+        return CommandHandler.createSlashCommand("ranking", true)
                 .addOptions(
                         CommandHandler.EPHEMERAL_OPTION,
                         CommandHandler.createOption(
