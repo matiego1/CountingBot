@@ -18,7 +18,7 @@ Discord bot for counting in many ways.
 - Sphenic counting
 - Fibonacci sequence
 - Lucas numbers
-- Trangular numbers
+- Triangular numbers
 - Palindromic numbers
 - Roman numbers
 - Alphabet
