@@ -19,7 +19,7 @@ public class LogicalExpressionsParser {
                 expression = expression.replace("(" + c + ")", String.valueOf(c));
             }
             if (expression.startsWith("(") && expression.endsWith(")")) {
-                expression = expression.substring(1, expression.length() - 2);
+                expression = expression.substring(1, expression.length() - 1);
             }
         }
         return expression;
@@ -40,7 +40,7 @@ public class LogicalExpressionsParser {
     }
 
     private static boolean checkSubstitutions(@NotNull String expression, @NotNull String variables) {
-        if (variables.isEmpty()) return calculateLogicalValue(expression);
+        if (variables.isEmpty()) return calculateLogicalValue(simplify(expression));
         return checkSubstitutions(expression.replace(variables.charAt(0), '0'), variables.substring(1))
                 && checkSubstitutions(expression.replace(variables.charAt(0), '1'), variables.substring(1));
     }
