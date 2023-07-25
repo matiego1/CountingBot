@@ -74,7 +74,7 @@ public class MySQL {
                 stmt.execute();
             }
             for (Dictionary.Type value : Dictionary.Type.values()) {
-                try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_" + value.toString().toLowerCase() + "(word VARCHAR(50) NOT NULL, used BOOL, PRIMARY KEY (word))")) {
+                try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_" + value.toString().toLowerCase() + "(word VARCHAR(2000) NOT NULL, used BOOL, PRIMARY KEY (word))")) {
                     stmt.execute();
                 }
             }
