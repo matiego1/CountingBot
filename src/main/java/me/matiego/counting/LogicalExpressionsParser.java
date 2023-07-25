@@ -15,6 +15,12 @@ public class LogicalExpressionsParser {
                     .replace("(1)", "1")
                     .replace("~1", "0")
                     .replace("~0", "1");
+            for (char c : ALLOWED_VARIABLES) {
+                expression = expression.replace("(" + c + ")", String.valueOf(c));
+            }
+            if (expression.startsWith("(") && expression.endsWith(")")) {
+                expression = expression.substring(1, expression.length() - 2);
+            }
         }
         return expression;
     }
