@@ -39,12 +39,11 @@ public class FactorialCounting implements ChannelHandler {
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }
-
         BigInteger b = factorials.stream()
-                .filter(factorial -> factorial.compareTo(a) < 0)
+                .filter(factorial -> factorial.compareTo(a) > 0)
                 .findFirst()
                 .orElse(BigInteger.ONE);
 
-        return a.equals(b) ? b.toString() : null;
+        return b.toString().equals(message.getContentDisplay()) ? b.toString() : null;
     }
 }
