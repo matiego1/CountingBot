@@ -18,13 +18,11 @@ public class LogicalExpressionsParser {
             for (char c : ALLOWED_VARIABLES) {
                 expression = expression.replace("(" + c + ")", String.valueOf(c));
             }
-            if (expression.startsWith("(") && expression.endsWith(")")) {
-                expression = expression.substring(1, expression.length() - 1);
-            }
         }
         return expression;
     }
 
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isTautology(@NotNull String expression) throws IllegalArgumentException {
         return checkSubstitutions(expression, getVariablesAsString(expression));
     }
