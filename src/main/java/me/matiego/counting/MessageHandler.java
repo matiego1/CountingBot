@@ -18,7 +18,11 @@ import java.util.List;
  * A Discord messages handler
  */
 public class MessageHandler extends ListenerAdapter {
+    public MessageHandler(@NotNull Main plugin) {
+        this.plugin = plugin;
+    }
 
+    private final Main plugin;
     private final FixedSizeMap<String, Pair<Integer, Long>> map = new FixedSizeMap<>(1000);
 
     @Override
@@ -28,7 +32,7 @@ public class MessageHandler extends ListenerAdapter {
 
             if (!event.isFromType(ChannelType.TEXT)) return;
 
-            ChannelData data = Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong());
+            ChannelData data = plugin.getStorage().getChannel(event.getChannel().getIdLong());
             if (data == null) return;
 
             User user = event.getAuthor();
@@ -40,7 +44,7 @@ public class MessageHandler extends ListenerAdapter {
                 return;
             }
 
-            int minTime = Main.getInstance().getConfig().getInt("anti-spam.time"), maxCount = Main.getInstance().getConfig().getInt("anti-spam.count");
+            int minTime = plugin.getConfig().getInt("anti-spam.time"), maxCount = plugin.getConfig().getInt("anti-spam.count");
             if (!check(user, event.getChannel().getIdLong(), time, minTime * 1000, maxCount)) {
                 message.delete().queue();
                 Utils.sendPrivateMessage(user, Translation.GENERAL__DO_NOT_SPAM.getFormatted(maxCount, minTime));
@@ -66,7 +70,7 @@ public class MessageHandler extends ListenerAdapter {
             if (countingMessageSendEvent.isCancelled()) return;
 
             if (Utils.sendWebhook(data.getWebhookUrl(), Utils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg)) {
-                Main.getInstance().getUserRanking().add(user, event.getGuild().getIdLong());
+                plugin.getUserRanking().add(user, event.getGuild().getIdLong());
             } else {
                 Utils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());
             }

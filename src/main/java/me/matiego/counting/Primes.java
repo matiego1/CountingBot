@@ -1,4 +1,4 @@
-package me.matiego.counting.utils;
+package me.matiego.counting;
 
 import org.jetbrains.annotations.Range;
 

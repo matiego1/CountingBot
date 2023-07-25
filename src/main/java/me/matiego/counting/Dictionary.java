@@ -11,28 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class Dictionary {
-    public enum Type {
-        POLISH,
-        ENGLISH,
-        GERMAN,
-        SPANISH;
-
-        public @NotNull String getTranslation() {
-            try {
-                return Translation.valueOf("COMMANDS__DICTIONARY__TYPES__" + name()).toString();
-            } catch (IllegalArgumentException ignored) {}
-            return "COMMANDS__DICTIONARY__TYPES__" + name();
-        }
-
-        static public @Nullable Type getByTranslation(@NotNull String string) {
-            for (Type type : values()) {
-                if (type.getTranslation().equalsIgnoreCase(string)) {
-                    return type;
-                }
-            }
-            return null;
-        }
-    }
+    private static final int ER_DUP_ENTRY = 1062;
 
     /**
      * Loads the dictionary from the file.
@@ -42,6 +21,7 @@ public class Dictionary {
      * @return {@code Response.SUCCESS} if file was loaded successfully, {@code Response.NO_CHANGES} if the file does not exist, {@code Response.FAILURE} if an error occurred.
      */
     public @NotNull Response loadDictionaryFromFile(@NotNull File file, @NotNull Type type) {
+        if (type.isList()) return Response.FAILURE;
         if (!file.exists()) return Response.NO_CHANGES;
 
         try (Connection conn = Main.getInstance().getMySQLConnection();
@@ -75,6 +55,7 @@ public class Dictionary {
      * @return {@code true} if the word was added successfully otherwise {@code false}
      */
     public boolean addWord(@NotNull Type type, @NotNull String word) {
+        if (type.isList()) return false;
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_" + type.toString().toLowerCase() + "(word, used) VALUES(?, false) ON DUPLICATE KEY UPDATE word = ?, used = false")) {
             stmt.setString(1, word);
@@ -112,6 +93,7 @@ public class Dictionary {
      * @return {@code Response.SUCCESS} if the word was marked successfully, {@code Response.NO_CHANGES} if the word has already been marked or {@code Response.FAILURE} if an error occurred
      */
     public @NotNull Response useWord(@NotNull Type type, @NotNull String word) {
+        if (type.isList()) return useListTypeWord(type, word);
         if (type == Type.POLISH && word.equalsIgnoreCase("yeti")) return Response.SUCCESS;
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("UPDATE counting_" + type.toString().toLowerCase() + " SET used = true WHERE word = ? AND used = false")) {
@@ -121,5 +103,54 @@ public class Dictionary {
             Logs.error("An error occurred while modifying the dictionary (" + type.toString().toLowerCase() + ").", e);
         }
         return Response.FAILURE;
+    }
+
+    private @NotNull Response useListTypeWord(@NotNull Type type, @NotNull String word) {
+        try (Connection conn = Main.getInstance().getMySQLConnection();
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_" + type.toString().toLowerCase() + "(word, used) VALUES(?, true)")) {
+            stmt.setString(1, word);
+            stmt.execute();
+            return Response.SUCCESS;
+        } catch (SQLException e) {
+            if (e.getErrorCode() == ER_DUP_ENTRY) return Response.NO_CHANGES;
+            Logs.error("An error occurred while modifying the dictionary (" + type.toString().toLowerCase() + ").", e);
+        }
+        return Response.FAILURE;
+    }
+
+    public enum Type {
+        POLISH,
+        ENGLISH,
+        GERMAN,
+        SPANISH,
+        TAUTOLOGIES(true);
+
+        Type() {
+            this(false);
+        }
+        Type(boolean list) {
+            this.list = list;
+        }
+
+        private final boolean list;
+        public boolean isList() {
+            return list;
+        }
+
+        public @NotNull String getTranslation() {
+            try {
+                return Translation.valueOf("COMMANDS__DICTIONARY__TYPES__" + name()).toString();
+            } catch (IllegalArgumentException ignored) {}
+            return "COMMANDS__DICTIONARY__TYPES__" + name();
+        }
+
+        static public @Nullable Type getByTranslation(@NotNull String string) {
+            for (Type type : values()) {
+                if (type.getTranslation().equalsIgnoreCase(string)) {
+                    return type;
+                }
+            }
+            return null;
+        }
     }
 }

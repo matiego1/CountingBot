@@ -65,19 +65,25 @@ public class ChannelData {
     }
 
     public enum Type {
+        //normal
         COUNTING("U+1F9EE", new Counting()),
         BINARY_COUNTING("U+1F4BB", new BinaryCounting()),
         HEXADECIMAL_COUNTING("U+1F524", new HexadecimalCounting()),
+        ROMAN_COUNTING("U+1F531", new RomanCounting()),
+        //primes
         PRIME_COUNTING("U+1F4DF", new PrimeCounting()),
         SEMIPRIME_COUNTING("U+1F319", new SemiprimeCounting()),
         SPHENIC_COUNTING("U+26AA", new SphenicCounting()),
+        //sequences
         FIBONACCI_SEQUENCE("U+1F69C", new FibonacciSequence()),
         LUCAS_NUMBERS("U+1F471", new LucasNumbers()),
+        //others
         TRIANGULAR_NUMBERS("U+1F4D0", new TriangularNumbers()),
         PALINDROMIC_NUMBERS("U+1FA9E", new PalindromicNumbers()),
-        ROMAN_COUNTING("U+1F531", new RomanCounting()),
         FACTORIAL_COUNTING("U+2757", new FactorialCounting()),
         ALPHABET("U+1F18E", new Alphabet()),
+        TAUTOLOGIES("U+2696", new Tautologies()),
+        //last letter
         POLISH_LAST_LETTER("U+1F524", new PolishLastLetter()),
         ENGLISH_LAST_LETTER("U+1F445", new EnglishLastLetter()),
         GERMAN_LAST_LETTER("U+1F7E5", new GermanLastLetter()),

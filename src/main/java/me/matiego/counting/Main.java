@@ -200,7 +200,7 @@ public final class Main extends JavaPlugin {
                 new UnblockCommand(this)
         );
         jda.addEventListener(
-                new MessageHandler(),
+                new MessageHandler(this),
                 commands
         );
 

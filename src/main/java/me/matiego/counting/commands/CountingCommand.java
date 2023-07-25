@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import java.awt.*;
 import java.time.Instant;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 
 public class CountingCommand extends CommandHandler {
@@ -148,24 +147,31 @@ public class CountingCommand extends CommandHandler {
 
                 plugin.getCommandHandler().putSlowdown(user, "counting", 5 * Utils.SECOND);
 
-                List<Webhook> webhooks = chn.retrieveWebhooks().complete();
-                Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
-
-                switch (plugin.getStorage().addChannel(new ChannelData(chn.getIdLong(), chn.getGuild().getIdLong(), type, webhook))) {
-                    case SUCCESS -> {
-                        reply(event, Translation.COMMANDS__SELECT_MENU__SUCCESS.toString());
-                        EmbedBuilder eb = new EmbedBuilder();
-                        eb.setTitle(Translation.GENERAL__OPEN_EMBED__TITLE.toString());
-                        eb.setDescription(Translation.GENERAL__OPEN_EMBED__DESCRIPTION.getFormatted(type, type.getDescription()));
-                        eb.setColor(Color.GREEN);
-                        eb.setTimestamp(Instant.now());
-                        eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
-                        chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
+                chn.retrieveWebhooks().queue(webhooks -> {
+                    if (webhooks.isEmpty()) {
+                        chn.createWebhook("Counting bot").queue(webhook -> openChannel(chn, type, webhook, event, user));
+                    } else {
+                        openChannel(chn, type, webhooks.get(0), event, user);
                     }
-                    case NO_CHANGES -> reply(event, Translation.COMMANDS__SELECT_MENU__NO_CHANGES.toString());
-                    case FAILURE -> reply(event, Translation.COMMANDS__SELECT_MENU__FAILURE.toString());
-                }
+                });
             });
+        }
+    }
+
+    private void openChannel(@NotNull TextChannel chn, ChannelData.Type type, Webhook webhook, @NotNull StringSelectInteraction event, User user) {
+        switch (plugin.getStorage().addChannel(new ChannelData(chn.getIdLong(), chn.getGuild().getIdLong(), type, webhook))) {
+            case SUCCESS -> {
+                reply(event, Translation.COMMANDS__SELECT_MENU__SUCCESS.toString());
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.setTitle(Translation.GENERAL__OPEN_EMBED__TITLE.toString());
+                eb.setDescription(Translation.GENERAL__OPEN_EMBED__DESCRIPTION.getFormatted(type, type.getDescription()));
+                eb.setColor(Color.GREEN);
+                eb.setTimestamp(Instant.now());
+                eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
+                chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
+            }
+            case NO_CHANGES -> reply(event, Translation.COMMANDS__SELECT_MENU__NO_CHANGES.toString());
+            case FAILURE -> reply(event, Translation.COMMANDS__SELECT_MENU__FAILURE.toString());
         }
     }
 
