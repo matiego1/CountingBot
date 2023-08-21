@@ -22,6 +22,14 @@ public abstract class CommandHandler {
             Translation.COMMANDS__OPTIONS__ADMIN_KEY__DESCRIPTION
     );
 
+    public static final OptionData ADMIN_KEY_OPTION_NOT_REQUIRED = createOption(
+            "admin-key",
+            OptionType.STRING,
+            false,
+            Translation.COMMANDS__OPTIONS__ADMIN_KEY__NAME,
+            Translation.COMMANDS__OPTIONS__ADMIN_KEY__DESCRIPTION
+    );
+
     public static final OptionData EPHEMERAL_OPTION = createOption(
                     "ephemeral",
                     OptionType.STRING,

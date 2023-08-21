@@ -43,8 +43,7 @@ public class UnblockCommand extends CommandHandler {
                                 Translation.COMMANDS__UNBLOCK__OPTION__DESCRIPTION
                         )
                                 .setChannelTypes(ChannelType.TEXT),
-                        ADMIN_KEY_OPTION
-                                .setRequired(false)
+                        ADMIN_KEY_OPTION_NOT_REQUIRED
                 );
     }
 
