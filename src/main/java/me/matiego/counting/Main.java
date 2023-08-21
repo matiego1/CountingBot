@@ -243,6 +243,10 @@ public final class Main extends JavaPlugin {
                 Logs.error("An error occurred while shutting down Discord bot.", e);
             }
         }
+        if (callbackThreadPool != null) {
+            callbackThreadPool.shutdownNow();
+            callbackThreadPool = null;
+        }
         //close MySQL connection
         if (mySQL != null) mySQL.close();
         Logs.info("Plugin disabled in " + (Utils.now() - time) + "ms.");
@@ -256,10 +260,6 @@ public final class Main extends JavaPlugin {
         jda.shutdownNow();
         if (jda.awaitShutdown(3, TimeUnit.SECONDS)) return;
         jda = null;
-
-        if (callbackThreadPool == null) return;
-        callbackThreadPool.shutdownNow();
-        callbackThreadPool = null;
     }
 
     /**
