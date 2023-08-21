@@ -36,13 +36,13 @@ public class LogicalExpressionsParser {
         return result.toString();
     }
 
-    private static boolean checkSubstitutions(@NotNull String expression, @NotNull String variables) {
+    private static boolean checkSubstitutions(@NotNull String expression, @NotNull String variables) throws IllegalArgumentException {
         if (variables.isEmpty()) return calculateLogicalValue(simplify(expression));
         return checkSubstitutions(expression.replace(variables.charAt(0), '0'), variables.substring(1))
                 && checkSubstitutions(expression.replace(variables.charAt(0), '1'), variables.substring(1));
     }
 
-    private static boolean calculateLogicalValue(@NotNull String expression) throws IllegalArgumentException {
+    private static boolean calculateLogicalValue(@NotNull String expression) {
         expression = simplify(expression);
         String before;
         do {
@@ -58,7 +58,7 @@ public class LogicalExpressionsParser {
         throw new IllegalArgumentException("expression becomes neither 1 nor 0");
     }
 
-    private static @NotNull String replaceFirstLogicalConnective(@NotNull String expression) throws IllegalArgumentException {
+    private static @NotNull String replaceFirstLogicalConnective(@NotNull String expression) {
         for (int i = 1; i < expression.length() - 1; i++) {
             char p = expression.charAt(i - 1);
             if (!(p == '0' || p == '1')) continue;
@@ -70,7 +70,7 @@ public class LogicalExpressionsParser {
 
             return expression.substring(0, i - 1) + (connective.calculateValue(p == '1', q == '1') ? "1" : "0") + expression.substring(i + 2);
         }
-        throw new IllegalArgumentException("expression cannot be simplified to 0 or 1");
+        return expression;
     }
 
     private enum LogicalConnective {

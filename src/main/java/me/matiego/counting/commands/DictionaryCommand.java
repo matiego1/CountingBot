@@ -129,9 +129,9 @@ public class DictionaryCommand extends CommandHandler {
                 }
                 case "load" -> {
                     switch (plugin.getDictionary().loadDictionaryFromFile(new File(plugin.getDataFolder() + File.separator + event.getOption("file", "null", OptionMapping::getAsString)), type)) {
-                        case SUCCESS -> reply(hook, user, event.getName(), 5 * 60 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(Utils.now() - time));
+                        case SUCCESS -> reply(hook, user, event.getName(), 30 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(Utils.now() - time));
                         case NO_CHANGES -> reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.getFormatted(Utils.now() - time));
-                        case FAILURE -> reply(hook, user, event.getName(), 30 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.getFormatted(Utils.now() - time));
+                        case FAILURE -> reply(hook, user, event.getName(), 15 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.getFormatted(Utils.now() - time));
                     }
                 }
             }
