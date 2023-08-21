@@ -97,7 +97,7 @@ public class ListCommand extends CommandHandler {
         Utils.async(() -> {
             switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
                 case "add" -> {
-                    if (!dictionary.isWordInDictionary(type, word)) {
+                    if (type.isDictionarySupported() && !dictionary.isWordInDictionary(type, word)) {
                         reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__LIST__ADD__NOT_IN_DICTIONARY.toString());
                         return;
                     }

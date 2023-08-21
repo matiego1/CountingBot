@@ -90,7 +90,7 @@ public class Dictionary {
     public boolean isWordInDictionary(@NotNull Type type, @NotNull String word) {
         if (!type.isDictionarySupported()) return false;
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT word FROM counting_" + type + "_dict WHERE uuid = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT word FROM counting_" + type + "_dict WHERE word = ?")) {
             stmt.setString(1, word);
             return stmt.executeQuery().next();
         } catch (SQLException e) {
