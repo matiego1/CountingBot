@@ -74,8 +74,13 @@ public class MySQL {
                 stmt.execute();
             }
             for (Dictionary.Type value : Dictionary.Type.values()) {
-                try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_" + value.toString().toLowerCase() + "(word VARCHAR(1000) NOT NULL, used BOOL, PRIMARY KEY (word))")) {
+                try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_" + value + "_list(word VARCHAR(1000) NOT NULL, guild VARCHAR(20), CONSTRAINT counting_" + value + "const UNIQUE (word, guild))")) {
                     stmt.execute();
+                }
+                if (value.isDictionarySupported()) {
+                    try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_" + value + "_dict(word VARCHAR(1000) NOT NULL, PRIMARY KEY (word))")) {
+                        stmt.execute();
+                    }
                 }
             }
         } catch (SQLException e) {

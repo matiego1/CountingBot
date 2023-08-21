@@ -21,11 +21,10 @@ import java.util.Arrays;
 import java.util.Objects;
 
 public class DictionaryCommand extends CommandHandler {
-    private final Main plugin;
-
     public DictionaryCommand(@NotNull Main plugin) {
         this.plugin = plugin;
     }
+    private final Main plugin;
 
 
     /**
@@ -35,7 +34,7 @@ public class DictionaryCommand extends CommandHandler {
      */
     @Override
     public @NotNull SlashCommandData getCommand() {
-        OptionData languageOption = CommandHandler.createOption(
+        OptionData languageOption = createOption(
                 "language",
                 OptionType.STRING,
                 true,
@@ -47,7 +46,7 @@ public class DictionaryCommand extends CommandHandler {
                         .map(value -> new Command.Choice(value, value))
                         .toList()
         );
-        OptionData wordOption = CommandHandler.createOption(
+        OptionData wordOption = createOption(
                 "word",
                 OptionType.STRING,
                 true,
@@ -55,34 +54,34 @@ public class DictionaryCommand extends CommandHandler {
                 Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION
         );
 
-        return CommandHandler.createSlashCommand("dictionary", true, Permission.MANAGE_CHANNEL)
+        return createSlashCommand("dictionary", true, Permission.MANAGE_CHANNEL)
                 .addSubcommands(
-                        CommandHandler.createSubcommand(
+                        createSubcommand(
                                 "add",
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__NAME,
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION
                         ).addOptions(
                                 languageOption,
-                                CommandHandler.ADMIN_KEY_OPTION,
+                                ADMIN_KEY_OPTION,
                                 wordOption
                         ),
-                        CommandHandler.createSubcommand(
+                        createSubcommand(
                                 "remove",
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__NAME,
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__DESCRIPTION
                         ).addOptions(
                                 languageOption,
-                                CommandHandler.ADMIN_KEY_OPTION,
+                                ADMIN_KEY_OPTION,
                                 wordOption
                         ),
-                        CommandHandler.createSubcommand(
+                        createSubcommand(
                                 "load",
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__NAME,
                                 Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__DESCRIPTION
                         ).addOptions(
                                 languageOption,
-                                CommandHandler.ADMIN_KEY_OPTION,
-                                CommandHandler.createOption(
+                                ADMIN_KEY_OPTION,
+                                createOption(
                                         "file",
                                         OptionType.STRING,
                                         true,
@@ -115,14 +114,14 @@ public class DictionaryCommand extends CommandHandler {
         Utils.async(() -> {
             switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
                 case "add" -> {
-                    if (plugin.getDictionary().addWord(type, event.getOption("word", "null", OptionMapping::getAsString))) {
+                    if (plugin.getDictionary().addWordToDictionary(type, event.getOption("word", "null", OptionMapping::getAsString))) {
                         reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__SUCCESS.getFormatted(Utils.now() - time));
                     } else {
                         reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__FAILURE.toString());
                     }
                 }
                 case "remove" -> {
-                    if (plugin.getDictionary().removeWord(type, event.getOption("word", "null", OptionMapping::getAsString))) {
+                    if (plugin.getDictionary().removeWordFromDictionary(type, event.getOption("word", "null", OptionMapping::getAsString))) {
                         reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__SUCCESS.getFormatted(Utils.now() - time));
                     } else {
                         reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__FAILURE.toString());

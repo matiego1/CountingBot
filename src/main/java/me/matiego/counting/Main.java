@@ -188,15 +188,17 @@ public final class Main extends JavaPlugin {
 
         //Add event listeners
         commands = new Commands(this,
-                new PingCommand(),
                 new AboutCommand(this),
-                new FeedbackCommand(this),
-                new CountingCommand(this),
-                new DictionaryCommand(this),
-                new RankingCommand(),
-                new DeleteMessageCommand(),
-                new RankingContextCommand(),
                 new BlockCommand(this),
+                new CountingCommand(this),
+                new DeleteMessageCommand(),
+                new DictionaryCommand(this),
+                new FeedbackCommand(this),
+                new GameCommand(),
+                new ListCommand(this),
+                new PingCommand(this),
+                new RankingCommand(this),
+                new RankingContextCommand(),
                 new UnblockCommand(this)
         );
         jda.addEventListener(

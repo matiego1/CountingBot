@@ -5,6 +5,7 @@ import me.matiego.counting.LogicalExpressionsParser;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.utils.ChannelHandler;
+import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -45,18 +46,23 @@ public class Tautologies implements ChannelHandler {
 
         try {
             if (!LogicalExpressionsParser.isTautology(content)) {
+                Logs.info("[DEBUG] not tautology: `" + content + "`");
                 Utils.sendPrivateMessage(user, Translation.HANDLERS__TAUTOLOGIES__NOT_TAUTOLOGY.toString());
                 return null;
             }
         } catch (Exception e) {
+            Logs.info("[DEBUG] incorrect (`" + e.getMessage() + "`): `" + content + "`");
             Utils.sendPrivateMessage(user, Translation.HANDLERS__TAUTOLOGIES__INCORRECT_EXPRESSION.toString());
             return null;
         }
 
         boolean success = false;
-        switch (Main.getInstance().getDictionary().useWord(Dictionary.Type.TAUTOLOGIES, content)) {
+        switch (Main.getInstance().getDictionary().markWordAsUsed(Dictionary.Type.TAUTOLOGIES, message.getGuild().getIdLong(), content)) {
             case SUCCESS -> success = true;
-            case NO_CHANGES -> Utils.sendPrivateMessage(user, Translation.HANDLERS__TAUTOLOGIES__ALREADY_EXISTS.toString());
+            case NO_CHANGES -> {
+                Logs.info("[DEBUG] already exists: `" + content + "`");
+                Utils.sendPrivateMessage(user, Translation.HANDLERS__TAUTOLOGIES__ALREADY_EXISTS.toString());
+            }
             case FAILURE -> Utils.sendPrivateMessage(user, Translation.HANDLERS__TAUTOLOGIES__FAILURE.toString());
         }
         if (!success) return null;

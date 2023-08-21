@@ -21,14 +21,14 @@ public class Dictionary {
      * @return {@code Response.SUCCESS} if file was loaded successfully, {@code Response.NO_CHANGES} if the file does not exist, {@code Response.FAILURE} if an error occurred.
      */
     public @NotNull Response loadDictionaryFromFile(@NotNull File file, @NotNull Type type) {
-        if (type.isList()) return Response.FAILURE;
+        if (!type.isDictionarySupported()) return Response.FAILURE;
         if (!file.exists()) return Response.NO_CHANGES;
 
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("TRUNCATE counting_" + type.toString().toLowerCase())) {
+             PreparedStatement stmt = conn.prepareStatement("TRUNCATE counting_" + type + "_dict")) {
             stmt.execute();
         } catch (SQLException e) {
-            Logs.error("An error occurred while loading the dictionary (" + type.toString().toLowerCase() + ").", e);
+            Logs.error("An error occurred while loading the dictionary (" + type + ").", e);
             return Response.FAILURE;
         }
 
@@ -38,12 +38,12 @@ public class Dictionary {
         } catch (SQLException ignored) {} //maybe it will work without it
 
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("LOAD DATA LOCAL INFILE ? REPLACE INTO TABLE counting_" + type.toString().toLowerCase() + "  COLUMNS TERMINATED BY ','")) {
+             PreparedStatement stmt = conn.prepareStatement("LOAD DATA LOCAL INFILE ? REPLACE INTO TABLE counting_" + type + "_dict COLUMNS TERMINATED BY ','")) {
             stmt.setString(1, file.getAbsolutePath());
             stmt.execute();
             return Response.SUCCESS;
         } catch (SQLException e) {
-            Logs.error("An error occurred while loading the dictionary (" + type.toString().toLowerCase() + ").", e);
+            Logs.error("An error occurred while loading the dictionary (" + type + ").", e);
         }
         return Response.FAILURE;
     }
@@ -54,16 +54,16 @@ public class Dictionary {
      * @param word the word
      * @return {@code true} if the word was added successfully otherwise {@code false}
      */
-    public boolean addWord(@NotNull Type type, @NotNull String word) {
-        if (type.isList()) return false;
+    public boolean addWordToDictionary(@NotNull Type type, @NotNull String word) {
+        if (!type.isDictionarySupported()) return false;
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_" + type.toString().toLowerCase() + "(word, used) VALUES(?, false) ON DUPLICATE KEY UPDATE word = ?, used = false")) {
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_" + type + "_dict(word) VALUES(?) ON DUPLICATE KEY UPDATE word = ?")) {
             stmt.setString(1, word);
             stmt.setString(2, word);
             stmt.execute();
             return true;
         } catch (SQLException e) {
-            Logs.error("An error occurred while adding the word to the dictionary (" + type.toString().toLowerCase() + ").", e);
+            Logs.error("An error occurred while adding the word to the dictionary (" + type + ").", e);
         }
         return false;
     }
@@ -74,14 +74,27 @@ public class Dictionary {
      * @param word the word
      * @return {@code true} if the word was removed successfully otherwise {@code false}
      */
-    public boolean removeWord(@NotNull Type type, @NotNull String word) {
+    public boolean removeWordFromDictionary(@NotNull Type type, @NotNull String word) {
+        if (!type.isDictionarySupported()) return false;
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("DELETE FROM counting_" + type.toString().toLowerCase() + " WHERE word = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM counting_" + type + "_dict WHERE word = ?")) {
             stmt.setString(1, word);
             stmt.execute();
             return true;
         } catch (SQLException e) {
-            Logs.error("An error occurred while removing the word from the dictionary (" + type.toString().toLowerCase() + ").", e);
+            Logs.error("An error occurred while removing the word from the dictionary (" + type + ").", e);
+        }
+        return false;
+    }
+
+    public boolean isWordInDictionary(@NotNull Type type, @NotNull String word) {
+        if (!type.isDictionarySupported()) return false;
+        try (Connection conn = Main.getInstance().getMySQLConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT word FROM counting_" + type + "_dict WHERE uuid = ?")) {
+            stmt.setString(1, word);
+            return stmt.executeQuery().next();
+        } catch (SQLException e) {
+            Logs.error("An error occurred while removing the word from the dictionary (" + type + ").", e);
         }
         return false;
     }
@@ -92,30 +105,32 @@ public class Dictionary {
      * @param word the word
      * @return {@code Response.SUCCESS} if the word was marked successfully, {@code Response.NO_CHANGES} if the word has already been marked or {@code Response.FAILURE} if an error occurred
      */
-    public @NotNull Response useWord(@NotNull Type type, @NotNull String word) {
-        if (type.isList()) return useListTypeWord(type, word);
+    public @NotNull Response markWordAsUsed(@NotNull Type type, long guildId, @NotNull String word) {
         if (type == Type.POLISH && word.equalsIgnoreCase("yeti")) return Response.SUCCESS;
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("UPDATE counting_" + type.toString().toLowerCase() + " SET used = true WHERE word = ? AND used = false")) {
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_" + type + "_list(word, guild) VALUES(?, ?)")) {
             stmt.setString(1, word);
-            return stmt.executeUpdate() > 0 ? Response.SUCCESS : Response.NO_CHANGES;
-        } catch (SQLException e) {
-            Logs.error("An error occurred while modifying the dictionary (" + type.toString().toLowerCase() + ").", e);
-        }
-        return Response.FAILURE;
-    }
-
-    private @NotNull Response useListTypeWord(@NotNull Type type, @NotNull String word) {
-        try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_" + type.toString().toLowerCase() + "(word, used) VALUES(?, true)")) {
-            stmt.setString(1, word);
+            stmt.setString(2, String.valueOf(guildId));
             stmt.execute();
             return Response.SUCCESS;
         } catch (SQLException e) {
             if (e.getErrorCode() == ER_DUP_ENTRY) return Response.NO_CHANGES;
-            Logs.error("An error occurred while modifying the dictionary (" + type.toString().toLowerCase() + ").", e);
+            Logs.error("An error occurred while modifying the dictionary (" + type + ").", e);
         }
         return Response.FAILURE;
+    }
+
+    public boolean unmarkWordAsUsed(@NotNull Type type, long guildId, @NotNull String word) {
+        try (Connection conn = Main.getInstance().getMySQLConnection();
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM counting_" + type + "_list WHERE word = ? AND guild = ?")) {
+            stmt.setString(1, word);
+            stmt.setString(2, String.valueOf(guildId));
+            stmt.execute();
+            return true;
+        } catch (SQLException e) {
+            Logs.error("An error occurred while modifying the dictionary (" + type + ").", e);
+        }
+        return false;
     }
 
     public enum Type {
@@ -123,18 +138,18 @@ public class Dictionary {
         ENGLISH,
         GERMAN,
         SPANISH,
-        TAUTOLOGIES(true);
+        TAUTOLOGIES(false);
 
         Type() {
-            this(false);
+            this(true);
         }
-        Type(boolean list) {
-            this.list = list;
+        Type(boolean dictionary) {
+            this.dictionary = dictionary;
         }
 
-        private final boolean list;
-        public boolean isList() {
-            return list;
+        private final boolean dictionary;
+        public boolean isDictionarySupported() {
+            return dictionary;
         }
 
         public @NotNull String getTranslation() {
@@ -151,6 +166,11 @@ public class Dictionary {
                 }
             }
             return null;
+        }
+
+        @Override
+        public String toString() {
+            return name().toLowerCase();
         }
     }
 }

@@ -46,7 +46,7 @@ public class Commands extends ListenerAdapter {
         User user = event.getUser();
         String command = event.getName();
 
-        Logs.info(user.getAsTag() + " [" + user.getId() + "]: /" + command);
+        Logs.info(Utils.getAsTag(user) + " [" + user.getId() + "]: /" + command);
 
         //check permissions
         if (!Utils.hasRequiredPermissions(event.getChannel())) {

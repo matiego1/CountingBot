@@ -21,8 +21,8 @@ public class AboutCommand extends CommandHandler {
      */
     @Override
     public @NotNull SlashCommandData getCommand() {
-        return CommandHandler.createSlashCommand("about", false)
-                .addOptions(CommandHandler.EPHEMERAL_OPTION);
+        return createSlashCommand("about", false)
+                .addOptions(EPHEMERAL_OPTION);
     }
 
     @Override

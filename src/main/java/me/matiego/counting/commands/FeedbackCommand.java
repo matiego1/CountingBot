@@ -43,7 +43,7 @@ public class FeedbackCommand extends CommandHandler {
      */
     @Override
     public @NotNull SlashCommandData getCommand() {
-        return CommandHandler.createSlashCommand("feedback", false);
+        return createSlashCommand("feedback", false);
     }
 
     @Override
@@ -87,7 +87,7 @@ public class FeedbackCommand extends CommandHandler {
             eb.setDescription(description);
             eb.setTimestamp(Instant.now());
             eb.setColor(Color.BLUE);
-            eb.setFooter(event.getUser().getAsTag());
+            eb.setFooter(Utils.getAsTag(event.getUser()));
 
             JDA jda = plugin.getJda();
             if (jda == null) {

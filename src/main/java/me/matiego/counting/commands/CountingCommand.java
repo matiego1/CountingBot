@@ -41,19 +41,19 @@ public class CountingCommand extends CommandHandler {
      */
     @Override
     public @NotNull SlashCommandData getCommand() {
-        return CommandHandler.createSlashCommand("counting", true, Permission.MANAGE_CHANNEL)
+        return createSlashCommand("counting", true, Permission.MANAGE_CHANNEL)
                 .addSubcommands(
-                        CommandHandler.createSubcommand(
+                        createSubcommand(
                                 "add",
                                 Translation.COMMANDS__COUNTING__OPTIONS__ADD__NAME,
                                 Translation.COMMANDS__COUNTING__OPTIONS__ADD__DESCRIPTION
                         ),
-                        CommandHandler.createSubcommand(
+                        createSubcommand(
                                 "remove",
                                 Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__NAME,
                                 Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__DESCRIPTION
                         ),
-                        CommandHandler.createSubcommand(
+                        createSubcommand(
                                 "list",
                                 Translation.COMMANDS__COUNTING__OPTIONS__LIST__NAME,
                                 Translation.COMMANDS__COUNTING__OPTIONS__LIST__DESCRIPTION

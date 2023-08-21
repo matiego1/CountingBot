@@ -7,6 +7,9 @@ import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -30,14 +33,19 @@ public class UnblockCommand extends CommandHandler {
      */
     @Override
     public @NotNull CommandData getCommand() {
-        return CommandHandler.createSlashCommand("unblock", true, Permission.MANAGE_CHANNEL)
-                .addOptions(CommandHandler.createOption(
-                        "channel",
-                        OptionType.CHANNEL,
-                        false,
-                        Translation.COMMANDS__UNBLOCK__OPTION__NAME,
-                        Translation.COMMANDS__UNBLOCK__OPTION__DESCRIPTION
-                ));
+        return createSlashCommand("unblock", true, Permission.MANAGE_CHANNEL)
+                .addOptions(
+                        createOption(
+                                "channel",
+                                OptionType.CHANNEL,
+                                false,
+                                Translation.COMMANDS__UNBLOCK__OPTION__NAME,
+                                Translation.COMMANDS__UNBLOCK__OPTION__DESCRIPTION
+                        )
+                                .setChannelTypes(ChannelType.TEXT),
+                        ADMIN_KEY_OPTION
+                                .setRequired(false)
+                );
     }
 
     @Override
@@ -45,28 +53,46 @@ public class UnblockCommand extends CommandHandler {
         event.deferReply(true).queue();
         InteractionHook hook = event.getHook();
         JDA jda = event.getJDA();
+        User user = event.getUser();
+        Guild guild = event.getGuild();
+        if (guild == null) return;
+        long guildId = guild.getIdLong();
         GuildChannel chn = event.getOption("channel", OptionMapping::getAsChannel);
+        String adminKey = event.getOption("admin-key", OptionMapping::getAsString);
 
         Utils.async(() -> {
             if (chn == null) {
                 List<ChannelData> channels = plugin.getStorage().getChannels();
+
+                if (adminKey == null || !adminKey.equals(plugin.getConfig().getString("admin-key"))) {
+                    channels = channels.stream()
+                            .filter(data -> data.getGuildId() == guildId)
+                            .toList();
+                }
+
                 int success = 0;
                 for (ChannelData channel : channels) {
                     if (channel.unblock(jda)) success++;
                 }
-                hook.sendMessage(Translation.COMMANDS__UNBLOCK__MESSAGE.getFormatted(success, channels.size())).queue();
+
+                reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__UNBLOCK__MESSAGE.getFormatted(success, channels.size()));
                 return;
             }
             ChannelData data = plugin.getStorage().getChannel(chn.getIdLong());
             if (data == null) {
-                hook.sendMessage(Translation.COMMANDS__UNBLOCK__NOT_COUNTING_CHANNEL.toString()).queue();
+                reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__UNBLOCK__NOT_COUNTING_CHANNEL.toString());
                 return;
             }
             if (data.unblock(jda)) {
-                hook.sendMessage(Translation.COMMANDS__UNBLOCK__SUCCESS.toString()).queue();
+                reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__UNBLOCK__SUCCESS.toString());
             } else {
-                hook.sendMessage(Translation.COMMANDS__UNBLOCK__FAILURE.toString()).queue();
+                reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__UNBLOCK__FAILURE.toString());
             }
         });
+    }
+
+    private void reply(@NotNull InteractionHook hook, @NotNull User user, @NotNull String command, long time, @NotNull String message) {
+        hook.sendMessage(message).queue();
+        plugin.getCommandHandler().putSlowdown(user, command, time);
     }
 }

@@ -247,7 +247,7 @@ public class Utils {
                             if (failure instanceof ErrorResponseException e && e.getErrorCode() == 50007) {
                                 long now = Utils.now();
                                 if (now - privateMessages.getOrDefault(user.getIdLong(), 0L) >= 15 * 60 * 1000L) {
-                                    Logs.warning("User " + user.getAsTag() + " doesn't allow private messages.");
+                                    Logs.warning("User `" + Utils.getAsTag(user) + "` doesn't allow private messages.");
                                     privateMessages.put(user.getIdLong(), now);
                                 }
                             } else {
@@ -278,7 +278,9 @@ public class Utils {
     }
 
     public static @NotNull String getMemberAsTag(@NotNull User user, @Nullable Member member) {
-        return getName(user, member) + "#" + user.getDiscriminator();
+        //noinspection deprecation
+        String tag = user.getDiscriminator();
+        return getName(user, member) + (tag.equals("0000") ? "" : "#" + tag);
     }
 
     /**
@@ -302,5 +304,10 @@ public class Utils {
 
     public static long now() {
         return System.currentTimeMillis();
+    }
+
+    public static @NotNull String getAsTag(@NotNull User user) {
+        //noinspection deprecation
+        return user.getDiscriminator().equals("0000") ? user.getName() : user.getAsTag();
     }
 }

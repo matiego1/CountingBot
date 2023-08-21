@@ -7,8 +7,8 @@ public class LogicalExpressionsParser {
     public final static char[] ALLOWED_VARIABLES = new char[]{'p', 'q', 'r', 's'};
 
     public static @NotNull String simplify(@NotNull String expression) {
-        String before = expression + "$";
-        while (!before.equals(expression)) {
+        String before;
+        do {
             before = expression;
             expression = expression
                     .replace("(0)", "0")
@@ -18,11 +18,10 @@ public class LogicalExpressionsParser {
             for (char c : ALLOWED_VARIABLES) {
                 expression = expression.replace("(" + c + ")", String.valueOf(c));
             }
-        }
+        } while (!before.equals(expression));
         return expression;
     }
 
-    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean isTautology(@NotNull String expression) throws IllegalArgumentException {
         return checkSubstitutions(expression, getVariablesAsString(expression));
     }
@@ -44,11 +43,12 @@ public class LogicalExpressionsParser {
     }
 
     private static boolean calculateLogicalValue(@NotNull String expression) throws IllegalArgumentException {
-        String before = expression + "$";
-        while (expression.length() > 1 && !before.equals(expression)) {
+        expression = simplify(expression);
+        String before;
+        do {
             before = expression;
             expression = simplify(replaceFirstLogicalConnective(expression));
-        }
+        } while (expression.length() > 1 && !before.equals(expression));
         if (expression.equals("0")) {
             return false;
         }

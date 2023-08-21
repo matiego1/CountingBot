@@ -21,6 +21,11 @@ import java.util.List;
 import java.util.Objects;
 
 public class RankingCommand extends CommandHandler {
+    public RankingCommand(@NotNull Main plugin) {
+        this.plugin = plugin;
+    }
+    private final Main plugin;
+
     /**
      * Returns the slash command.
      *
@@ -28,10 +33,10 @@ public class RankingCommand extends CommandHandler {
      */
     @Override
     public @NotNull CommandData getCommand() {
-        return CommandHandler.createSlashCommand("ranking", true)
+        return createSlashCommand("ranking", true)
                 .addOptions(
-                        CommandHandler.EPHEMERAL_OPTION,
-                        CommandHandler.createOption(
+                        EPHEMERAL_OPTION,
+                        createOption(
                                 "amount",
                                 OptionType.INTEGER,
                                 false,
@@ -75,6 +80,7 @@ public class RankingCommand extends CommandHandler {
             String description = builder.toString();
             if (description.isBlank()) {
                 hook.sendMessage(Translation.COMMANDS__RANKING__EMPTY.toString()).queue();
+                plugin.getCommandHandler().putSlowdown(event.getUser(), event.getName(), 3 * Utils.SECOND);
                 return;
             }
             description = Utils.checkLength(description, MessageEmbed.DESCRIPTION_MAX_LENGTH);
@@ -83,6 +89,7 @@ public class RankingCommand extends CommandHandler {
             }
             eb.setDescription(description);
             hook.sendMessageEmbeds(eb.build()).queue();
+            plugin.getCommandHandler().putSlowdown(event.getUser(), event.getName(), 5 * Utils.SECOND);
         });
     }
 }
