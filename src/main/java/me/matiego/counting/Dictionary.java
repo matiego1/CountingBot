@@ -138,7 +138,8 @@ public class Dictionary {
         ENGLISH,
         GERMAN,
         SPANISH,
-        TAUTOLOGIES(false);
+        TAUTOLOGIES(false),
+        MINECRAFT_ITEM(false);
 
         Type() {
             this(true);

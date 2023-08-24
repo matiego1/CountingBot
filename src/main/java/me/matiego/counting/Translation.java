@@ -168,6 +168,9 @@ public enum Translation {
     HANDLERS__TAUTOLOGIES__NOT_TAUTOLOGY("**Oops!** Your expression is not tautology."),
     HANDLERS__TAUTOLOGIES__ALREADY_EXISTS("**Oops!** This tautology has already been used or is blocked on this server!"),
     HANDLERS__TAUTOLOGIES__FAILURE("**Oops!** An error occurred while loading dictionary. Try again."),
+    HANDLERS__MINECRAFT_ITEM__ITEM_DOES_NOT_EXIST("**Oops!** This item does not exists!"),
+    HANDLERS__MINECRAFT_ITEM__ALREADY_EXISTS("**Oops!** This item has already been used or is blocked on this server!"),
+    HANDLERS__MINECRAFT_ITEM__FAILURE("**Oops!** An error occurred while loading dictionary. Try again."),
     /*--- Channel types ---*/
     //normal
     TYPE__COUNTING__NAME("Counting"),
@@ -201,6 +204,8 @@ public enum Translation {
     TYPE__ALPHABET__DESCRIPTION("Write next letters in english alphabet"),
     TYPE__TAUTOLOGIES__NAME("Tautologies"),
     TYPE__TAUTOLOGIES__DESCRIPTION("Write various logical expressions that are tautologies"),
+    TYPE__MINECRAFT_ITEM__NAME("Minecraft items"),
+    TYPE__MINECRAFT_ITEM__DESCRIPTION("Write name of minecraft item"),
     //last letter
     TYPE__POLISH_LAST_LETTER__NAME("Polish last letter"),
     TYPE__POLISH_LAST_LETTER__DESCRIPTION("Write a word that starts with the last letter of the previous one (Polish)"),

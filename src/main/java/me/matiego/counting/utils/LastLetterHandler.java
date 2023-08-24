@@ -65,7 +65,7 @@ public abstract class LastLetterHandler implements ChannelHandler {
         }
 
         boolean success = false;
-        switch (Main.getInstance().getDictionary().markWordAsUsed(getType(), message.getGuild().getIdLong(), msgContent)) {
+        switch (dictionary.markWordAsUsed(getType(), message.getGuild().getIdLong(), msgContent)) {
             case SUCCESS -> success = true;
             case NO_CHANGES -> Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__INCORRECT_WORD.toString());
             case FAILURE -> Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__FAILURE.toString());
