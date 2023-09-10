@@ -77,7 +77,7 @@ public class ChannelData {
         FACTORIAL_COUNTING("U+2757", new FactorialCounting()),
         ALPHABET("U+1F18E", new Alphabet()),
         TAUTOLOGIES("U+2696", new Tautologies()),
-        MINECRAFT_ITEM("U+1F30D", new MinecraftItems()),
+        MINECRAFT_ITEM("U+1F30D", new MinecraftItem()),
         //last letter
         POLISH_LAST_LETTER("U+1F524", new PolishLastLetter()),
         ENGLISH_LAST_LETTER("U+1F445", new EnglishLastLetter()),

@@ -20,8 +20,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class ListCommand extends CommandHandler {
-    public ListCommand(@NotNull Main plugin) {
+public class WordListCommand extends CommandHandler {
+    public WordListCommand(@NotNull Main plugin) {
         this.plugin = plugin;
     }
     private final Main plugin;
@@ -54,7 +54,7 @@ public class ListCommand extends CommandHandler {
                 Translation.COMMANDS__LIST__OPTIONS__WORD__DESCRIPTION
         );
 
-        return createSlashCommand("list", true, Permission.MANAGE_CHANNEL)
+        return createSlashCommand("word-list", true, Permission.MANAGE_CHANNEL)
                 .addSubcommands(
                         createSubcommand(
                                 "add",

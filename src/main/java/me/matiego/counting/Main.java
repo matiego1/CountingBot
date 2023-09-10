@@ -195,7 +195,7 @@ public final class Main extends JavaPlugin {
                 new DictionaryCommand(this),
                 new FeedbackCommand(this),
                 new GameCommand(),
-                new ListCommand(this),
+                new WordListCommand(this),
                 new PingCommand(this),
                 new RankingCommand(this),
                 new RankingContextCommand(),

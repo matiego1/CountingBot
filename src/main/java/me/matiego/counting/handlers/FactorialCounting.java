@@ -4,22 +4,20 @@ import me.matiego.counting.utils.ChannelHandler;
 import net.dv8tion.jda.api.entities.Message;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Range;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
 public class FactorialCounting implements ChannelHandler {
-    private final static int MAX_FACTORIAL = 800;
-    private final static List<BigInteger> factorials = new ArrayList<>();
-
-
-    static {
-        BigInteger current = BigInteger.ONE;
-        for (int i = 1; i <= MAX_FACTORIAL; i++) {
-            current = current.multiply(BigInteger.valueOf(i));
-            factorials.add(current);
-        }
+    /**
+     * Returns the amount of messages retrieved from the channel history.
+     *
+     * @return the amount of messages.
+     */
+    @Override
+    public @Range(from = 0, to = 3) int getAmountOfMessages() {
+        return 2;
     }
 
     /**
@@ -32,18 +30,22 @@ public class FactorialCounting implements ChannelHandler {
     @Override
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
         if (history.isEmpty()) return message.getContentDisplay().equals("1") ? "1" : null;
+        if (history.size() == 1) return message.getContentDisplay().equals("1") ? "1" : null;
 
-        BigInteger a;
+        BigInteger a, b, c;
         try {
-            a = new BigInteger(history.get(0).getContentDisplay());
+            a = new BigInteger(history.get(1).getContentDisplay());
+            b = new BigInteger(history.get(0).getContentDisplay());
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }
-        BigInteger b = factorials.stream()
-                .filter(factorial -> factorial.compareTo(a) > 0)
-                .findFirst()
-                .orElse(BigInteger.ONE);
 
-        return b.toString().equals(message.getContentDisplay()) ? b.toString() : null;
+        try {
+            c = new BigInteger(message.getContentDisplay());
+        } catch (NumberFormatException e) {
+            return null;
+        }
+
+        return c.equals(b.divide(a).add(BigInteger.ONE)) ? c.toString() : null;
     }
 }

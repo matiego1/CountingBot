@@ -12,11 +12,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.List;
 
-public class MinecraftItems implements ChannelHandler {
+public class MinecraftItem implements ChannelHandler {
     /**
      * Returns the amount of messages retrieved from the channel history.
      *
@@ -58,14 +57,13 @@ public class MinecraftItems implements ChannelHandler {
                 .map(Enum::name)
                 .filter(item -> {
                     try {
-                        Field field = Material.class.getField(item);
-                        return !field.isAnnotationPresent(Deprecated.class);
+                        return !Material.class.getField(item).isAnnotationPresent(Deprecated.class);
                     } catch (Exception e) {
                         return true;
                     }
                 })
                 .map(String::toLowerCase)
-                .map(item -> item.replace("_", ""))
+                .map(item -> item.replace("_", " "))
                 .noneMatch(item -> item.equals(name));
     }
 }
