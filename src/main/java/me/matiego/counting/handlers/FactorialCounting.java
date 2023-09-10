@@ -46,6 +46,6 @@ public class FactorialCounting implements ChannelHandler {
             return null;
         }
 
-        return c.equals(b.divide(a).add(BigInteger.ONE)) ? c.toString() : null;
+        return c.equals(b.multiply(b.divide(a).add(BigInteger.ONE))) ? c.toString() : null;
     }
 }
