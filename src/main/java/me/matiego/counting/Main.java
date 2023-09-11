@@ -194,7 +194,7 @@ public final class Main extends JavaPlugin {
                 new DeleteMessageCommand(),
                 new DictionaryCommand(this),
                 new FeedbackCommand(this),
-                new GameCommand(),
+                new GameCommand(this),
                 new WordListCommand(this),
                 new PingCommand(this),
                 new RankingCommand(this),
