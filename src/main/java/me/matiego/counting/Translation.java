@@ -60,6 +60,7 @@ public enum Translation {
     COMMANDS__RANKING__OPTIONS__AMOUNT__NAME("amount"),
     COMMANDS__RANKING__OPTIONS__AMOUNT__DESCRIPTION("amount of places to show"),
     COMMANDS__RANKING__TITLE("**Top %s places**"),
+    COMMANDS__RANKING__HEADER("**Total number of messages in all guilds:** `%s`\n**Total number of messages in this guild:** `%s`\n\n"),
     COMMANDS__RANKING__ROW("%s %s - %s message(s)"),
     COMMANDS__RANKING__EMPTY("The ranking is currently empty or an error occurred."),
     COMMANDS__RANKING_CONTEXT__NAME("ranking"),

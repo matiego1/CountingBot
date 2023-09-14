@@ -42,14 +42,14 @@ public class RankingCommand extends CommandHandler {
                                 false,
                                 Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__NAME,
                                 Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__DESCRIPTION
-                        )
+                        ).setRequiredRange(5, 30)
                 );
     }
 
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         boolean ephemeral = event.getOption("ephemeral", "False", OptionMapping::getAsString).equals("True");
-        if (Main.getInstance().getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
+        if (plugin.getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
         event.deferReply(ephemeral).queue();
 
         User user = event.getUser();
@@ -59,15 +59,22 @@ public class RankingCommand extends CommandHandler {
 
         Utils.async(() -> {
             EmbedBuilder eb = new EmbedBuilder();
-            eb.setTitle(Translation.COMMANDS__RANKING__TITLE.getFormatted(option));
             eb.setTimestamp(Instant.now());
             eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
             eb.setColor(Color.YELLOW);
 
-            List<UserRanking.Data> top = Main.getInstance().getUserRanking().getTop(Objects.requireNonNull(event.getGuild()).getIdLong(), option);
+            List<UserRanking.Data> top = plugin.getUserRanking().getTop(Objects.requireNonNull(event.getGuild()).getIdLong(), option);
             StringBuilder builder = new StringBuilder();
 
+            int total = 0, total_guild = 0;
+
             for (UserRanking.Data data : top) {
+                if (data.getUser().getIdLong() == 0) {
+                    total_guild = data.getRank();
+                    total = data.getScore();
+                    continue;
+                }
+
                 String place = switch (data.getRank()) {
                     case 1 -> ":first_place:";
                     case 2 -> ":second_place:";
@@ -83,11 +90,17 @@ public class RankingCommand extends CommandHandler {
                 plugin.getCommandHandler().putSlowdown(event.getUser(), event.getName(), 3 * Utils.SECOND);
                 return;
             }
+
+            description = Translation.COMMANDS__RANKING__HEADER.getFormatted(total, total_guild) + description;
+
             description = Utils.checkLength(description, MessageEmbed.DESCRIPTION_MAX_LENGTH);
             if (description.endsWith("...")) {
                 description = description.substring(0, description.lastIndexOf("\n") + 1) + "...";
             }
+
             eb.setDescription(description);
+            eb.setTitle(Translation.COMMANDS__RANKING__TITLE.getFormatted(top.size()));
+
             hook.sendMessageEmbeds(eb.build()).queue();
             plugin.getCommandHandler().putSlowdown(event.getUser(), event.getName(), 5 * Utils.SECOND);
         });

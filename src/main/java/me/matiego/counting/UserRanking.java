@@ -31,7 +31,7 @@ public class UserRanking {
 
     public @NotNull Response remove(@NotNull UserSnowflake user, long guild) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("UPDATE counting_user_ranking SET score = score - 1 WHERE id = ? AND guild = ? AND score > 0;")) {
+             PreparedStatement stmt = conn.prepareStatement("UPDATE counting_user_ranking SET score = score - 1 WHERE id = ? AND guild = ? AND score > 0")) {
             stmt.setString(1, user.getId());
             stmt.setString(2, String.valueOf(guild));
             stmt.execute();
@@ -64,19 +64,41 @@ public class UserRanking {
 
     public @NotNull List<Data> getTop(long guild, @Range(from = 1, to = Integer.MAX_VALUE) int amount) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT id, score, RANK() OVER(ORDER BY score DESC) pos FROM counting_user_ranking WHERE guild = ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT id, score, RANK() OVER(ORDER BY score DESC) pos, (SELECT SUM(score) FROM counting_user_ranking) total, (SELECT SUM(score) FROM counting_user_ranking WHERE guild = ?) total_guild FROM counting_user_ranking WHERE guild = ?;")) {
             stmt.setString(1, String.valueOf(guild));
+            stmt.setString(2, String.valueOf(guild));
+
+            int total = 0, total_guild = 0;
+
             ResultSet resultSet = stmt.executeQuery();
             List<Data> result = new ArrayList<>();
             while (resultSet.next()) {
+                total = resultSet.getInt("total");
+                total_guild = resultSet.getInt("total_guild");
+
                 int rank = resultSet.getInt("pos");
-                if (rank > amount) return result;
+                if (rank > amount) {
+                    result.add(new Data(
+                            UserSnowflake.fromId(0),
+                            total_guild,
+                            total
+                    ));
+                    return result;
+                }
+
                 result.add(new Data(
                         UserSnowflake.fromId(resultSet.getLong("id")),
                         resultSet.getInt("score"),
                         rank
                 ));
             }
+
+            result.add(new Data(
+                    UserSnowflake.fromId(0),
+                    total_guild,
+                    total
+            ));
+
             return result;
         } catch (SQLException e) {
             Logs.error("An error occurred while modifying user ranking.", e);
