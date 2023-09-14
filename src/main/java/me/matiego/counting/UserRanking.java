@@ -80,8 +80,8 @@ public class UserRanking {
                 if (rank > amount) {
                     result.add(new Data(
                             UserSnowflake.fromId(0),
-                            total_guild,
-                            total
+                            total,
+                            total_guild
                     ));
                     return result;
                 }
@@ -95,8 +95,8 @@ public class UserRanking {
 
             result.add(new Data(
                     UserSnowflake.fromId(0),
-                    total_guild,
-                    total
+                    total,
+                    total_guild
             ));
 
             return result;

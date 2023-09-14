@@ -64,14 +64,20 @@ public class RankingCommand extends CommandHandler {
             eb.setColor(Color.YELLOW);
 
             List<UserRanking.Data> top = plugin.getUserRanking().getTop(Objects.requireNonNull(event.getGuild()).getIdLong(), option);
-            StringBuilder builder = new StringBuilder();
+
+            if (top.size() <= 1) {
+                hook.sendMessage(Translation.COMMANDS__RANKING__EMPTY.toString()).queue();
+                plugin.getCommandHandler().putSlowdown(event.getUser(), event.getName(), 3 * Utils.SECOND);
+                return;
+            }
 
             int total = 0, total_guild = 0;
+            StringBuilder builder = new StringBuilder();
 
             for (UserRanking.Data data : top) {
                 if (data.getUser().getIdLong() == 0) {
-                    total_guild = data.getRank();
                     total = data.getScore();
+                    total_guild = data.getRank();
                     continue;
                 }
 
@@ -84,22 +90,13 @@ public class RankingCommand extends CommandHandler {
                 builder.append(Translation.COMMANDS__RANKING__ROW.getFormatted("**" + place + "**", data.getUser().getAsMention(), data.getScore())).append("\n");
             }
 
-            String description = builder.toString();
-            if (description.isBlank()) {
-                hook.sendMessage(Translation.COMMANDS__RANKING__EMPTY.toString()).queue();
-                plugin.getCommandHandler().putSlowdown(event.getUser(), event.getName(), 3 * Utils.SECOND);
-                return;
-            }
-
-            description = Translation.COMMANDS__RANKING__HEADER.getFormatted(total, total_guild) + description;
-
-            description = Utils.checkLength(description, MessageEmbed.DESCRIPTION_MAX_LENGTH);
+            String description = Utils.checkLength(Translation.COMMANDS__RANKING__HEADER.getFormatted(total, total_guild) + builder, MessageEmbed.DESCRIPTION_MAX_LENGTH);
             if (description.endsWith("...")) {
                 description = description.substring(0, description.lastIndexOf("\n") + 1) + "...";
             }
 
             eb.setDescription(description);
-            eb.setTitle(Translation.COMMANDS__RANKING__TITLE.getFormatted(top.size()));
+            eb.setTitle(Translation.COMMANDS__RANKING__TITLE.getFormatted(top.size() - 1));
 
             hook.sendMessageEmbeds(eb.build()).queue();
             plugin.getCommandHandler().putSlowdown(event.getUser(), event.getName(), 5 * Utils.SECOND);
