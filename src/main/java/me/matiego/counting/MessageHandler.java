@@ -70,6 +70,7 @@ public class MessageHandler extends ListenerAdapter {
             if (countingMessageSendEvent.isCancelled()) return;
 
             if (Utils.sendWebhook(data.getWebhookUrl(), Utils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg)) {
+                countingMessageSendEvent.getOnSuccess().run();
                 plugin.getUserRanking().add(user, event.getGuild().getIdLong());
             } else {
                 Utils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());

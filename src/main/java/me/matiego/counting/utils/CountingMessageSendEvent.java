@@ -25,6 +25,7 @@ public class CountingMessageSendEvent extends Event implements Cancellable {
     private final UserSnowflake user;
     private final Long previousMessage;
     private String displayName;
+    private Runnable onSuccess;
 
     public CountingMessageSendEvent(@NotNull ChannelData channel, @NotNull UserSnowflake user, @NotNull String displayName) {
         this(channel, user, displayName, null);
@@ -35,6 +36,7 @@ public class CountingMessageSendEvent extends Event implements Cancellable {
         this.user = user;
         this.displayName = displayName;
         this.previousMessage = previousMessageId;
+        this.onSuccess = () -> {};
     }
 
     public @NotNull ChannelData getChannel() {
@@ -55,6 +57,14 @@ public class CountingMessageSendEvent extends Event implements Cancellable {
 
     public void setDisplayName(@NotNull String displayName) {
         this.displayName = displayName;
+    }
+
+    public @NotNull Runnable getOnSuccess() {
+        return onSuccess;
+    }
+
+    public void setOnSuccess(@NotNull Runnable onSuccess) {
+        this.onSuccess = onSuccess;
     }
 
     private boolean cancelled = false;
