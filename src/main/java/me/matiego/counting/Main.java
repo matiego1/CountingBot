@@ -131,7 +131,7 @@ public final class Main extends JavaPlugin {
                     .setEnableShutdownHook(false)
                     .setContextEnabled(false)
                     .disableCache(Utils.getDisabledCacheFlag())
-                    .setActivity(Activity.playing(Translation.GENERAL__STATUS.toString()))
+                    .setActivity(Activity.customStatus(Translation.GENERAL__STATUS.toString()))
                     .addEventListeners(new ListenerAdapter() {
                         @Override
                         public void onReady(@NotNull ReadyEvent event) {
