@@ -123,7 +123,7 @@ public final class Main extends JavaPlugin {
                     .setMemberCachePolicy(MemberCachePolicy.NONE)
                     .setCallbackPool(callbackThreadPool, false)
                     .setGatewayPool(Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Counting - JDA Gateway").build()), true)
-                    .setRateLimitPool(new ScheduledThreadPoolExecutor(5, new ThreadFactoryBuilder().setNameFormat("Counting - JDA Rate Limit").build()), true)
+                    .setRateLimitScheduler(new ScheduledThreadPoolExecutor(5, new ThreadFactoryBuilder().setNameFormat("Counting - JDA Rate Limit").build()), true)
                     .setWebsocketFactory(new WebSocketFactory().setDualStackMode(DualStackMode.IPV4_ONLY))
                     .setHttpClient(Utils.getHttpClient())
                     .setAutoReconnect(true)
