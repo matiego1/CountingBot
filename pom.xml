@@ -12,7 +12,7 @@
     <name>Counting</name>
 
     <properties>
-        <java.version>17</java.version>
+        <java.version>19</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.build.timestamp.format>yy.MM.dd</maven.build.timestamp.format>
     </properties>
@@ -79,7 +79,7 @@
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.20</version>
+            <version>5.0.0-beta.21</version>
             <exclusions>
                 <exclusion>
                     <groupId>club.minnced</groupId>
