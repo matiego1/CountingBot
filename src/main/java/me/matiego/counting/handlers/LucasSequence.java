@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Range;
 import java.math.BigInteger;
 import java.util.List;
 
-public class LucasNumbers implements ChannelHandler {
+public class LucasSequence implements ChannelHandler {
     /**
      * Returns the amount of messages retrieved from the channel history.
      *
@@ -21,7 +21,7 @@ public class LucasNumbers implements ChannelHandler {
     }
 
     /**
-     * Checks if the sent message is correct.
+     * Checks if sent message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -31,22 +31,24 @@ public class LucasNumbers implements ChannelHandler {
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
         if (history.isEmpty()) return message.getContentDisplay().equals("2") ? "2" : null;
         if (history.size() == 1) return message.getContentDisplay().equals("1") ? "1" : null;
-        BigInteger a = null, b = null, c = new BigInteger("-1");
-        try {
-            a = new BigInteger(history.get(0).getContentDisplay());
-        } catch (NumberFormatException ignored) {}
+
+        BigInteger a, b, c;
         try {
             b = new BigInteger(history.get(1).getContentDisplay());
-        } catch (NumberFormatException ignored) {}
-        if (b == null) {
+        } catch (NumberFormatException ignored) {
             return message.getContentDisplay().equals("2") ? "2" : null;
         }
-        if (a == null) {
+        try {
+            a = new BigInteger(history.get(0).getContentDisplay());
+        } catch (NumberFormatException ignored) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }
         try {
             c = new BigInteger(message.getContentDisplay());
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+
         return a.add(b).equals(c) ? c.toString() : null;
     }
 }

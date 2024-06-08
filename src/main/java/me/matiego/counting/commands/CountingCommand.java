@@ -23,7 +23,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
 public class CountingCommand extends CommandHandler {
@@ -99,24 +101,31 @@ public class CountingCommand extends CommandHandler {
                     }
                 }
                 case "list" -> {
-                    StringBuilder msg = new StringBuilder(Translation.COMMANDS__COUNTING__LIST__LIST + "\n");
-                    int emptyMsgLength = msg.length();
                     JDA jda = event.getJDA();
                     long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+                    long mainGuildId = plugin.getConfig().getLong("main-guild-id");
 
+                    List<String> channels = new ArrayList<>();
                     for (ChannelData data : plugin.getStorage().getChannels()) {
                         GuildChannel chn = jda.getGuildChannelById(data.getChannelId());
                         if (chn != null && chn.getGuild().getIdLong() == guildId) {
-                            msg.append(chn.getAsMention()).append(": ").append(data.getType()).append("\n");
-                        } else if (plugin.getConfig().getLong("main-guild-id") == guildId) {
-                            msg.append(chn == null ? "`" + data.getChannelId() + "`" : chn.getAsMention()).append(": ").append(data.getType()).append("\n");
+                            channels.add("**" + (channels.size() + 1) + ".** " + chn.getAsMention() + ": " + data.getType());
+                        } else if (mainGuildId == guildId) {
+                            channels.add("**" + (channels.size() + 1) + ".** " + (chn == null ? "`" + data.getChannelId() + "`" : chn.getAsMention()) + ": " + data.getType());
                         }
                     }
 
-                    if (emptyMsgLength == msg.length()) {
-                        hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__EMPTY_LIST.toString()).queue();
+                    int totalSize = channels.size();
+                    if (totalSize > 40) {
+                        int more = totalSize - 40;
+                        channels = channels.subList(0, 40);
+                        channels.add(Translation.COMMANDS__COUNTING__LIST__TOO_MUCH.getFormatted(more));
+                    }
+
+                    if (channels.isEmpty()) {
+                        hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__EMPTY_LIST.getFormatted(totalSize)).queue();
                     } else {
-                        hook.sendMessage(msg.toString()).queue();
+                        hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__LIST + "\n" + String.join("\n", channels)).queue();
                     }
                 }
             }

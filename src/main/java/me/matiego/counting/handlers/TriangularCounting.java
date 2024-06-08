@@ -7,9 +7,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class TriangularNumbers implements ChannelHandler {
+public class TriangularCounting implements ChannelHandler {
     /**
-     * Checks if the sent message is correct.
+     * Checks if sent message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -18,20 +18,24 @@ public class TriangularNumbers implements ChannelHandler {
     @Override
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
         if (history.isEmpty()) return message.getContentDisplay().equals("1") ? "1" : null;
-        int a, b = -1;
+
+        long a, b;
         try {
-            a = Integer.parseInt(history.get(0).getContentDisplay());
+            a = Long.parseLong(history.get(0).getContentDisplay());
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }
         try {
-            b = Integer.parseInt(message.getContentDisplay());
-        } catch (NumberFormatException ignored) {}
+            b = Long.parseLong(message.getContentDisplay());
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+
         return getNext(a) == b ? String.valueOf(b) : null;
     }
 
-    private int getNext(int a) {
-        int n = (int) ((-1 + Math.sqrt(8 * a + 1)) / 2) + 1;
+    private long getNext(long a) {
+        long n = (int) ((-1 + Math.sqrt(8 * a + 1)) / 2) + 1;
         return n * (n + 1) / 2;
     }
 }

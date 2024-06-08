@@ -64,6 +64,15 @@ public final class Main extends JavaPlugin {
         //Save config file
         saveDefaultConfig();
 
+        //Check translations
+        if (!getConfig().getBoolean("do-not-check-translations")) {
+            for (Translation translation : Translation.values()) {
+                if (translation.toString().equals(translation.getDefault())) {
+                    Logs.warning("Translation for " + translation.name() + " is not set in the config file! (To disable this message set `do-not-check-translations` to `false`)");
+                }
+            }
+        }
+
         //Add console command
         PluginCommand command = getCommand("counting");
         if (command != null) command.setExecutor((sender, cmd, label, args) -> {

@@ -10,7 +10,7 @@ import java.util.List;
 
 public class PrimeCounting implements ChannelHandler {
     /**
-     * Checks if the sent message is correct.
+     * Checks if sent message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -19,16 +19,22 @@ public class PrimeCounting implements ChannelHandler {
     @Override
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
         if (history.isEmpty()) return message.getContentDisplay().equals("2") ? "2" : null;
-        int a, b = -1;
+
+        long a, b;
         try {
             a = Integer.parseInt(history.get(0).getContentDisplay()) + 1;
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("2") ? "2" : null;
         }
-        while (!Primes.isPrime(a)) a++;
         try {
             b = Integer.parseInt(message.getContentDisplay());
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+
+        while (!Primes.isPrime(a)) a++;
+        if (a > Integer.MAX_VALUE) a = 2;
+
         return a == b ? String.valueOf(b) : null;
     }
 }

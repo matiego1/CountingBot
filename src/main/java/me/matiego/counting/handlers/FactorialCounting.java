@@ -21,7 +21,7 @@ public class FactorialCounting implements ChannelHandler {
     }
 
     /**
-     * Checks if the sent message is correct.
+     * Checks if sent message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -39,7 +39,6 @@ public class FactorialCounting implements ChannelHandler {
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }
-
         try {
             c = new BigInteger(message.getContentDisplay());
         } catch (NumberFormatException e) {

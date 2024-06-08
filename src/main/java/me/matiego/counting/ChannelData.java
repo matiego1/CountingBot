@@ -70,10 +70,11 @@ public class ChannelData {
         SPHENIC_COUNTING("U+26AA", new SphenicCounting()),
         //sequences
         FIBONACCI_SEQUENCE("U+1F69C", new FibonacciSequence()),
-        LUCAS_NUMBERS("U+1F471", new LucasNumbers()),
+        LUCAS_SEQUENCE("U+1F471", new LucasSequence()),
         //others
-        TRIANGULAR_NUMBERS("U+1F4D0", new TriangularNumbers()),
-        PALINDROMIC_NUMBERS("U+1FA9E", new PalindromicNumbers()),
+        TRIANGULAR_COUNTING("U+1F4D0", new TriangularCounting()),
+        PRONIC_COUNTING("U+1F4CF", new PronicCounting()),
+        PALINDROMIC_COUNTING("U+1FA9E", new PalindromicCounting()),
         FACTORIAL_COUNTING("U+2757", new FactorialCounting()),
         ALPHABET("U+1F18E", new Alphabet()),
         TAUTOLOGIES("U+2696", new Tautologies()),

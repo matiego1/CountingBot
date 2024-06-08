@@ -21,7 +21,7 @@ public class FibonacciSequence implements ChannelHandler {
     }
 
     /**
-     * Checks if the sent message is correct.
+     * Checks if sent message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -31,19 +31,20 @@ public class FibonacciSequence implements ChannelHandler {
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
         if (history.isEmpty()) return message.getContentDisplay().equals("1") ? "1" : null;
         if (history.size() == 1) return message.getContentDisplay().equals("1") ? "1" : null;
-        BigInteger a = null, b = null, c = new BigInteger("-1");
+
+        BigInteger a, b, c;
         try {
             a = new BigInteger(history.get(1).getContentDisplay());
-        } catch (NumberFormatException ignored) {}
-        try {
             b = new BigInteger(history.get(0).getContentDisplay());
-        } catch (NumberFormatException ignored) {}
-        if (a == null || b == null) {
+        } catch (NumberFormatException ignored) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }
         try {
             c = new BigInteger(message.getContentDisplay());
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+
         return a.add(b).equals(c) ? c.toString() : null;
     }
 }

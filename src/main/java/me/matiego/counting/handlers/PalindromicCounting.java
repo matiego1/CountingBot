@@ -8,9 +8,9 @@ import org.jetbrains.annotations.Nullable;
 import java.math.BigInteger;
 import java.util.List;
 
-public class PalindromicNumbers implements ChannelHandler {
+public class PalindromicCounting implements ChannelHandler {
     /**
-     * Checks if the sent message is correct.
+     * Checks if sent message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -19,7 +19,8 @@ public class PalindromicNumbers implements ChannelHandler {
     @Override
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
         if (history.isEmpty()) return message.getContentDisplay().equals("1") ? "1" : null;
-        BigInteger a, b = new BigInteger("-1");
+
+        BigInteger a, b;
         try {
             a = new BigInteger(history.get(0).getContentDisplay());
         } catch (NumberFormatException e) {
@@ -27,7 +28,10 @@ public class PalindromicNumbers implements ChannelHandler {
         }
         try {
             b = new BigInteger(message.getContentDisplay());
-        } catch (NumberFormatException ignored) {}
+        } catch (NumberFormatException ignored) {
+            return null;
+        }
+
         return getNext(a.toString()).equals(b.toString()) ? b.toString() : null;
     }
 

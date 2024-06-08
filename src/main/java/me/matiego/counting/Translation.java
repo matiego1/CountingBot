@@ -82,8 +82,9 @@ public enum Translation {
     COMMANDS__COUNTING__REMOVE__SUCCESS("The channel has been successfully closed!"),
     COMMANDS__COUNTING__REMOVE__NO_CHANGES("This channel has been already closed."),
     COMMANDS__COUNTING__REMOVE__FAILURE("An error occurred. Try again."),
-    COMMANDS__COUNTING__LIST__LIST("**__Open Counting Channels:__**"),
+    COMMANDS__COUNTING__LIST__LIST("**__Open Counting Channels (%s in total):__**"),
     COMMANDS__COUNTING__LIST__EMPTY_LIST("No counting channel has been opened yet. Open a new one with `/counting add`"),
+    COMMANDS__COUNTING__LIST__TOO_MUCH("... and %s more channels"),
     //dictionary
     COMMANDS__DICTIONARY__NAME("dictionary"),
     COMMANDS__DICTIONARY__DESCRIPTION("Manages dictionaries"),

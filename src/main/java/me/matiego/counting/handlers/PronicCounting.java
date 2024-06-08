@@ -7,23 +7,16 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class Counting implements ChannelHandler {
-    /**
-     * Checks if sent message is correct.
-     *
-     * @param message the message sent by the user.
-     * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
-     * @return {@code null} if the message is not correct, otherwise a new content of this message
-     */
+public class PronicCounting implements ChannelHandler {
     @Override
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
-        if (history.isEmpty()) return message.getContentDisplay().equals("1") ? "1" : null;
+        if (history.isEmpty()) return message.getContentDisplay().equals("2") ? "2" : null;
 
         long a, b;
         try {
             a = Long.parseLong(history.get(0).getContentDisplay());
         } catch (NumberFormatException e) {
-            return message.getContentDisplay().equals("1") ? "1" : null;
+            return message.getContentDisplay().equals("2") ? "2" : null;
         }
         try {
             b = Long.parseLong(message.getContentDisplay());
@@ -31,6 +24,11 @@ public class Counting implements ChannelHandler {
             return null;
         }
 
-        return a + 1 == b ? String.valueOf(b) : null;
+        return getNext(a) == b ? String.valueOf(b) : null;
+    }
+
+    private long getNext(long a) {
+        long n = (int) ((-1 + Math.sqrt(4 * a + 1)) / 2) + 1;
+        return n * (n + 1);
     }
 }

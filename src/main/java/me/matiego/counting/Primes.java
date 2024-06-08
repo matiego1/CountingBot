@@ -1,7 +1,5 @@
 package me.matiego.counting;
 
-import org.jetbrains.annotations.Range;
-
 import java.util.Arrays;
 
 public class Primes {
@@ -27,9 +25,9 @@ public class Primes {
      * @param number the number
      * @return {@code true} or {@code false}
      */
-    public static boolean isPrime(@Range(from = 2, to = Integer.MAX_VALUE) int number) {
-        if (number <= MAX_PRIME) return primes[number];
-        for (int i = 2; i * i < number; i++) {
+    public static boolean isPrime(long number) {
+        if (number <= MAX_PRIME) return primes[(int) number];
+        for (long i = 2; i * i < number; i++) {
             if (number % i == 0) return false;
         }
         return true;
@@ -40,9 +38,9 @@ public class Primes {
      * @param number the number
      * @return {@code true} or {@code false}
      */
-    public static boolean isSemiPrime(int number) {
+    public static boolean isSemiPrime(long number) {
         if (isPrime(number)) return false;
-        for (int i = 2; i * i <= number; i++) {
+        for (long i = 2; i * i <= number; i++) {
             if (number % i == 0 && isPrime(i) && isPrime(number / i)) return true;
         }
         return false;
@@ -53,9 +51,9 @@ public class Primes {
      * @param number the number
      * @return {@code true} or {@code false}
      */
-    public static boolean isSphenic(int number) {
+    public static boolean isSphenic(long number) {
         if (isPrime(number)) return false;
-        for (int i = 2; i * i <= number; i++) {
+        for (long i = 2; i * i <= number; i++) {
             if (number % i == 0 && isPrime(i) && isSemiPrimeDifferent(number / i, i)) return true;
         }
         return false;
@@ -69,9 +67,9 @@ public class Primes {
      * @param different the number from which the divisors must be different
      * @return {@code true} or {@code false}
      */
-    private static boolean isSemiPrimeDifferent(int number, int different) {
+    private static boolean isSemiPrimeDifferent(long number, long different) {
         if (isPrime(number)) return false;
-        for (int i = 2; i * i < number; i++) {
+        for (long i = 2; i * i < number; i++) {
             if (number % i == 0 && isPrime(i) && isPrime(number / i) && i != different && number / i != different) return true;
         }
         return false;
