@@ -93,6 +93,7 @@ public enum Translation {
     COMMANDS__DICTIONARY__TYPES__GERMAN("German"),
     COMMANDS__DICTIONARY__TYPES__SPANISH("Spanish"),
     COMMANDS__DICTIONARY__TYPES__TAUTOLOGIES("Tautologies"),
+    COMMANDS__DICTIONARY__TYPES__MINECRAFT_ITEM("Minecraft item"),
     COMMANDS__DICTIONARY__OPTIONS__ADD__NAME("add"),
     COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION("Adds a word to the dictionary"),
     COMMANDS__DICTIONARY__OPTIONS__REMOVE__NAME("remove"),
@@ -224,9 +225,13 @@ public enum Translation {
         this.def = def;
     }
 
+    public @NotNull String getConfigPath() {
+        return "translations." + name().replace("__", ".").toLowerCase();
+    }
+
     @Override
     public @NotNull String toString() {
-        return Main.getInstance().getConfig().getString("translations." + name().replace("__", ".").toLowerCase(), def).replace("\\n", "\n");
+        return Main.getInstance().getConfig().getString(getConfigPath(), def).replace("\\n", "\n");
     }
 
     /**

@@ -29,13 +29,17 @@ public class FibonacciSequence implements ChannelHandler {
      */
     @Override
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
-        if (history.isEmpty()) return message.getContentDisplay().equals("1") ? "1" : null;
+        if (history.isEmpty()) return message.getContentDisplay().equals("0") ? "0" : null;
         if (history.size() == 1) return message.getContentDisplay().equals("1") ? "1" : null;
 
         BigInteger a, b, c;
         try {
-            a = new BigInteger(history.get(1).getContentDisplay());
-            b = new BigInteger(history.get(0).getContentDisplay());
+            b = new BigInteger(history.get(1).getContentDisplay());
+        } catch (NumberFormatException ignored) {
+            return message.getContentDisplay().equals("0") ? "0" : null;
+        }
+        try {
+            a = new BigInteger(history.get(0).getContentDisplay());
         } catch (NumberFormatException ignored) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }

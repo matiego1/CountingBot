@@ -67,7 +67,7 @@ public final class Main extends JavaPlugin {
         //Check translations
         if (!getConfig().getBoolean("do-not-check-translations")) {
             for (Translation translation : Translation.values()) {
-                if (translation.toString().equals(translation.getDefault())) {
+                if (!getConfig().isSet(translation.getConfigPath())) {
                     Logs.warning("Translation for " + translation.name() + " is not set in the config file! (To disable this message set `do-not-check-translations` to `false`)");
                 }
             }
