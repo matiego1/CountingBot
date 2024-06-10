@@ -65,18 +65,13 @@ public final class Main extends JavaPlugin {
         saveDefaultConfig();
 
         //Check translations
-        if (!getConfig().getBoolean("do-not-check-translations")) {
-            for (Translation translation : Translation.values()) {
-                if (!getConfig().isSet(translation.getConfigPath())) {
-                    Logs.warning("Translation for " + translation.name() + " is not set in the config file! (To disable this message set `do-not-check-translations` to `false`)");
-                }
-            }
-        }
+        checkTranslations();
 
         //Add console command
         PluginCommand command = getCommand("counting");
         if (command != null) command.setExecutor((sender, cmd, label, args) -> {
             reloadConfig();
+            checkTranslations();
             sender.sendRichMessage("<green>Successfully reloaded config.");
             return true;
         });
@@ -156,6 +151,16 @@ public final class Main extends JavaPlugin {
         }
 
         Logs.quietInfo("Plugin enabled in " + (Utils.now() - time) + "ms.");
+    }
+
+    private void checkTranslations() {
+        if (!getConfig().getBoolean("do-not-check-translations")) {
+            for (Translation translation : Translation.values()) {
+                if (!getConfig().isSet(translation.getConfigPath())) {
+                    Logs.warning("Translation for " + translation.name() + " is not set in the config file! (To disable this message set `do-not-check-translations` to `false`)");
+                }
+            }
+        }
     }
 
     public void onDiscordBotReady() {

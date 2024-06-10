@@ -199,6 +199,8 @@ public enum Translation {
     //others
     TYPE__TRIANGULAR_COUNTING__NAME("Triangular numbers"),
     TYPE__TRIANGULAR_COUNTING__DESCRIPTION("Write next triangular numbers"),
+    TYPE__PRONIC_COUNTING__NAME("Pronic numbers"),
+    TYPE__PRONIC_COUNTING__DESCRIPTION("Write next pronic numbers"),
     TYPE__PALINDROMIC_COUNTING__NAME("Palindromic numbers"),
     TYPE__PALINDROMIC_COUNTING__DESCRIPTION("Write next palindromic numbers"),
     TYPE__FACTORIAL_COUNTING__NAME("Factorial counting"),

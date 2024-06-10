@@ -115,17 +115,18 @@ public class CountingCommand extends CommandHandler {
                         }
                     }
 
+                    final int maxSize = 35;
                     int totalSize = channels.size();
-                    if (totalSize > 40) {
-                        int more = totalSize - 40;
-                        channels = channels.subList(0, 40);
+                    if (totalSize > maxSize) {
+                        int more = totalSize - maxSize;
+                        channels = channels.subList(0, maxSize);
                         channels.add(Translation.COMMANDS__COUNTING__LIST__TOO_MUCH.getFormatted(more));
                     }
 
                     if (channels.isEmpty()) {
-                        hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__EMPTY_LIST.getFormatted(totalSize)).queue();
+                        hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__EMPTY_LIST.toString()).queue();
                     } else {
-                        hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__LIST + "\n" + String.join("\n", channels)).queue();
+                        hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__LIST.getFormatted(totalSize) + "\n" + String.join("\n", channels)).queue();
                     }
                 }
             }
