@@ -4,7 +4,10 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import me.matiego.counting.commands.*;
-import me.matiego.counting.utils.*;
+import me.matiego.counting.utils.Logs;
+import me.matiego.counting.utils.Pair;
+import me.matiego.counting.utils.Response;
+import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
@@ -74,11 +77,7 @@ public final class Main extends JavaPlugin {
             reloadConfig();
             checkTranslations();
             sender.sendRichMessage("<green>Successfully reloaded config.");
-
-            JDA jda = getJda();
-            if (jda == null) return true;
-            List<String> guilds = jda.getGuilds().stream().map(Guild::getName).toList();
-            sender.sendMessage("Guilds: " + String.join(" ", guilds));
+            sendGuildsMessage();
             return true;
         });
 
@@ -169,6 +168,15 @@ public final class Main extends JavaPlugin {
         }
     }
 
+    private void sendGuildsMessage() {
+        JDA jda = getJda();
+        if (jda == null) return;
+        List<String> guilds = jda.getGuilds().stream().map(Guild::getName).toList();
+        Logs.info("Bot's guilds: " + String.join(", ", guilds));
+
+    }
+
+
     public void onDiscordBotReady() {
         long time = Utils.now();
 
@@ -227,6 +235,8 @@ public final class Main extends JavaPlugin {
         );
 
         Logs.info("Checks performed in " + (Utils.now() - time) + "ms.");
+
+        sendGuildsMessage();
     }
 
     private boolean refreshWebhook(@NotNull ChannelData data) {
