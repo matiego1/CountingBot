@@ -8,6 +8,7 @@ import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
@@ -73,6 +74,11 @@ public final class Main extends JavaPlugin {
             reloadConfig();
             checkTranslations();
             sender.sendRichMessage("<green>Successfully reloaded config.");
+
+            JDA jda = getJda();
+            if (jda == null) return true;
+            List<String> guilds = jda.getGuilds().stream().map(Guild::getName).toList();
+            sender.sendMessage("Guilds: " + String.join(" ", guilds));
             return true;
         });
 
