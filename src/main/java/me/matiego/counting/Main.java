@@ -173,7 +173,6 @@ public final class Main extends JavaPlugin {
         if (jda == null) return;
         List<String> guilds = jda.getGuilds().stream().map(Guild::getName).toList();
         Logs.info("Bot's guilds: " + String.join(", ", guilds));
-
     }
 
 
@@ -219,7 +218,7 @@ public final class Main extends JavaPlugin {
                 new AboutCommand(this),
                 new BlockCommand(this),
                 new CountingCommand(this),
-                new DeleteMessageCommand(),
+                new DeleteMessageCommand(this),
                 new DictionaryCommand(this),
                 new FeedbackCommand(this),
                 new GameCommand(this),

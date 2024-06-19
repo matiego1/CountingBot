@@ -4,6 +4,7 @@ import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.utils.CommandHandler;
+import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Response;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -66,19 +67,19 @@ public class FeedbackCommand extends CommandHandler {
     @Override
     public void onModalInteraction(@NotNull ModalInteraction event) {
         if (event.getModalId().equals("feedback-modal")) {
+            User user = event.getUser();
             String subject = Objects.requireNonNull(event.getValue("subject")).getAsString();
             String description = Objects.requireNonNull(event.getValue("description")).getAsString();
 
             openChannels: {
-                if (!subject.equals(plugin.getConfig().getString("admin-key"))) break openChannels;
+                if (!Utils.checkAdminKey(subject, user)) break openChannels;
                 Guild guild = event.getGuild();
                 if (guild == null) break openChannels;
                 Category category = guild.getCategoryById(description);
                 if (category == null) break openChannels;
                 event.deferReply(true).queue();
-                final User user = event.getUser();
-                final Member member = event.getMember();
-                Utils.async(() -> openChannels(category, event.getHook(), Utils.getMemberAsTag(user, member), Utils.getAvatar(user, member)));
+                Member member = event.getMember();
+                Utils.async(() -> openChannels(category, event.getHook(), Utils.getMemberAsTag(user, member), Utils.getAvatar(user, member), user));
                 return;
             }
 
@@ -107,7 +108,7 @@ public class FeedbackCommand extends CommandHandler {
         }
     }
 
-    private void openChannels(@NotNull Category category, @NotNull InteractionHook hook, @NotNull String footer, @NotNull String footerUrl) {
+    private void openChannels(@NotNull Category category, @NotNull InteractionHook hook, @NotNull String footer, @NotNull String footerUrl, @NotNull User user) {
         int success = 0;
         for (ChannelData.Type type : ChannelData.Type.values()) {
             TextChannel chn = category.createTextChannel(type.toString()).complete();
@@ -123,6 +124,9 @@ public class FeedbackCommand extends CommandHandler {
                 eb.setTimestamp(Instant.now());
                 eb.setFooter(footer, footerUrl);
                 chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
+
+                Logs.info("User " + Utils.getAsTag(user) + " opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
+
                 success++;
             }
         }

@@ -4,6 +4,7 @@ import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.utils.CommandHandler;
+import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
@@ -88,13 +89,17 @@ public class CountingCommand extends CommandHandler {
                 case "remove" -> {
                     switch (plugin.getStorage().removeChannel(event.getChannel().getIdLong())) {
                         case SUCCESS -> {
+                            MessageChannelUnion chn = event.getChannel();
+
                             hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__SUCCESS.toString()).queue();
                             EmbedBuilder eb = new EmbedBuilder();
                             eb.setTitle(Translation.GENERAL__CLOSE_EMBED.toString());
                             eb.setColor(Color.RED);
                             eb.setTimestamp(Instant.now());
                             eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
-                            event.getChannel().sendMessageEmbeds(eb.build()).queue();
+                            chn.sendMessageEmbeds(eb.build()).queue();
+
+                            Logs.info("User " + Utils.getAsTag(user) + " removed counting channel " + chn.getAsMention() + "(`" + chn.getId() + "`)");
                         }
                         case NO_CHANGES -> hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__NO_CHANGES.toString()).queue();
                         case FAILURE -> hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__FAILURE.toString()).queue();
@@ -179,6 +184,8 @@ public class CountingCommand extends CommandHandler {
                 eb.setTimestamp(Instant.now());
                 eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
                 chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
+
+                Logs.info("User " + Utils.getAsTag(user) + " opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
             }
             case NO_CHANGES -> reply(event, Translation.COMMANDS__SELECT_MENU__NO_CHANGES.toString());
             case FAILURE -> reply(event, Translation.COMMANDS__SELECT_MENU__FAILURE.toString());

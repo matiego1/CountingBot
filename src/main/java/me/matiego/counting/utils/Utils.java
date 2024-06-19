@@ -310,4 +310,12 @@ public class Utils {
         //noinspection deprecation
         return user.getDiscriminator().equals("0000") ? user.getName() : user.getAsTag();
     }
+
+    public static boolean checkAdminKey(@NotNull String string, @NotNull User user) {
+        if (string.equals(Main.getInstance().getConfig().getString("admin-key"))) {
+            Logs.info("User " + getAsTag(user) + " successfully used admin key.");
+            return true;
+        }
+        return false;
+    }
 }

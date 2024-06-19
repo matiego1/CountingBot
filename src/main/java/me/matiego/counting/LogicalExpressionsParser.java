@@ -37,7 +37,7 @@ public class LogicalExpressionsParser {
     }
 
     private static boolean checkSubstitutions(@NotNull String expression, @NotNull String variables) throws IllegalArgumentException {
-        if (variables.isEmpty()) return calculateLogicalValue(simplify(expression));
+        if (variables.isEmpty()) return calculateLogicalValue(expression);
         return checkSubstitutions(expression.replace(variables.charAt(0), '0'), variables.substring(1))
                 && checkSubstitutions(expression.replace(variables.charAt(0), '1'), variables.substring(1));
     }

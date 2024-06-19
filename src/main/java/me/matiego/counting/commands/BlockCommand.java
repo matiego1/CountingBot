@@ -4,6 +4,7 @@ import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.utils.CommandHandler;
+import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
@@ -63,7 +64,7 @@ public class BlockCommand extends CommandHandler {
             if (chn == null) {
                 List<ChannelData> channels = plugin.getStorage().getChannels();
 
-                if (adminKey == null || !adminKey.equals(plugin.getConfig().getString("admin-key"))) {
+                if (adminKey == null || !Utils.checkAdminKey(adminKey, user)) {
                     channels = channels.stream()
                             .filter(data -> data.getGuildId() == guildId)
                             .toList();
@@ -74,6 +75,8 @@ public class BlockCommand extends CommandHandler {
                     if (channel.block(jda)) success++;
                 }
 
+                Logs.info("User " + Utils.getAsTag(user) + " blocked " + success + " counting channel(s) out of " + channels.size() + ".");
+
                 reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__BLOCK__MESSAGE.getFormatted(success, channels.size()));
                 return;
             }
@@ -83,6 +86,7 @@ public class BlockCommand extends CommandHandler {
                 return;
             }
             if (data.block(jda)) {
+                Logs.info("User " + Utils.getAsTag(user) + " blocked counting channel. (ID: `" + data.getChannelId() + "`; Guild ID: `" + data.getGuildId() + "`; Channel type: `" + data.getType() + "`)");
                 reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__BLOCK__SUCCESS.toString());
             } else {
                 reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__BLOCK__FAILURE.toString());

@@ -2,10 +2,13 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
-import me.matiego.counting.utils.FixedSizeMap;
 import me.matiego.counting.utils.CommandHandler;
+import me.matiego.counting.utils.FixedSizeMap;
+import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Message;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
@@ -21,7 +24,10 @@ import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import org.jetbrains.annotations.NotNull;
 
 public class DeleteMessageCommand extends CommandHandler {
-
+    public DeleteMessageCommand(@NotNull Main plugin) {
+        this.plugin = plugin;
+    }
+    private final Main plugin;
     private final FixedSizeMap<Long, Long> messages = new FixedSizeMap<>(1000);
 
     /**
@@ -45,7 +51,7 @@ public class DeleteMessageCommand extends CommandHandler {
             event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__NO_PERMISSION.toString()).setEphemeral(true).queue();
             return;
         }
-        if (Main.getInstance().getStorage().getChannel(union.getIdLong()) == null) {
+        if (plugin.getStorage().getChannel(union.getIdLong()) == null) {
             event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__NO_PERMISSION.toString()).setEphemeral(true).queue();
             return;
         }
@@ -64,6 +70,7 @@ public class DeleteMessageCommand extends CommandHandler {
     @Override
     public void onModalInteraction(@NotNull ModalInteraction event) {
         if (!event.getModalId().equals("delete-msg-modal")) return;
+        User user = event.getUser();
 
         ModalMapping mapping = event.getValue("admin-key");
         if (mapping == null) return;
@@ -72,12 +79,12 @@ public class DeleteMessageCommand extends CommandHandler {
             event.reply(Translation.GENERAL__INCORRECT_ADMIN_KEY.toString()).setEphemeral(true).queue();
             return;
         }
-        if (!Main.getInstance().getConfig().getString("admin-key", "null").equals(key)) {
+        if (!Utils.checkAdminKey(key, user)) {
             event.reply(Translation.GENERAL__INCORRECT_ADMIN_KEY.toString()).setEphemeral(true).queue();
             return;
         }
 
-        Long messageId = messages.remove(event.getUser().getIdLong());
+        Long messageId = messages.remove(user.getIdLong());
         if (messageId == null) {
             event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE.toString()).setEphemeral(true).queue();
             return;
@@ -94,6 +101,8 @@ public class DeleteMessageCommand extends CommandHandler {
                 message -> {
                     message.delete().queue();
                     event.getHook().sendMessage(Translation.COMMANDS__DELETE_MESSAGE__SUCCESS.toString()).queue();
+
+                    Logs.info(Utils.checkLength("User " + Utils.getAsTag(user) + " deleted `" + Utils.getAsTag(message.getAuthor()) + "`'s message in channel " + message.getChannel().getAsMention() + " (ID: `" + message.getChannelId() + "`). Message's content: ```\n" + message.getContentDisplay().replace("```", "\\`\\`\\`"), Message.MAX_CONTENT_LENGTH - 5) + "\n```");
                 },
                 failure -> event.getHook().sendMessage(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE.toString()).queue()
         );
