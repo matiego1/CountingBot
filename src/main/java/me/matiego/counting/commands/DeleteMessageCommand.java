@@ -102,7 +102,7 @@ public class DeleteMessageCommand extends CommandHandler {
                     message.delete().queue();
                     event.getHook().sendMessage(Translation.COMMANDS__DELETE_MESSAGE__SUCCESS.toString()).queue();
 
-                    Logs.info(Utils.checkLength("User " + Utils.getAsTag(user) + " deleted `" + Utils.getAsTag(message.getAuthor()) + "`'s message in channel " + message.getChannel().getAsMention() + " (ID: `" + message.getChannelId() + "`). Message's content: ```\n" + message.getContentDisplay().replace("```", "\\`\\`\\`"), Message.MAX_CONTENT_LENGTH - 5) + "\n```");
+                    Logs.info(Utils.checkLength(Utils.getAsTag(user) + " deleted `" + Utils.getAsTag(message.getAuthor()) + "`'s message in channel " + message.getChannel().getAsMention() + " (ID: `" + message.getChannelId() + "`). Message's content: ```\n" + message.getContentDisplay().replace("```", "\\`\\`\\`"), Message.MAX_CONTENT_LENGTH - 5) + "\n```");
                 },
                 failure -> event.getHook().sendMessage(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE.toString()).queue()
         );

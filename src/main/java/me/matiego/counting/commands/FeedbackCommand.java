@@ -125,7 +125,7 @@ public class FeedbackCommand extends CommandHandler {
                 eb.setFooter(footer, footerUrl);
                 chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
 
-                Logs.info("User " + Utils.getAsTag(user) + " opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
+                Logs.info(Utils.getAsTag(user) + " opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
 
                 success++;
             }

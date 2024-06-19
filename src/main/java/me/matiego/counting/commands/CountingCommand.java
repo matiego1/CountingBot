@@ -99,7 +99,7 @@ public class CountingCommand extends CommandHandler {
                             eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
                             chn.sendMessageEmbeds(eb.build()).queue();
 
-                            Logs.info("User " + Utils.getAsTag(user) + " removed counting channel " + chn.getAsMention() + "(`" + chn.getId() + "`)");
+                            Logs.info(Utils.getAsTag(user) + " removed counting channel " + chn.getAsMention() + "(`" + chn.getId() + "`)");
                         }
                         case NO_CHANGES -> hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__NO_CHANGES.toString()).queue();
                         case FAILURE -> hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__FAILURE.toString()).queue();
@@ -185,7 +185,7 @@ public class CountingCommand extends CommandHandler {
                 eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
                 chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
 
-                Logs.info("User " + Utils.getAsTag(user) + " opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
+                Logs.info(Utils.getAsTag(user) + " opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
             }
             case NO_CHANGES -> reply(event, Translation.COMMANDS__SELECT_MENU__NO_CHANGES.toString());
             case FAILURE -> reply(event, Translation.COMMANDS__SELECT_MENU__FAILURE.toString());

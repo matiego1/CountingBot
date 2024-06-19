@@ -119,7 +119,7 @@ public class DictionaryCommand extends CommandHandler {
                 case "add" -> {
                     if (plugin.getDictionary().addWordToDictionary(type, word)) {
                         reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__SUCCESS.getFormatted(Utils.now() - time));
-                        Logs.info("User " + Utils.getAsTag(user) + " added the word `" + word + "` to the `" + type + "` dictionary.");
+                        Logs.info(Utils.getAsTag(user) + " added the word `" + word + "` to the `" + type + "` dictionary.");
                     } else {
                         reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__FAILURE.toString());
                     }
@@ -127,26 +127,26 @@ public class DictionaryCommand extends CommandHandler {
                 case "remove" -> {
                     if (plugin.getDictionary().removeWordFromDictionary(type, event.getOption("word", "null", OptionMapping::getAsString))) {
                         reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__SUCCESS.getFormatted(Utils.now() - time));
-                        Logs.info("User " + Utils.getAsTag(user) + " removed the word `" + word + "` from the `" + type + "` dictionary.");
+                        Logs.info(Utils.getAsTag(user) + " removed the word `" + word + "` from the `" + type + "` dictionary.");
                     } else {
                         reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__FAILURE.toString());
                     }
                 }
                 case "load" -> {
                     File file = new File(plugin.getDataFolder() + File.separator + event.getOption("file", OptionMapping::getAsString));
-                    Logs.info("User " + Utils.getAsTag(user) + " started loading a new `" + type + "` dictionary from file `" + file + "`.");
+                    Logs.info(Utils.getAsTag(user) + " started loading a new `" + type + "` dictionary from file `" + file + "`.");
                     switch (plugin.getDictionary().loadDictionaryFromFile(file, type)) {
                         case SUCCESS -> {
                             reply(hook, user, event.getName(), 30 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(Utils.now() - time));
-                            Logs.info("User " + Utils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **Success**");
+                            Logs.info(Utils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **Success**");
                         }
                         case NO_CHANGES -> {
                             reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.getFormatted(Utils.now() - time));
-                            Logs.info("User " + Utils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **File does not exist**");
+                            Logs.info(Utils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **File does not exist**");
                         }
                         case FAILURE -> {
                             reply(hook, user, event.getName(), 15 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.getFormatted(Utils.now() - time));
-                            Logs.info("User " + Utils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **Failure**");
+                            Logs.info(Utils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **Failure**");
                         }
                     }
                 }

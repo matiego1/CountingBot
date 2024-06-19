@@ -313,7 +313,7 @@ public class Utils {
 
     public static boolean checkAdminKey(@NotNull String string, @NotNull User user) {
         if (string.equals(Main.getInstance().getConfig().getString("admin-key"))) {
-            Logs.info("User " + getAsTag(user) + " successfully used admin key.");
+            Logs.info(getAsTag(user) + " successfully used admin key.");
             return true;
         }
         return false;

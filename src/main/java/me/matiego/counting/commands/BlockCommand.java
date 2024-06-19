@@ -75,7 +75,7 @@ public class BlockCommand extends CommandHandler {
                     if (channel.block(jda)) success++;
                 }
 
-                Logs.info("User " + Utils.getAsTag(user) + " blocked " + success + " counting channel(s) out of " + channels.size() + ".");
+                Logs.info(Utils.getAsTag(user) + " blocked " + success + " counting channel(s) out of " + channels.size() + ".");
 
                 reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__BLOCK__MESSAGE.getFormatted(success, channels.size()));
                 return;
@@ -86,7 +86,7 @@ public class BlockCommand extends CommandHandler {
                 return;
             }
             if (data.block(jda)) {
-                Logs.info("User " + Utils.getAsTag(user) + " blocked counting channel. (ID: `" + data.getChannelId() + "`; Guild ID: `" + data.getGuildId() + "`; Channel type: `" + data.getType() + "`)");
+                Logs.info(Utils.getAsTag(user) + " blocked counting channel. (ID: `" + data.getChannelId() + "`; Guild ID: `" + data.getGuildId() + "`; Channel type: `" + data.getType() + "`)");
                 reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__BLOCK__SUCCESS.toString());
             } else {
                 reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__BLOCK__FAILURE.toString());
