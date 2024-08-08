@@ -17,7 +17,7 @@ public abstract class LastLetterHandler implements ChannelHandler {
 
 
     /**
-     * Checks if the sent message is correct.
+     * Checks if sent message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
