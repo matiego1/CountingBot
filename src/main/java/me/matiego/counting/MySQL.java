@@ -63,7 +63,7 @@ public class MySQL {
 
     /**
      * Creates the database tables.
-     * @return {@code true} if the tables creation was successful otherwise {@code false}
+     * @return {@code true} if tables creation was successful otherwise {@code false}
      */
     public boolean createTables() {
         try (Connection conn = getConnection()) {

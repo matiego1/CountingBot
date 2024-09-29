@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Counting implements ChannelHandler {
     /**
-     * Checks if sent message is correct.
+     * Checks if sent a message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -21,7 +21,7 @@ public class Counting implements ChannelHandler {
 
         long a, b;
         try {
-            a = Long.parseLong(history.get(0).getContentDisplay());
+            a = Long.parseLong(history.getFirst().getContentDisplay());
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }

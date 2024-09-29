@@ -10,7 +10,7 @@ import java.util.List;
 
 public class SphenicCounting implements ChannelHandler {
     /**
-     * Checks if sent message is correct.
+     * Checks if sent a message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -22,7 +22,7 @@ public class SphenicCounting implements ChannelHandler {
 
         long a, b;
         try {
-            a = Integer.parseInt(history.get(0).getContentDisplay()) + 1;
+            a = Integer.parseInt(history.getFirst().getContentDisplay()) + 1;
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("30") ? "30" : null;
         }

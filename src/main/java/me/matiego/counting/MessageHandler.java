@@ -6,12 +6,14 @@ import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -23,16 +25,17 @@ public class MessageHandler extends ListenerAdapter {
     }
 
     private final Main plugin;
-    private final FixedSizeMap<String, Pair<Integer, Long>> map = new FixedSizeMap<>(1000);
+    private final HashMap<String, Pair<Integer, Long>> cooldown = Utils.createLimitedSizeMap(1000);
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         Utils.async(() -> {
             long time = Utils.now();
 
-            if (!event.isFromType(ChannelType.TEXT)) return;
+            if (!event.isFromType(ChannelType.TEXT) && !event.isFromType(ChannelType.GUILD_PUBLIC_THREAD)) return;
 
-            ChannelData data = plugin.getStorage().getChannel(event.getChannel().getIdLong());
+            MessageChannelUnion chn = event.getChannel();
+            ChannelData data = plugin.getStorage().getChannel(chn.getIdLong());
             if (data == null) return;
 
             User user = event.getAuthor();
@@ -45,52 +48,64 @@ public class MessageHandler extends ListenerAdapter {
             }
 
             int minTime = plugin.getConfig().getInt("anti-spam.time"), maxCount = plugin.getConfig().getInt("anti-spam.count");
-            if (!check(user, event.getChannel().getIdLong(), time, minTime * 1000, maxCount)) {
+            if (checkCooldown(user, chn.getIdLong(), time, minTime * 1000, maxCount)) {
                 message.delete().queue();
-                Utils.sendPrivateMessage(user, Translation.GENERAL__DO_NOT_SPAM.getFormatted(maxCount, minTime));
+                DiscordUtils.sendPrivateMessage(user, Translation.GENERAL__DO_NOT_SPAM.getFormatted(maxCount, minTime));
                 return;
             }
 
             ChannelHandler handler = data.getHandler();
             int amount = handler.getAmountOfMessages();
-            List<Message> history = amount == 0 ? new ArrayList<>() : event.getChannel().getHistory().retrievePast(amount + 1).complete();
-            try {
-                history.remove(0);
-            } catch (IndexOutOfBoundsException ignored) {}
-            history = history.stream().filter(Message::isWebhookMessage).toList();
+            List<Message> history = amount == 0
+                    ? new ArrayList<>()
+                    : chn.getHistory().retrievePast(amount + 1).complete();
+            if (!history.isEmpty()) {
+                history.removeFirst();
+            }
 
             message.delete().queue();
 
-            String correctMsg = handler.check(message, history);
+            String correctMsg = handler.check(
+                    message,
+                    history.stream()
+                            .filter(Message::isWebhookMessage)
+                            .toList()
+            );
             if (correctMsg == null) return;
 
             Member member = event.getMember();
-            CountingMessageSendEvent countingMessageSendEvent = new CountingMessageSendEvent(data, user, Utils.getName(user, member), history.isEmpty() ? null : history.get(0).getIdLong());
+            CountingMessageSendEvent countingMessageSendEvent = new CountingMessageSendEvent(data, user, DiscordUtils.getName(user, member), history.isEmpty() ? null : history.getFirst().getIdLong());
             Bukkit.getPluginManager().callEvent(countingMessageSendEvent);
             if (countingMessageSendEvent.isCancelled()) return;
 
-            if (Utils.sendWebhook(data.getWebhookUrl(), Utils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg)) {
-                countingMessageSendEvent.getOnSuccess().run();
+            boolean success = switch (chn.getType()) {
+                case TEXT -> DiscordUtils.sendWebhook(data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg);
+                case GUILD_PUBLIC_THREAD -> DiscordUtils.sendWebhookToThread(chn.getIdLong(), data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg);
+                default -> false;
+            };
+
+            if (success) {
                 plugin.getUserRanking().add(user, event.getGuild().getIdLong());
+                countingMessageSendEvent.getOnSuccess().run();
             } else {
-                Utils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());
+                DiscordUtils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());
             }
 
             time = Utils.now() - time;
             if (time >= 1000) {
-                Logs.warning("The message verification time exceeded 1 second! (Time: " + time + "ms; Channel: " + event.getChannel().getName() + "; ID: " + event.getChannel().getId() + ")");
+                Logs.warning("The message verification time exceeded 1 second! (Time: " + time + "ms; Channel: " + chn.getName() + "; ID: " + event.getChannel().getId() + ")");
             }
         });
     }
 
-    public synchronized boolean check(@NotNull UserSnowflake user, long chn, long now, int minTime, int maxCount) {
+    public synchronized boolean checkCooldown(@NotNull UserSnowflake user, long chn, long now, int minTime, int maxCount) {
         String key = new Pair<>(user, chn).toString();
-        Pair<Integer, Long> last = map.getOrDefault(key, new Pair<>(0, now));
+        Pair<Integer, Long> last = cooldown.getOrDefault(key, new Pair<>(0, now));
         if (now - last.getSecond() > minTime) {
-            map.put(key, new Pair<>(0, now));
-            return true;
+            cooldown.put(key, new Pair<>(0, now));
+            return false;
         }
-        map.put(key, new Pair<>(last.getFirst() + 1, now));
-        return last.getFirst() + 1 <= maxCount;
+        cooldown.put(key, new Pair<>(last.getFirst() + 1, now));
+        return last.getFirst() + 1 > maxCount;
     }
 }

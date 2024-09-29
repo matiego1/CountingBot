@@ -4,7 +4,7 @@ import me.matiego.counting.Dictionary;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.utils.ChannelHandler;
-import me.matiego.counting.utils.Utils;
+import me.matiego.counting.utils.DiscordUtils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Material;
@@ -17,9 +17,9 @@ import java.util.List;
 
 public class MinecraftItem implements ChannelHandler {
     /**
-     * Returns the amount of messages retrieved from the channel history.
+     * Returns the number of messages retrieved from the channel history.
      *
-     * @return the amount of messages.
+     * @return the number of messages.
      */
     @Override
     public @Range(from = 0, to = 3) int getAmountOfMessages() {
@@ -27,7 +27,7 @@ public class MinecraftItem implements ChannelHandler {
     }
 
     /**
-     * Checks if sent message is correct.
+     * Checks if sent a message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -39,15 +39,15 @@ public class MinecraftItem implements ChannelHandler {
         String content = message.getContentDisplay().toLowerCase().replace("_", " ");
 
         if (doesItemNotExist(content)) {
-            Utils.sendPrivateMessage(user, Translation.HANDLERS__MINECRAFT_ITEM__ITEM_DOES_NOT_EXIST.toString());
+            DiscordUtils.sendPrivateMessage(user, Translation.HANDLERS__MINECRAFT_ITEM__ITEM_DOES_NOT_EXIST.toString());
             return null;
         }
 
         boolean success = false;
         switch (Main.getInstance().getDictionary().markWordAsUsed(Dictionary.Type.MINECRAFT_ITEM, message.getGuild().getIdLong(), content)) {
             case SUCCESS -> success = true;
-            case NO_CHANGES -> Utils.sendPrivateMessage(user, Translation.HANDLERS__MINECRAFT_ITEM__ALREADY_EXISTS.toString());
-            case FAILURE -> Utils.sendPrivateMessage(user, Translation.HANDLERS__MINECRAFT_ITEM__FAILURE.toString());
+            case NO_CHANGES -> DiscordUtils.sendPrivateMessage(user, Translation.HANDLERS__MINECRAFT_ITEM__ALREADY_EXISTS.toString());
+            case FAILURE -> DiscordUtils.sendPrivateMessage(user, Translation.HANDLERS__MINECRAFT_ITEM__FAILURE.toString());
         }
         return success ? content : null;
     }

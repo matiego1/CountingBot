@@ -18,7 +18,7 @@ public class Dictionary {
      * <b>Execution of this method may block the thread for a long time!</b>
      * @param file the file
      * @param type the type of the dictionary
-     * @return {@code Response.SUCCESS} if file was loaded successfully, {@code Response.NO_CHANGES} if the file does not exist, {@code Response.FAILURE} if an error occurred.
+     * @return {@code Response.SUCCESS} if a file was loaded successfully, {@code Response.NO_CHANGES} if the file does not exist, {@code Response.FAILURE} if an error occurred.
      */
     public @NotNull Response loadDictionaryFromFile(@NotNull File file, @NotNull Type type) {
         if (!type.isDictionarySupported()) return Response.FAILURE;

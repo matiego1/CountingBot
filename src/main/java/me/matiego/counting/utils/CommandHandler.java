@@ -54,16 +54,16 @@ public abstract class CommandHandler {
         Translation descriptionTranslation = getTranslation("COMMANDS__" + name + "__DESCRIPTION");
 
         return Commands.slash(name, descriptionTranslation == null ? name : descriptionTranslation.getDefault())
-                .setNameLocalizations(Utils.getAllLocalizations(nameTranslation == null ? name : nameTranslation.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(descriptionTranslation == null ? name : descriptionTranslation.toString()))
+                .setNameLocalizations(DiscordUtils.getAllLocalizations(nameTranslation == null ? name : nameTranslation.toString()))
+                .setDescriptionLocalizations(DiscordUtils.getAllLocalizations(descriptionTranslation == null ? name : descriptionTranslation.toString()))
                 .setGuildOnly(guildOnly)
                 .setDefaultPermissions(permissions.length == 0 ? DefaultMemberPermissions.ENABLED : DefaultMemberPermissions.enabledFor(permissions));
     }
 
     public static @NotNull SubcommandData createSubcommand(@NotNull String name, @NotNull Translation nameTranslation, @NotNull Translation descriptionTranslation, @NotNull OptionData... options) {
         return new SubcommandData(name, descriptionTranslation.getDefault())
-                .setNameLocalizations(Utils.getAllLocalizations(nameTranslation.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(descriptionTranslation.toString()))
+                .setNameLocalizations(DiscordUtils.getAllLocalizations(nameTranslation.toString()))
+                .setDescriptionLocalizations(DiscordUtils.getAllLocalizations(descriptionTranslation.toString()))
                 .addOptions(options);
     }
 
@@ -73,8 +73,8 @@ public abstract class CommandHandler {
 
     public static @NotNull OptionData createOption(@NotNull String name, @NotNull OptionType type, boolean required,  @NotNull Translation nameTranslation, @NotNull Translation descriptionTranslation) {
         return new OptionData(type, name, descriptionTranslation.getDefault(), required)
-                .setNameLocalizations(Utils.getAllLocalizations(nameTranslation.toString()))
-                .setDescriptionLocalizations(Utils.getAllLocalizations(descriptionTranslation.toString()));
+                .setNameLocalizations(DiscordUtils.getAllLocalizations(nameTranslation.toString()))
+                .setDescriptionLocalizations(DiscordUtils.getAllLocalizations(descriptionTranslation.toString()));
     }
 
     private static @Nullable Translation getTranslation(@NotNull String path) {

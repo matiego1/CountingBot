@@ -22,7 +22,7 @@ public class Logs {
     }
 
     /**
-     * Sends an info to the console and Discord logs channel.
+     * Sends info to the console and Discord logs channel.
      * @param message the message to send
      */
     public static void info(@NotNull String message) {
@@ -31,7 +31,7 @@ public class Logs {
     }
 
     /**
-     * Sends an info to the console and Discord logs channel. This method will block current thread until message is send to Discord.
+     * Sends info to the console and Discord logs channel. This method will block the current thread until a message is sent to Discord.
      * @param message the message to send
      */
     public static void infoWithBlock(@NotNull String message) {
@@ -68,7 +68,7 @@ public class Logs {
 
             EmbedBuilder eb = new EmbedBuilder();
             eb.setColor(Color.YELLOW);
-            eb.setDescription(Utils.checkLength(stringWriter.toString(), MessageEmbed.DESCRIPTION_MAX_LENGTH));
+            eb.setDescription(DiscordUtils.checkLength(stringWriter.toString(), MessageEmbed.DESCRIPTION_MAX_LENGTH));
             embed = eb.build();
         }
 
@@ -100,14 +100,13 @@ public class Logs {
 
             EmbedBuilder eb = new EmbedBuilder();
             eb.setColor(Color.RED);
-            eb.setDescription(Utils.checkLength(stringWriter.toString(), MessageEmbed.DESCRIPTION_MAX_LENGTH));
+            eb.setDescription(DiscordUtils.checkLength(stringWriter.toString(), MessageEmbed.DESCRIPTION_MAX_LENGTH));
             embed = eb.build();
         }
 
         discord("__ERROR__", message, embed);
     }
 
-    @SuppressWarnings("SameParameterValue")
     private static void discordWithBlock(@NotNull String type, @NotNull String message, @Nullable MessageEmbed embed) {
         MessageCreateAction action = getMessageCreateAction(type, message, embed);
         if (action == null) return;
@@ -123,7 +122,7 @@ public class Logs {
     private static @Nullable MessageCreateAction getMessageCreateAction(@NotNull String type, @NotNull String message, @Nullable MessageEmbed embed) {
         TextChannel chn = getConsoleChannel();
         if (chn == null) return null;
-        MessageCreateAction action = chn.sendMessage(Utils.checkLength("**[<t:" + (Utils.now() / 1000) + ":T> " + type + "]:** " + message, Message.MAX_CONTENT_LENGTH));
+        MessageCreateAction action = chn.sendMessage(DiscordUtils.checkLength("**[<t:" + (Utils.now() / 1000) + ":T> " + type + "]:** " + message, Message.MAX_CONTENT_LENGTH));
         if (embed != null) {
             action.setEmbeds(embed);
         }

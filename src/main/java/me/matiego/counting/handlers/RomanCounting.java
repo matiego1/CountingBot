@@ -44,7 +44,7 @@ public class RomanCounting implements ChannelHandler {
     private final Pattern ROMAN_NUMBER = Pattern.compile("M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})");
 
     /**
-     * Checks if sent message is correct.
+     * Checks if sent a message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -55,7 +55,7 @@ public class RomanCounting implements ChannelHandler {
         String content = message.getContentDisplay().toUpperCase();
         if (!ROMAN_NUMBER.matcher(content).matches()) return null;
         if (history.isEmpty()) return content.equals("I") ? "I" : null;
-        int a = romanToInt(history.get(0).getContentDisplay()), b = romanToInt(content);
+        int a = romanToInt(history.getFirst().getContentDisplay()), b = romanToInt(content);
         if (a <= 0 || b <= 0 || a >= 3999) return content.equals("I") ? "I" : null;
         return a + 1 == b ? content : null;
     }

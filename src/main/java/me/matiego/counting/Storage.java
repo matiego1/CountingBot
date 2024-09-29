@@ -18,16 +18,12 @@ import java.util.regex.Matcher;
  * Counting channels storage
  */
 public class Storage {
-
-    @SuppressWarnings("unused")
-    private Storage() throws IllegalAccessException {
-        throw new IllegalAccessException("Use Storage#load instead");
-    }
-
-    private Storage(@NotNull HashMap<Long, ChannelData> cache) {
+    private Storage(@NotNull Main plugin, @NotNull HashMap<Long, ChannelData> cache) {
+        this.plugin = plugin;
         this.cache = cache;
     }
 
+    private final Main plugin;
     private final HashMap<Long, ChannelData> cache;
 
     /**
@@ -37,7 +33,7 @@ public class Storage {
      */
     public synchronized @NotNull Response addChannel(@NotNull ChannelData data) {
         if (cache.containsKey(data.getChannelId())) return Response.NO_CHANGES;
-        try (Connection conn = Main.getInstance().getMySQLConnection();
+        try (Connection conn = plugin.getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_channels(chn, guild, type, url) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE chn = chn, guild = ?, type = ?, url = ?")) {
             stmt.setString(1, String.valueOf(data.getChannelId()));
             stmt.setString(2, String.valueOf(data.getGuildId()));
@@ -64,7 +60,7 @@ public class Storage {
      */
     public synchronized @NotNull Response removeChannel(long id) {
         if (!cache.containsKey(id)) return Response.NO_CHANGES;
-        try (Connection conn = Main.getInstance().getMySQLConnection();
+        try (Connection conn = plugin.getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("DELETE FROM counting_channels WHERE chn = ?;")) {
             stmt.setString(1, String.valueOf(id));
             stmt.execute();
@@ -97,8 +93,8 @@ public class Storage {
      * Loads counting channels from the database.
      * @return a new instance of this class with loaded channels.
      */
-    public static @Nullable Storage load() {
-        try (Connection conn = Main.getInstance().getMySQLConnection();
+    public static @Nullable Storage load(@NotNull Main plugin) {
+        try (Connection conn = plugin.getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("SELECT chn, guild, type, url FROM counting_channels")) {
             ResultSet result = stmt.executeQuery();
             HashMap<Long, ChannelData> cache = new HashMap<>();
@@ -121,7 +117,7 @@ public class Storage {
                     Logs.warning("An error occurred while loading the counting channels: " + e.getMessage());
                 }
             }
-            return new Storage(cache);
+            return new Storage(plugin, cache);
         } catch (SQLException e) {
             Logs.error("An error occurred while loading the storage", e);
         }

@@ -17,7 +17,7 @@ public abstract class LastLetterHandler implements ChannelHandler {
 
 
     /**
-     * Checks if sent message is correct.
+     * Checks if sent a message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -29,29 +29,29 @@ public abstract class LastLetterHandler implements ChannelHandler {
 
         String msgContent = message.getContentDisplay().toLowerCase();
         if (!history.isEmpty()) {
-            String lastContent = history.get(0).getContentDisplay().toLowerCase();
+            String lastContent = history.getFirst().getContentDisplay().toLowerCase();
             if (lastContent.isEmpty() || msgContent.isEmpty() || lastContent.charAt(lastContent.length() - 1) != msgContent.charAt(0)) {
-                Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__INCORRECT_START_CHAR.toString());
+                DiscordUtils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__INCORRECT_START_CHAR.toString());
                 return null;
             }
         }
 
         if (msgContent.length() <= 3) {
-            Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__TOO_SHORT.toString());
+            DiscordUtils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__TOO_SHORT.toString());
             return null;
         }
 
         List<Character> illegalEndCharacters = getIllegalEndCharacters();
         char lastChar = msgContent.charAt(msgContent.length() - 1);
         if (illegalEndCharacters.contains(lastChar)) {
-            Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__ILLEGAL_END_CHAR.getFormatted(String.join(", ", illegalEndCharacters.stream().map(String::valueOf).toList())));
+            DiscordUtils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__ILLEGAL_END_CHAR.getFormatted(String.join(", ", illegalEndCharacters.stream().map(String::valueOf).toList())));
             return null;
         }
 
         List<Character> alphabet = getAlphabet();
         for (int i = 0; i < msgContent.length(); i++) {
             if (!alphabet.contains(msgContent.charAt(i))) {
-                Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__ILLEGAL_CHAR.getFormatted(msgContent.charAt(i)));
+                DiscordUtils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__ILLEGAL_CHAR.getFormatted(msgContent.charAt(i)));
                 return null;
             }
         }
@@ -60,15 +60,15 @@ public abstract class LastLetterHandler implements ChannelHandler {
         Dictionary.Type type = getType();
 
         if (!dictionary.isWordInDictionary(type, msgContent)) {
-            Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__NOT_IN_DICTIONARY.toString());
+            DiscordUtils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__NOT_IN_DICTIONARY.toString());
             return null;
         }
 
         boolean success = false;
         switch (dictionary.markWordAsUsed(getType(), message.getGuild().getIdLong(), msgContent)) {
             case SUCCESS -> success = true;
-            case NO_CHANGES -> Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__INCORRECT_WORD.toString());
-            case FAILURE -> Utils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__FAILURE.toString());
+            case NO_CHANGES -> DiscordUtils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__INCORRECT_WORD.toString());
+            case FAILURE -> DiscordUtils.sendPrivateMessage(user, Translation.HANDLERS__LAST_LETTER__FAILURE.toString());
         }
         return success ? msgContent : null;
     }

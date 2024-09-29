@@ -4,16 +4,14 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import me.matiego.counting.commands.*;
-import me.matiego.counting.utils.Logs;
-import me.matiego.counting.utils.Pair;
-import me.matiego.counting.utils.Response;
-import me.matiego.counting.utils.Utils;
+import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Webhook;
-import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
+import net.dv8tion.jda.api.entities.channel.attribute.IWebhookContainer;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -33,7 +31,6 @@ import java.util.concurrent.*;
  * The main class.
  */
 public final class Main extends JavaPlugin {
-
     public Main() {
         instance = this;
     }
@@ -99,7 +96,7 @@ public final class Main extends JavaPlugin {
 
         //Load storages
         Logs.info("Loading saved channels...");
-        storage = Storage.load();
+        storage = Storage.load(this);
         if (storage == null) {
             Bukkit.getPluginManager().disablePlugin(this);
             return;
@@ -127,19 +124,19 @@ public final class Main extends JavaPlugin {
                 worker.setName("Counting - JDA Callback " + worker.getPoolIndex());
                 return worker;
             }, null, true);
-            jda = JDABuilder.create(Utils.getIntents())
+            jda = JDABuilder.create(DiscordUtils.getIntents())
                     .setToken(getConfig().getString("bot-token", ""))
                     .setMemberCachePolicy(MemberCachePolicy.NONE)
                     .setCallbackPool(callbackThreadPool, false)
                     .setGatewayPool(Executors.newSingleThreadScheduledExecutor(new ThreadFactoryBuilder().setNameFormat("Counting - JDA Gateway").build()), true)
                     .setRateLimitScheduler(new ScheduledThreadPoolExecutor(5, new ThreadFactoryBuilder().setNameFormat("Counting - JDA Rate Limit").build()), true)
                     .setWebsocketFactory(new WebSocketFactory().setDualStackMode(DualStackMode.IPV4_ONLY))
-                    .setHttpClient(Utils.getHttpClient())
+                    .setHttpClient(DiscordUtils.getHttpClient())
                     .setAutoReconnect(true)
                     .setBulkDeleteSplittingEnabled(false)
                     .setEnableShutdownHook(false)
                     .setContextEnabled(false)
-                    .disableCache(Utils.getDisabledCacheFlag())
+                    .disableCache(DiscordUtils.getDisabledCacheFlag())
                     .setActivity(Activity.customStatus(Translation.GENERAL__STATUS.toString()))
                     .addEventListeners(new ListenerAdapter() {
                         @Override
@@ -172,7 +169,7 @@ public final class Main extends JavaPlugin {
         JDA jda = getJda();
         if (jda == null) return;
         List<String> guilds = jda.getGuilds().stream().map(Guild::getName).toList();
-        Logs.info("Bot's guilds: " + String.join(", ", guilds));
+        Logs.info("Bot's guilds: " + String.join(", ", guilds) + " (" + guilds.size() + ")");
     }
 
 
@@ -184,7 +181,7 @@ public final class Main extends JavaPlugin {
 
         //Check permissions
         jda.getGuilds().forEach(guild -> {
-            if (!guild.getSelfMember().hasPermission(Utils.getRequiredPermissions())) {
+            if (!guild.getSelfMember().hasPermission(DiscordUtils.getRequiredPermissions())) {
                 Logs.warning("The Discord bot does not have all the required permissions in the " + guild.getName() + " guild. Add the bot to it again.");
             }
         });
@@ -193,18 +190,18 @@ public final class Main extends JavaPlugin {
         List<ChannelData> channels = getStorage().getChannels();
         int removed = (int) channels.stream()
                 .map(ChannelData::getChannelId)
-                .filter(id -> jda.getTextChannelById(id) == null)
+                .filter(id -> jda.getTextChannelById(id) == null && jda.getThreadChannelById(id) == null)
                 .map(id -> getStorage().removeChannel(id))
                 .filter(response -> response == Response.SUCCESS)
                 .count();
         if (removed > 0) Logs.info("Successfully removed " + removed + " unknown counting channel(s).");
 
         //Check webhooks
-        List<Pair<CompletableFuture<Webhook>, ChannelData>> futures1 = channels.stream()
+        List<Pair<CompletableFuture<Webhook>, ChannelData>> futures = channels.stream()
                 .map(data -> new Pair<>(jda.retrieveWebhookById(data.getWebhookId()).submit(), data))
                 .toList();
         int refreshedWebhooks = 0;
-        for (Pair<CompletableFuture<Webhook>, ChannelData> future : futures1) {
+        for (Pair<CompletableFuture<Webhook>, ChannelData> future : futures) {
             try {
                 future.getFirst().get();
             } catch (Exception e) {
@@ -242,13 +239,19 @@ public final class Main extends JavaPlugin {
         long id = data.getChannelId();
         if (getStorage().removeChannel(id) == Response.FAILURE) return false;
 
-        TextChannel chn = jda.getTextChannelById(id);
-        if (chn == null) return false;
-        List<Webhook> webhooks = chn.retrieveWebhooks().complete();
-        Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
+        IWebhookContainer webhookChannel = jda.getTextChannelById(id);
+
+        if (webhookChannel == null) {
+            ThreadChannel chn = jda.getThreadChannelById(id);
+            if (chn == null) return false;
+            webhookChannel = chn.getParentChannel().asForumChannel();
+        }
+
+        List<Webhook> webhooks = webhookChannel.retrieveWebhooks().complete();
+        Webhook webhook = webhooks.isEmpty() ? webhookChannel.createWebhook("Counting bot").complete() : webhooks.getFirst();
 
         if (getStorage().addChannel(new ChannelData(id, data.getGuildId(), data.getType(), webhook)) != Response.FAILURE) return true;
-        Logs.warning("An error occurred while refreshing an unknown webhook. The counting channel has been removed.");
+        Logs.warning("An error occurred while refreshing an unknown webhook. The counting channel will be removed.");
         getStorage().removeChannel(id);
         return false;
     }

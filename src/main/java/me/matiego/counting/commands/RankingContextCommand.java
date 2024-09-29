@@ -4,7 +4,7 @@ import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.UserRanking;
 import me.matiego.counting.utils.CommandHandler;
-import me.matiego.counting.utils.Utils;
+import me.matiego.counting.utils.DiscordUtils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
@@ -30,7 +30,7 @@ public class RankingContextCommand extends CommandHandler {
     @Override
     public @NotNull CommandData getCommand() {
         return Commands.user("get number of sent messages")
-                .setNameLocalizations(Utils.getAllLocalizations(Translation.COMMANDS__RANKING_CONTEXT__NAME.toString()))
+                .setNameLocalizations(DiscordUtils.getAllLocalizations(Translation.COMMANDS__RANKING_CONTEXT__NAME.toString()))
                 .setGuildOnly(true);
     }
 
@@ -50,7 +50,7 @@ public class RankingContextCommand extends CommandHandler {
         }
         EmbedBuilder eb = new EmbedBuilder();
         eb.setTimestamp(Instant.now());
-        eb.setFooter(Utils.getMemberAsTag(user, event.getMember()), Utils.getAvatar(user, event.getMember()));
+        eb.setFooter(DiscordUtils.getMemberAsTag(user, event.getMember()), DiscordUtils.getAvatar(user, event.getMember()));
         eb.setColor(Color.YELLOW);
         eb.setDescription(Translation.COMMANDS__RANKING_CONTEXT__MESSAGE.getFormatted(target.getAsMention(), data.getScore(), data.getRank()));
         hook.sendMessageEmbeds(eb.build())

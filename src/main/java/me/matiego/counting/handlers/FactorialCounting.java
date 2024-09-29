@@ -11,9 +11,9 @@ import java.util.List;
 
 public class FactorialCounting implements ChannelHandler {
     /**
-     * Returns the amount of messages retrieved from the channel history.
+     * Returns the number of messages retrieved from the channel history.
      *
-     * @return the amount of messages.
+     * @return the number of messages.
      */
     @Override
     public @Range(from = 0, to = 3) int getAmountOfMessages() {
@@ -21,7 +21,7 @@ public class FactorialCounting implements ChannelHandler {
     }
 
     /**
-     * Checks if sent message is correct.
+     * Checks if sent a message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -35,7 +35,7 @@ public class FactorialCounting implements ChannelHandler {
         BigInteger a, b, c;
         try {
             a = new BigInteger(history.get(1).getContentDisplay());
-            b = new BigInteger(history.get(0).getContentDisplay());
+            b = new BigInteger(history.getFirst().getContentDisplay());
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }

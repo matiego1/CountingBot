@@ -36,6 +36,6 @@ public class PingCommand extends CommandHandler {
                 .flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", Utils.now() - time))
                 .queue();
 
-        plugin.getCommandHandler().putSlowdown(event.getUser(), event.getName(), 2 * Utils.SECOND);
+        plugin.getCommandHandler().putCooldown(event.getUser(), event.getName(), 2 * Utils.SECOND);
     }
 }

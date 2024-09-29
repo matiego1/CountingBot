@@ -1,5 +1,7 @@
 package me.matiego.counting.utils;
 
+import java.util.Objects;
+
 @SuppressWarnings("unused")
 public class Pair<F, S> {
 
@@ -33,9 +35,14 @@ public class Pair<F, S> {
     }
 
     @Override
-    public boolean equals(Object other) {
-        if (other == this) return true;
-        if (!(other instanceof Pair<?, ?> pair)) return false;
-        return getFirst().equals(pair.getFirst()) && getSecond().equals(pair.getSecond());
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Pair<?, ?> pair)) return false;
+        return Objects.equals(F, pair.F) && Objects.equals(S, pair.S);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(F, S);
     }
 }

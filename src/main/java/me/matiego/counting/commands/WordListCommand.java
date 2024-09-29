@@ -4,6 +4,7 @@ import me.matiego.counting.Dictionary;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.utils.CommandHandler;
+import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.Permission;
@@ -105,7 +106,7 @@ public class WordListCommand extends CommandHandler {
                     switch (dictionary.markWordAsUsed(type, guildId, word)) {
                         case SUCCESS -> {
                             reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__LIST__ADD__SUCCESS.getFormatted(Utils.now() - time));
-                            Logs.info(Utils.getAsTag(user) + " added the word `" + word + "` to the  `" + type + "` list of used world.");
+                            Logs.info(DiscordUtils.getAsTag(user) + " added the word `" + word + "` to the  `" + type + "` list of used world.");
                         }
                         case NO_CHANGES -> reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__LIST__ADD__ALREADY_USED.toString());
                         case FAILURE -> reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__LIST__ADD__FAILURE.toString());
@@ -114,7 +115,7 @@ public class WordListCommand extends CommandHandler {
                 case "remove" -> {
                     if (plugin.getDictionary().unmarkWordAsUsed(type, guildId, word)) {
                         reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__LIST__REMOVE__SUCCESS.getFormatted(Utils.now() - time));
-                        Logs.info(Utils.getAsTag(user) + " removed the word `" + word + "` from the  `" + type + "` list of used world.");
+                        Logs.info(DiscordUtils.getAsTag(user) + " removed the word `" + word + "` from the  `" + type + "` list of used world.");
                     } else {
                         reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__LIST__REMOVE__FAILURE.toString());
                     }
@@ -125,6 +126,6 @@ public class WordListCommand extends CommandHandler {
 
     private void reply(@NotNull InteractionHook hook, @NotNull User user, @NotNull String command, long time, @NotNull String message) {
         hook.sendMessage(message).queue();
-        plugin.getCommandHandler().putSlowdown(user, command, time);
+        plugin.getCommandHandler().putCooldown(user, command, time);
     }
 }

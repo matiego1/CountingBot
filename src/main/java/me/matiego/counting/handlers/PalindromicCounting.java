@@ -10,7 +10,7 @@ import java.util.List;
 
 public class PalindromicCounting implements ChannelHandler {
     /**
-     * Checks if sent message is correct.
+     * Checks if sent a message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -22,7 +22,7 @@ public class PalindromicCounting implements ChannelHandler {
 
         BigInteger a, b;
         try {
-            a = new BigInteger(history.get(0).getContentDisplay());
+            a = new BigInteger(history.getFirst().getContentDisplay());
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }

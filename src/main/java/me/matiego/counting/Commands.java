@@ -38,7 +38,7 @@ public class Commands extends ListenerAdapter {
     }
 
 
-    private final FixedSizeMap<String, Long> cooldown = new FixedSizeMap<>(1000);
+    private final HashMap<String, Long> cooldown = Utils.createLimitedSizeMap(1000);
     private final HashMap<String, CommandHandler> commands = new HashMap<>();
 
     @Override
@@ -46,10 +46,10 @@ public class Commands extends ListenerAdapter {
         User user = event.getUser();
         String command = event.getName();
 
-        Logs.info(Utils.getAsTag(user) + " [" + user.getId() + "]: /" + command);
+        Logs.info(DiscordUtils.getAsTag(user) + " [" + user.getId() + "]: /" + command);
 
         //check permissions
-        if (!Utils.hasRequiredPermissions(event.getChannel())) {
+        if (!DiscordUtils.hasRequiredPermissions(event.getChannel())) {
             event.reply(Translation.GENERAL__NO_PERMISSION.toString()).setEphemeral(true).queue();
             return;
         }
@@ -138,7 +138,7 @@ public class Commands extends ListenerAdapter {
         event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
     }
 
-    public synchronized void putSlowdown(@NotNull UserSnowflake user, @NotNull String command, long time) {
+    public synchronized void putCooldown(@NotNull UserSnowflake user, @NotNull String command, long time) {
         cooldown.put(new Pair<>(user.getId(), command).toString(), Utils.now() + time);
     }
 

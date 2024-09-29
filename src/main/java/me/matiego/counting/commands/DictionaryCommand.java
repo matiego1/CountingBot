@@ -4,6 +4,7 @@ import me.matiego.counting.Dictionary;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
 import me.matiego.counting.utils.CommandHandler;
+import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.Permission;
@@ -101,7 +102,7 @@ public class DictionaryCommand extends CommandHandler {
         User user = event.getUser();
 
 
-        if (!Utils.checkAdminKey(event.getOption("admin-key", "", OptionMapping::getAsString), user)) {
+        if (!DiscordUtils.checkAdminKey(event.getOption("admin-key", "", OptionMapping::getAsString), user)) {
             reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.GENERAL__INCORRECT_ADMIN_KEY.toString());
             return;
         }
@@ -119,7 +120,7 @@ public class DictionaryCommand extends CommandHandler {
                 case "add" -> {
                     if (plugin.getDictionary().addWordToDictionary(type, word)) {
                         reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__SUCCESS.getFormatted(Utils.now() - time));
-                        Logs.info(Utils.getAsTag(user) + " added the word `" + word + "` to the `" + type + "` dictionary.");
+                        Logs.info(DiscordUtils.getAsTag(user) + " added the word `" + word + "` to the `" + type + "` dictionary.");
                     } else {
                         reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__FAILURE.toString());
                     }
@@ -127,26 +128,26 @@ public class DictionaryCommand extends CommandHandler {
                 case "remove" -> {
                     if (plugin.getDictionary().removeWordFromDictionary(type, event.getOption("word", "null", OptionMapping::getAsString))) {
                         reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__SUCCESS.getFormatted(Utils.now() - time));
-                        Logs.info(Utils.getAsTag(user) + " removed the word `" + word + "` from the `" + type + "` dictionary.");
+                        Logs.info(DiscordUtils.getAsTag(user) + " removed the word `" + word + "` from the `" + type + "` dictionary.");
                     } else {
                         reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__FAILURE.toString());
                     }
                 }
                 case "load" -> {
                     File file = new File(plugin.getDataFolder() + File.separator + event.getOption("file", OptionMapping::getAsString));
-                    Logs.info(Utils.getAsTag(user) + " started loading a new `" + type + "` dictionary from file `" + file + "`.");
+                    Logs.info(DiscordUtils.getAsTag(user) + " started loading a new `" + type + "` dictionary from file `" + file + "`.");
                     switch (plugin.getDictionary().loadDictionaryFromFile(file, type)) {
                         case SUCCESS -> {
                             reply(hook, user, event.getName(), 30 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(Utils.now() - time));
-                            Logs.info(Utils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **Success**");
+                            Logs.info(DiscordUtils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **Success**");
                         }
                         case NO_CHANGES -> {
                             reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.getFormatted(Utils.now() - time));
-                            Logs.info(Utils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **File does not exist**");
+                            Logs.info(DiscordUtils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **File does not exist**");
                         }
                         case FAILURE -> {
                             reply(hook, user, event.getName(), 15 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.getFormatted(Utils.now() - time));
-                            Logs.info(Utils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **Failure**");
+                            Logs.info(DiscordUtils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **Failure**");
                         }
                     }
                 }
@@ -156,6 +157,6 @@ public class DictionaryCommand extends CommandHandler {
 
     private void reply(@NotNull InteractionHook hook, @NotNull User user, @NotNull String command, long time, @NotNull String message) {
         hook.sendMessage(message).queue();
-        plugin.getCommandHandler().putSlowdown(user, command, time);
+        plugin.getCommandHandler().putCooldown(user, command, time);
     }
 }

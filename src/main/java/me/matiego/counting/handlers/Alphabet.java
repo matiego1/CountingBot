@@ -9,7 +9,7 @@ import java.util.List;
 
 public class Alphabet implements ChannelHandler {
     /**
-     * Checks if sent message is correct.
+     * Checks if sent a message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -20,7 +20,7 @@ public class Alphabet implements ChannelHandler {
         String b = message.getContentDisplay().toUpperCase();
         if (b.length() != 1) return null;
         if (history.isEmpty()) return b.equals("A") ? b : null;
-        String a = history.get(0).getContentDisplay().toUpperCase();
+        String a = history.getFirst().getContentDisplay().toUpperCase();
         if (a.length() != 1) return null;
         int aChar = a.charAt(0);
         if (aChar < (int) 'A' || aChar > (int) 'Z') return null;

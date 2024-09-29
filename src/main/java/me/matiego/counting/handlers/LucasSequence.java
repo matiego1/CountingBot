@@ -11,9 +11,9 @@ import java.util.List;
 
 public class LucasSequence implements ChannelHandler {
     /**
-     * Returns the amount of messages retrieved from the channel history.
+     * Returns the number of messages retrieved from the channel history.
      *
-     * @return the amount of messages.
+     * @return the number of messages.
      */
     @Override
     public @Range(from = 0, to = 3) int getAmountOfMessages() {
@@ -21,7 +21,7 @@ public class LucasSequence implements ChannelHandler {
     }
 
     /**
-     * Checks if sent message is correct.
+     * Checks if sent a message is correct.
      *
      * @param message the message sent by the user.
      * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
@@ -39,7 +39,7 @@ public class LucasSequence implements ChannelHandler {
             return message.getContentDisplay().equals("2") ? "2" : null;
         }
         try {
-            a = new BigInteger(history.get(0).getContentDisplay());
+            a = new BigInteger(history.getFirst().getContentDisplay());
         } catch (NumberFormatException ignored) {
             return message.getContentDisplay().equals("1") ? "1" : null;
         }

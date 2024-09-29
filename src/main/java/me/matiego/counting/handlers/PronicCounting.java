@@ -14,7 +14,7 @@ public class PronicCounting implements ChannelHandler {
 
         long a, b;
         try {
-            a = Long.parseLong(history.get(0).getContentDisplay());
+            a = Long.parseLong(history.getFirst().getContentDisplay());
         } catch (NumberFormatException e) {
             return message.getContentDisplay().equals("2") ? "2" : null;
         }

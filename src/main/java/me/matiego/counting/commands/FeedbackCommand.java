@@ -3,10 +3,7 @@ package me.matiego.counting.commands;
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import me.matiego.counting.Translation;
-import me.matiego.counting.utils.CommandHandler;
-import me.matiego.counting.utils.Logs;
-import me.matiego.counting.utils.Response;
-import me.matiego.counting.utils.Utils;
+import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
@@ -72,14 +69,14 @@ public class FeedbackCommand extends CommandHandler {
             String description = Objects.requireNonNull(event.getValue("description")).getAsString();
 
             openChannels: {
-                if (!Utils.checkAdminKey(subject, user)) break openChannels;
+                if (!DiscordUtils.checkAdminKey(subject, user)) break openChannels;
                 Guild guild = event.getGuild();
                 if (guild == null) break openChannels;
                 Category category = guild.getCategoryById(description);
                 if (category == null) break openChannels;
                 event.deferReply(true).queue();
                 Member member = event.getMember();
-                Utils.async(() -> openChannels(category, event.getHook(), Utils.getMemberAsTag(user, member), Utils.getAvatar(user, member), user));
+                Utils.async(() -> openChannels(category, event.getHook(), DiscordUtils.getMemberAsTag(user, member), DiscordUtils.getAvatar(user, member), user));
                 return;
             }
 
@@ -88,7 +85,8 @@ public class FeedbackCommand extends CommandHandler {
             eb.setDescription(description);
             eb.setTimestamp(Instant.now());
             eb.setColor(Color.BLUE);
-            eb.setFooter(Utils.getAsTag(event.getUser()));
+            eb.setAuthor(DiscordUtils.getAsTag(user), null, user.getEffectiveAvatarUrl());
+            eb.setFooter("Received at", event.getJDA().getSelfUser().getEffectiveAvatarUrl());
 
             JDA jda = plugin.getJda();
             if (jda == null) {
@@ -104,7 +102,7 @@ public class FeedbackCommand extends CommandHandler {
                 event.reply(Translation.COMMANDS__FEEDBACK__FAILURE.toString()).setEphemeral(true).queue();
             }
 
-            plugin.getCommandHandler().putSlowdown(event.getUser(), "feedback", 15 * Utils.SECOND);
+            plugin.getCommandHandler().putCooldown(user, "feedback", 15 * Utils.SECOND);
         }
     }
 
@@ -114,7 +112,7 @@ public class FeedbackCommand extends CommandHandler {
             TextChannel chn = category.createTextChannel(type.toString()).complete();
 
             List<Webhook> webhooks = chn.retrieveWebhooks().complete();
-            Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.get(0);
+            Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.getFirst();
 
             if (plugin.getStorage().addChannel(new ChannelData(chn.getIdLong(), chn.getGuild().getIdLong(), type, webhook)) == Response.SUCCESS) {
                 EmbedBuilder eb = new EmbedBuilder();
@@ -125,7 +123,7 @@ public class FeedbackCommand extends CommandHandler {
                 eb.setFooter(footer, footerUrl);
                 chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
 
-                Logs.info(Utils.getAsTag(user) + " opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
+                Logs.info(DiscordUtils.getAsTag(user) + " opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
 
                 success++;
             }

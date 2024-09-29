@@ -95,7 +95,7 @@
             <version>0.8.4</version>
             <scope>compile</scope>
         </dependency>
-        <!--DNS for JdaBuilderUtils class-->
+        <!--DNS for Utils class-->
         <dependency>
             <groupId>org.minidns</groupId>
             <artifactId>minidns-hla</artifactId>

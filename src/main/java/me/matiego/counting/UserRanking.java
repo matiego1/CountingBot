@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserRanking {
-
     public @NotNull Response add(@NotNull UserSnowflake user, long guild) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_user_ranking(id, guild, score) VALUES(?, ?, 1) ON DUPLICATE KEY UPDATE id = id, guild = guild, score = score + 1")) {
@@ -29,6 +28,7 @@ public class UserRanking {
         return Response.FAILURE;
     }
 
+    // TODO: add implementation
     public @NotNull Response remove(@NotNull UserSnowflake user, long guild) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("UPDATE counting_user_ranking SET score = score - 1 WHERE id = ? AND guild = ? AND score > 0")) {
