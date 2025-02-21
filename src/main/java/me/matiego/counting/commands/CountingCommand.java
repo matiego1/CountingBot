@@ -188,7 +188,8 @@ public class CountingCommand extends CommandHandler {
 
         ChannelAction<ForumChannel> action;
         if (chn instanceof Category category) {
-            action = category.createForumChannel("Counting");
+            action = category.createForumChannel("Counting")
+                    .syncPermissionOverrides();
         } else {
             action = guild.createForumChannel("Counting");
         }
@@ -197,9 +198,11 @@ public class CountingCommand extends CommandHandler {
                 .setDefaultLayout(ForumChannel.Layout.LIST_VIEW)
                 .setDefaultSortOrder(IPostContainer.SortOrder.CREATION_TIME)
                 .setDefaultReaction(null)
-                .addPermissionOverride(guild.getPublicRole(), allow, deny)
                 .queue(
-                        forum -> Utils.async(() -> openForumChannels(hook, forum, event.getUser(), event.getMember())),
+                        forum -> {
+                            forum.upsertPermissionOverride(forum.getGuild().getPublicRole()).grant(allow).deny(deny).queue();
+                            Utils.async(() -> openForumChannels(hook, forum, event.getUser(), event.getMember()));
+                        },
                         failure -> hook.sendMessage("Failed to create the forum channel: `%s`. Is the community enabled in this guild?".formatted(failure.getMessage())).queue()
                 );
 
