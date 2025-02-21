@@ -9,6 +9,7 @@ import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
@@ -29,7 +30,7 @@ public class RankingContextCommand extends CommandHandler {
     @Override
     public @NotNull CommandData getCommand() {
         return Commands.user("ranking")
-                .setGuildOnly(true);
+                .setContexts(InteractionContextType.GUILD);
     }
 
     @Override
@@ -69,7 +70,12 @@ public class RankingContextCommand extends CommandHandler {
         event.deferReply(true).queue();
         event.editButton(event.getButton().asDisabled()).queue();
 
-        if (instance.getStorage().getChannel(chn.getIdLong()) == null && chn.canTalk()) {
+        if (instance.getStorage().getChannel(chn.getIdLong()) != null) {
+            event.getHook().sendMessage("Nie możesz pokazać tej wiadomości wszystkim na kanale do liczenia.").queue();
+            return;
+        }
+
+        if (chn.canTalk()) {
             chn.sendMessage(message.getContentDisplay()).setEmbeds(message.getEmbeds()).queue();
             event.getHook().sendMessage("Sukces.").queue();
         } else {

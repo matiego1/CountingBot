@@ -124,7 +124,7 @@ public class CountingCommand extends CommandHandler {
                 hook.sendMessage("The counting channel has been successfully closed.").queue();
                 Logs.info(DiscordUtils.getAsTag(user) + " has closed the counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
             }
-            case NO_CHANGES -> hook.sendMessage("This channel has been already closed.").queue();
+            case NO_CHANGES -> hook.sendMessage("This channel has already been closed.").queue();
             case FAILURE -> hook.sendMessage("Failed to close this counting channel.").queue();
         }
     }
@@ -156,23 +156,27 @@ public class CountingCommand extends CommandHandler {
         String message = chunks.getFirst();
 
         if (chunks.size() > 1) {
-            final String moreLine = "... and %s more channel(s)";
-            final int maxMoreLineLength = moreLine.length() + 10;
-
-            List<String> lines = Arrays.asList(message.split("\n"));
-
-            int removedCharacters = 0;
-            do {
-                removedCharacters += lines.removeLast().length();
-            } while (removedCharacters < maxMoreLineLength);
-
-            int more = channels.size() - (lines.size() - 1);
-            lines.add(moreLine.formatted(more));
-
+            List<String> lines = getMessage(message, channels);
             message = String.join("\n", lines);
         }
 
         hook.sendMessage(message).queue();
+    }
+
+    private @NotNull List<String> getMessage(@NotNull String message, @NotNull List<String> channels) {
+        final String moreLine = "... and %s more channel(s)";
+        final int maxMoreLineLength = moreLine.length() + 10;
+
+        List<String> lines = new ArrayList<>(Arrays.asList(message.split("\n")));
+
+        int removedCharacters = 0;
+        do {
+            removedCharacters += lines.removeLast().length();
+        } while (removedCharacters < maxMoreLineLength);
+
+        int more = channels.size() - (lines.size() - 1);
+        lines.add(moreLine.formatted(more));
+        return lines;
     }
 
     private void handleCreateForumSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {

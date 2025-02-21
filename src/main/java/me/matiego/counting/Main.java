@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 public final class Main extends JavaPlugin {
@@ -167,6 +168,7 @@ public final class Main extends JavaPlugin {
             if (refreshedWebhooks > 0) {
                 Logs.info("Refreshed " + refreshedWebhooks + " unknown webhook(s).");
             }
+            refreshSlowmode(jda);
             Logs.info("Reloaded!");
         });
     }
@@ -217,6 +219,9 @@ public final class Main extends JavaPlugin {
                     new MessageHandler(this),
                     commands
             );
+
+            // Refresh channels' slowmode
+            refreshSlowmode(jda);
 
             Logs.info("Checks performed in " + (Utils.now() - time) + "ms.");
 
@@ -270,6 +275,14 @@ public final class Main extends JavaPlugin {
                     getStorage().removeChannel(id);
                     return 0;
                 });
+    }
+
+    private void refreshSlowmode(@NotNull JDA jda) {
+        getStorage().getChannels().stream()
+                .map(ChannelData::getChannelId)
+                .map(id -> DiscordUtils.getSupportedChannelById(jda, id))
+                .filter(Objects::nonNull)
+                .forEach(chn -> DiscordUtils.setSlowmode(this, chn));
     }
 
     @Override

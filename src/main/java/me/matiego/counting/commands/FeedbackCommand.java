@@ -60,6 +60,9 @@ public class FeedbackCommand extends CommandHandler {
     @Override
     public void onModalInteraction(@NotNull ModalInteraction event) {
         if (event.getModalId().equals("feedback-modal")) {
+            event.deferReply(true).queue();
+            InteractionHook hook = event.getHook();
+
             User user = event.getUser();
             String subject = Objects.requireNonNull(event.getValue("subject")).getAsString();
             String description = Objects.requireNonNull(event.getValue("description")).getAsString();
@@ -70,8 +73,7 @@ public class FeedbackCommand extends CommandHandler {
                 if (guild == null) break openChannels;
                 Category category = guild.getCategoryById(description);
                 if (category == null) break openChannels;
-                event.deferReply(true).queue();
-                Utils.async(() -> openChannels(category, event.getHook(), user, event.getMember()));
+                Utils.async(() -> openChannels(category, hook, user, event.getMember()));
                 return;
             }
 
@@ -86,11 +88,11 @@ public class FeedbackCommand extends CommandHandler {
             TextChannel chn = event.getJDA().getTextChannelById(instance.getConfig().getLong("logs-channel-id"));
             if (chn != null) {
                 chn.sendMessageEmbeds(eb.build()).queue(
-                        success -> event.reply("Dziękuję za twoją opinię! :)").setEphemeral(true).queue(),
-                        failure -> event.reply(DiscordUtils.checkLength("Napotkano niespodziewany błąd przy wysyłaniu twojej opinii:\n```\n" + description, Message.MAX_CONTENT_LENGTH - 10) + "\n```").queue()
+                        success -> hook.sendMessage("Dziękuję za twoją opinię! :)").setEphemeral(true).queue(),
+                        failure -> hook.sendMessage(DiscordUtils.checkLength("Napotkano niespodziewany błąd przy wysyłaniu twojej opinii:\n```\n" + description, Message.MAX_CONTENT_LENGTH - 10) + "\n```").queue()
                 );
             } else {
-                event.reply(DiscordUtils.checkLength("Napotkano niespodziewany błąd przy wysyłaniu twojej opinii:\n```\n" + description, Message.MAX_CONTENT_LENGTH - 10) + "\n```").queue();
+                hook.sendMessage(DiscordUtils.checkLength("Napotkano niespodziewany błąd przy wysyłaniu twojej opinii:\n```\n" + description, Message.MAX_CONTENT_LENGTH - 10) + "\n```").queue();
             }
         }
     }

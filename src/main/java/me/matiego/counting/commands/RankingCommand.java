@@ -110,7 +110,7 @@ public class RankingCommand extends CommandHandler {
                 case 3 -> ":third_place:";
                 default -> data.getRank() + ".";
             };
-            builder.append("**%s** %s - %s message(s)\n".formatted(place, data.getUser().getAsMention(), data.getScore()));
+            builder.append("**%s** %s - %s wiadomości\n".formatted(place, data.getUser().getAsMention(), data.getScore()));
         }
 
         return "**Łącznie `%s` wiadomości, w tym `%s` na tym serwerze**\n\n".formatted(total, total_guild) + builder;

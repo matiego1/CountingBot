@@ -1,6 +1,7 @@
 package me.matiego.counting.utils;
 
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.interactions.InteractionContextType;
 import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
@@ -52,7 +53,7 @@ public abstract class CommandHandler {
 
     public static @NotNull SlashCommandData createSlashCommand(@NotNull String name, @NotNull String description, boolean guildOnly, @NotNull Permission... permissions) {
         return Commands.slash(name, description)
-                .setGuildOnly(guildOnly)
+                .setContexts(guildOnly ? InteractionContextType.GUILD : InteractionContextType.BOT_DM)
                 .setDefaultPermissions(permissions.length == 0 ? DefaultMemberPermissions.ENABLED : DefaultMemberPermissions.enabledFor(permissions));
     }
 

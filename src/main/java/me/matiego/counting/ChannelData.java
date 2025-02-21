@@ -62,7 +62,7 @@ public class ChannelData {
         PALINDROMIC_COUNTING("Liczby palindromiczne", "Kolejne liczby palindromiczne", "U+1FA9E", new PalindromicCounting()),
         FACTORIAL_COUNTING("Silnie", "Kolejne silnie", "U+2757", new FactorialCounting()),
         ALPHABET("Alfabet", "Kolejne litery alfabetu angielskiego", "U+1F18E", new Alphabet()),
-        TAUTOLOGIES("Tautologie", "Wyrażenia logiczne, które są tautologiami. Dopuszczalna składnia opisana jest [tutaj](https://matifilip.w.staszic.waw.pl/).", "U+2696", new Tautologies()),
+        TAUTOLOGIES("Tautologie", "Wyrażenia logiczne, które są tautologiami", "U+2696", new Tautologies()),
         MINECRAFT_ITEM("Przedmioty z Minecraft", "Nazwy przedmiotów z Minecraft", "U+1F30D", new MinecraftItem()),
         //last letter
         POLISH_LAST_LETTER("Ostatnia litera (polski)", "Słowo zaczynające się ostatnią literą poprzedniego po polsku", "U+1F524", new PolishLastLetter()),

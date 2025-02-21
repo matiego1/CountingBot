@@ -56,7 +56,7 @@ public class MessageHandler extends ListenerAdapter {
                 withRetrievedHistory(event, data, new ArrayList<>(), time);
             } else {
                 channel.getHistory().retrievePast(amount + 1).queue(
-                        h -> withRetrievedHistory(event, data, new ArrayList<>(), time),
+                        h -> withRetrievedHistory(event, data, h, time),
                         f -> message.delete().queue()
                 );
             }
