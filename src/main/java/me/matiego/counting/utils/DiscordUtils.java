@@ -164,13 +164,19 @@ public class DiscordUtils {
 
     public static @NotNull List<Permission> getRequiredPermissions() {
         return Arrays.asList(
-                Permission.MANAGE_CHANNEL,
-                Permission.MANAGE_WEBHOOKS,
                 Permission.VIEW_CHANNEL,
-                Permission.MESSAGE_SEND,
                 Permission.MANAGE_CHANNEL,
-                Permission.MESSAGE_HISTORY,
-                Permission.MANAGE_ROLES
+                Permission.MANAGE_ROLES,
+                Permission.MANAGE_WEBHOOKS,
+                Permission.MESSAGE_SEND,
+                Permission.MESSAGE_SEND_IN_THREADS,
+                Permission.CREATE_PUBLIC_THREADS,
+                Permission.CREATE_PRIVATE_THREADS,
+                Permission.MESSAGE_EMBED_LINKS,
+                Permission.MESSAGE_ATTACH_FILES,
+                Permission.MESSAGE_ADD_REACTION,
+                Permission.MESSAGE_MANAGE,
+                Permission.MESSAGE_HISTORY
         );
     }
 
