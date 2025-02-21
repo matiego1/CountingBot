@@ -5,12 +5,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class Utils {
-    public static final int SECOND = 1000;
+    public static final Color GREEN = Color.decode("#5dd55d");
+    public static final Color YELLOW = Color.decode("#f0e479");
+    public static final Color RED = Color.decode("#f17f8b");
 
     public static void async(@NotNull Runnable task) {
         try {
@@ -32,5 +35,10 @@ public class Utils {
                 return size() > maxEntries;
             }
         };
+    }
+
+    public static @NotNull String getVersion() {
+        //noinspection deprecation
+        return Main.getInstance().getDescription().getVersion();
     }
 }

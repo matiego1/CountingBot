@@ -3,7 +3,6 @@ package me.matiego.counting;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.events.interaction.ModalInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.MessageContextInteractionEvent;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -25,18 +24,15 @@ import java.util.HashMap;
 import java.util.List;
 
 public class Commands extends ListenerAdapter {
-    public Commands(@NotNull Main plugin, @NotNull CommandHandler... handlers) {
+    public Commands(@NotNull JDA jda, @NotNull CommandHandler... handlers) {
         List<CommandData> commandsData = new ArrayList<>();
         for (CommandHandler handler : handlers) {
             CommandData data = handler.getCommand();
             commands.put(getCommandName(data), handler);
             commandsData.add(data);
         }
-        JDA jda = plugin.getJda();
-        if (jda == null) throw new NullPointerException("JDA is null");
         jda.updateCommands().addCommands(commandsData).queue();
     }
-
 
     private final HashMap<String, Long> cooldown = Utils.createLimitedSizeMap(1000);
     private final HashMap<String, CommandHandler> commands = new HashMap<>();
@@ -50,31 +46,35 @@ public class Commands extends ListenerAdapter {
 
         //check permissions
         if (!DiscordUtils.hasRequiredPermissions(event.getChannel())) {
-            event.reply(Translation.GENERAL__NO_PERMISSION.toString()).setEphemeral(true).queue();
+            event.reply("Nie mam wszystkich wymaganych uprawnień na tym kanale.").setEphemeral(true).queue();
             return;
         }
 
         //check cooldown
-        long time = Utils.now();
-        long cooldownTime = cooldown.getOrDefault(new Pair<>(user.getId(), command).toString(), 0L);
-        if (cooldownTime >= time) {
-            event.reply(Translation.COMMANDS__COOLDOWN.getFormatted((cooldownTime - time) / Utils.SECOND)).setEphemeral(true).queue();
+        String cooldownKey = new Pair<>(user.getId(), command).toString();
+        long cooldownTime = cooldown.getOrDefault(cooldownKey, 0L);
+        long now = Utils.now();
+        if (cooldownTime >= now) {
+            event.reply("Tej komendy możesz użyć ponownie za %s sekund.".formatted((cooldownTime - now) / 1000)).setEphemeral(true).queue();
             return;
         }
 
         //get handler
         CommandHandler handler = commands.get(command);
         if (handler == null) {
-            event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+            event.reply("Nieznana komenda. Spróbuj ponownie.").setEphemeral(true).queue();
             return;
         }
 
         //execute command
         try {
-            handler.onSlashCommandInteraction(event.getInteraction());
+            cooldown.put(cooldownKey, Utils.now() + (10 * 1000L));
+            handler.onSlashCommandInteraction(event.getInteraction())
+                    .thenAccept(time -> cooldown.put(cooldownKey, Utils.now() + (time * 1000L)));
         } catch (Exception e) {
-            Logs.error("An error occurred while executing a command.", e);
-            event.reply(Translation.COMMANDS__ERROR.toString()).setEphemeral(true).queue(success -> {}, failure -> {});
+            Logs.error("Failed to execute the slash command.", e);
+            cooldown.put(cooldownKey, Utils.now() + (3 * 1000L));
+            event.reply("Napotkano niespodziewany błąd. Spróbuj później.").setEphemeral(true).queue(s -> {}, f -> {});
         }
     }
 
@@ -87,7 +87,7 @@ public class Commands extends ListenerAdapter {
             } catch (Exception ignored) {}
             if (interaction.isAcknowledged()) return;
         }
-        event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+        event.reply("Nieznana komenda. Spróbuj ponownie.").setEphemeral(true).queue();
     }
 
     @Override
@@ -99,7 +99,7 @@ public class Commands extends ListenerAdapter {
             } catch (Exception ignored) {}
             if (interaction.isAcknowledged()) return;
         }
-        event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+        event.reply("Nieznana komenda. Spróbuj ponownie.").setEphemeral(true).queue();
     }
 
     @Override
@@ -111,7 +111,7 @@ public class Commands extends ListenerAdapter {
             } catch (Exception ignored) {}
             if (interaction.isAcknowledged()) return;
         }
-        event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+        event.reply("Nieznana komenda. Spróbuj ponownie.").setEphemeral(true).queue();
     }
 
     @Override
@@ -123,7 +123,7 @@ public class Commands extends ListenerAdapter {
             } catch (Exception ignored) {}
             if (interaction.isAcknowledged()) return;
         }
-        event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
+        event.reply("Nieznana komenda. Spróbuj ponownie.").setEphemeral(true).queue();
     }
 
     @Override
@@ -135,11 +135,7 @@ public class Commands extends ListenerAdapter {
             } catch (Exception ignored) {}
             if (interaction.isAcknowledged()) return;
         }
-        event.reply(Translation.COMMANDS__UNKNOWN.toString()).setEphemeral(true).queue();
-    }
-
-    public synchronized void putCooldown(@NotNull UserSnowflake user, @NotNull String command, long time) {
-        cooldown.put(new Pair<>(user.getId(), command).toString(), Utils.now() + time);
+        event.reply("Nieznana komenda. Spróbuj ponownie.").setEphemeral(true).queue();
     }
 
     private @NotNull String getCommandName(@NotNull CommandData data) {

@@ -1,7 +1,7 @@
 package me.matiego.counting;
 
+import lombok.Getter;
 import me.matiego.counting.utils.Logs;
-import me.matiego.counting.utils.Response;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -15,31 +15,31 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class UserRanking {
-    public @NotNull Response add(@NotNull UserSnowflake user, long guild) {
+    public boolean add(@NotNull UserSnowflake user, long guild) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_user_ranking(id, guild, score) VALUES(?, ?, 1) ON DUPLICATE KEY UPDATE id = id, guild = guild, score = score + 1")) {
             stmt.setString(1, user.getId());
             stmt.setString(2, String.valueOf(guild));
             stmt.execute();
-            return Response.SUCCESS;
+            return true;
         } catch (SQLException e) {
-            Logs.error("An error occurred while modifying user ranking.", e);
+            Logs.error("Failed to increase the user's ranking.", e);
         }
-        return Response.FAILURE;
+        return false;
     }
 
     // TODO: add implementation
-    public @NotNull Response remove(@NotNull UserSnowflake user, long guild) {
+    public boolean remove(@NotNull UserSnowflake user, long guild) {
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("UPDATE counting_user_ranking SET score = score - 1 WHERE id = ? AND guild = ? AND score > 0")) {
             stmt.setString(1, user.getId());
             stmt.setString(2, String.valueOf(guild));
             stmt.execute();
-            return Response.SUCCESS;
+            return true;
         } catch (SQLException e) {
-            Logs.error("An error occurred while modifying user ranking.", e);
+            Logs.error("Failed to decrease the user's ranking.", e);
         }
-        return Response.FAILURE;
+        return false;
     }
 
     public @Nullable Data get(@NotNull UserSnowflake user, long guild) {
@@ -57,7 +57,7 @@ public class UserRanking {
             }
             return null;
         } catch (SQLException e) {
-            Logs.error("An error occurred while modifying user ranking.", e);
+            Logs.error("Failed to get the user's ranking.", e);
         }
         return null;
     }
@@ -101,11 +101,12 @@ public class UserRanking {
 
             return result;
         } catch (SQLException e) {
-            Logs.error("An error occurred while modifying user ranking.", e);
+            Logs.error("Failed to get the top users from the ranking.", e);
         }
         return new ArrayList<>();
     }
 
+    @Getter
     public static class Data {
         private final UserSnowflake user;
         private final int score;
@@ -115,16 +116,6 @@ public class UserRanking {
             this.user = user;
             this.score = score;
             this.rank = rank;
-        }
-
-        public @NotNull UserSnowflake getUser() {
-            return user;
-        }
-        public int getScore() {
-            return score;
-        }
-        public int getRank() {
-            return rank;
         }
     }
 }

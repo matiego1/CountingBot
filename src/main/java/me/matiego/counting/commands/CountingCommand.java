@@ -2,141 +2,238 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
-import me.matiego.counting.Translation;
-import me.matiego.counting.utils.CommandHandler;
-import me.matiego.counting.utils.DiscordUtils;
-import me.matiego.counting.utils.Logs;
-import me.matiego.counting.utils.Utils;
+import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.entities.Guild;
+import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.attribute.IPostContainer;
 import net.dv8tion.jda.api.entities.channel.attribute.IWebhookContainer;
+import net.dv8tion.jda.api.entities.channel.concrete.Category;
+import net.dv8tion.jda.api.entities.channel.concrete.ForumChannel;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
+import net.dv8tion.jda.api.entities.channel.forums.ForumPost;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectInteraction;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
+import net.dv8tion.jda.api.requests.restaction.ChannelAction;
+import net.dv8tion.jda.api.utils.messages.MessageCreateData;
+import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class CountingCommand extends CommandHandler {
-    private final Main plugin;
+    private final Main instance;
 
-    public CountingCommand(@NotNull Main plugin) {
-        this.plugin = plugin;
+    public CountingCommand(@NotNull Main instance) {
+        this.instance = instance;
     }
 
-
-    /**
-     * Returns the slash command.
-     *
-     * @return the slash command
-     */
     @Override
     public @NotNull SlashCommandData getCommand() {
-        return createSlashCommand("counting", true, Permission.MANAGE_CHANNEL)
-                .addSubcommands(
-                        createSubcommand(
-                                "add",
-                                Translation.COMMANDS__COUNTING__OPTIONS__ADD__NAME,
-                                Translation.COMMANDS__COUNTING__OPTIONS__ADD__DESCRIPTION
-                        ),
-                        createSubcommand(
-                                "remove",
-                                Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__NAME,
-                                Translation.COMMANDS__COUNTING__OPTIONS__REMOVE__DESCRIPTION
-                        ),
-                        createSubcommand(
-                                "list",
-                                Translation.COMMANDS__COUNTING__OPTIONS__LIST__NAME,
-                                Translation.COMMANDS__COUNTING__OPTIONS__LIST__DESCRIPTION
-                        )
-                );
+        return createSlashCommand(
+                "counting",
+                "Manages the counting channels",
+                true,
+                Permission.MANAGE_CHANNEL
+        ).addSubcommands(
+                createSubcommand(
+                        "open",
+                        "Opens a new counting channel"
+                ),
+                createSubcommand(
+                        "close",
+                        "Closes the counting channel"
+                ),
+                createSubcommand(
+                        "list",
+                        "Shows a list of opened counting channels in this guild"
+                ),
+                createSubcommand(
+                        "create-forum",
+                        "Creates a forum channel with all possible counting channels",
+                        createOption(
+                                "category",
+                                "The category to create a forum channel in",
+                                OptionType.CHANNEL,
+                                false
+                        ).setChannelTypes(ChannelType.CATEGORY)
+                )
+        );
     }
 
     @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
+    public @NotNull CompletableFuture<Integer> onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         event.deferReply(true).queue();
-        User user = event.getUser();
         InteractionHook hook = event.getHook();
 
         Utils.async(() -> {
-            ChannelType type = event.getChannelType();
-            if (type != ChannelType.TEXT && type != ChannelType.GUILD_PUBLIC_THREAD) {
-                hook.sendMessage(Translation.GENERAL__UNSUPPORTED_CHANNEL_TYPE.toString()).queue();
+            if (!DiscordUtils.isSupportedChannel(event.getChannel())) {
+                hook.sendMessage("This channel type is not supported.").queue();
                 return;
             }
 
-            plugin.getCommandHandler().putCooldown(user, event.getName(), 5 * Utils.SECOND);
-
-            switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
-                case "add" -> hook.sendMessage(Translation.COMMANDS__COUNTING__ADD.toString())
-                        .addActionRow(
-                                StringSelectMenu.create("counting-type")
-                                        .addOptions(ChannelData.getSelectMenuOptions())
-                                        .setRequiredRange(1, 1)
-                                        .build())
-                        .queue();
-                case "remove" -> {
-                    switch (plugin.getStorage().removeChannel(event.getChannel().getIdLong())) {
-                        case SUCCESS -> {
-                            MessageChannelUnion chn = event.getChannel();
-
-                            hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__SUCCESS.toString()).queue();
-                            EmbedBuilder eb = new EmbedBuilder();
-                            eb.setTitle(Translation.GENERAL__CLOSE_EMBED.toString());
-                            eb.setColor(Color.RED);
-                            eb.setTimestamp(Instant.now());
-                            eb.setFooter(DiscordUtils.getMemberAsTag(user, event.getMember()), DiscordUtils.getAvatar(user, event.getMember()));
-                            chn.sendMessageEmbeds(eb.build()).queue();
-
-                            Logs.info(DiscordUtils.getAsTag(user) + " removed counting channel " + chn.getAsMention() + "(`" + chn.getId() + "`)");
-                        }
-                        case NO_CHANGES -> hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__NO_CHANGES.toString()).queue();
-                        case FAILURE -> hook.sendMessage(Translation.COMMANDS__COUNTING__REMOVE__FAILURE.toString()).queue();
-                    }
-                }
-                case "list" -> {
-                    long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
-                    long mainGuildId = plugin.getConfig().getLong("main-guild-id");
-
-                    List<String> channels = new ArrayList<>();
-                    for (ChannelData data : plugin.getStorage().getChannels()) {
-                        GuildChannel chn = event.getJDA().getGuildChannelById(data.getChannelId());
-                        if (chn != null && chn.getGuild().getIdLong() == guildId) {
-                            channels.add("**" + (channels.size() + 1) + ".** " + chn.getAsMention() + ": " + data.getType());
-                        } else if (mainGuildId == guildId) {
-                            channels.add("**" + (channels.size() + 1) + ".** " + (chn == null ? "`" + data.getChannelId() + "`" : chn.getAsMention()) + ": " + data.getType());
-                        }
-                    }
-
-                    final int maxSize = 35;
-                    int totalSize = channels.size();
-                    if (totalSize > maxSize) {
-                        int more = totalSize - maxSize;
-                        channels = channels.subList(0, maxSize);
-                        channels.add(Translation.COMMANDS__COUNTING__LIST__TOO_MUCH.getFormatted(more));
-                    }
-
-                    if (channels.isEmpty()) {
-                        hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__EMPTY_LIST.toString()).queue();
-                    } else {
-                        hook.sendMessage(Translation.COMMANDS__COUNTING__LIST__LIST.getFormatted(totalSize) + "\n" + String.join("\n", channels)).queue();
-                    }
-                }
+            switch (String.valueOf(event.getSubcommandName())) {
+                case "open" -> handleOpenSubcommand(hook);
+                case "close" -> handleCloseSubcommand(event, hook);
+                case "list" -> handleListSubcommand(event, hook);
+                case "create-forum" -> handleCreateForumSubcommand(event, hook);
             }
         });
+        return CompletableFuture.completedFuture(5);
+    }
+
+    private void handleOpenSubcommand(@NotNull InteractionHook hook) {
+        hook.sendMessage("**__Select type of a new counting channel:__**")
+                .addActionRow(
+                        StringSelectMenu.create("counting-type")
+                                .addOptions(ChannelData.getSelectMenuOptions())
+                                .setRequiredRange(1, 1)
+                                .build())
+                .queue();
+    }
+
+    private void handleCloseSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
+        User user = event.getUser();
+        switch (instance.getStorage().removeChannel(event.getChannel().getIdLong())) {
+            case SUCCESS -> {
+                MessageChannelUnion chn = event.getChannel();
+
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.setTitle("Kanał do liczenia został zamknięty!");
+                eb.setColor(Utils.RED);
+                eb.setTimestamp(Instant.now());
+                eb.setFooter(DiscordUtils.getMemberAsTag(user, event.getMember()), DiscordUtils.getAvatar(user, event.getMember()));
+                chn.sendMessageEmbeds(eb.build()).queue();
+
+                hook.sendMessage("The counting channel has been successfully closed.").queue();
+                Logs.info(DiscordUtils.getAsTag(user) + " has closed the counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
+            }
+            case NO_CHANGES -> hook.sendMessage("This channel has been already closed.").queue();
+            case FAILURE -> hook.sendMessage("Failed to close this counting channel.").queue();
+        }
+    }
+
+    private void handleListSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
+        long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
+        boolean isAdmin = DiscordUtils.checkAdminKey(event.getOption("admin-key", OptionMapping::getAsString), event.getUser());
+
+        List<String> channels = new ArrayList<>();
+        for (ChannelData data : instance.getStorage().getChannels()) {
+            GuildMessageChannel chn = DiscordUtils.getSupportedChannelById(event.getJDA(), data.getChannelId());
+            if (chn != null && chn.getGuild().getIdLong() == guildId) {
+                channels.add("**" + (channels.size() + 1) + ".** " + chn.getAsMention() + ": " + data.getType());
+            } else if (isAdmin) {
+                channels.add("**" + (channels.size() + 1) + ".** " + (chn == null ? "`" + data.getChannelId() + "`" : chn.getAsMention()) + ": " + data.getType());
+            }
+        }
+
+        // TODO: rewrite - add pages
+        final int maxSize = 35;
+        int totalSize = channels.size();
+        if (totalSize > maxSize) {
+            int more = totalSize - maxSize;
+            channels = channels.subList(0, maxSize);
+            channels.add("... and %s more channel(s)".formatted(more));
+        }
+
+        if (channels.isEmpty()) {
+            hook.sendMessage("No counting channel has been opened yet. Open a new one with command `/counting open`").queue();
+        } else {
+            hook.sendMessage("**__Open Counting Channels (%s in total):__**".formatted(totalSize) + "\n" + String.join("\n", channels)).queue();
+        }
+    }
+
+    private void handleCreateForumSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
+        final long allow = Permission.MESSAGE_HISTORY.getRawValue() | Permission.MESSAGE_SEND_IN_THREADS.getRawValue();
+        final long deny = Permission.MESSAGE_SEND.getRawValue();
+
+        GuildChannel chn = event.getOption("category", OptionMapping::getAsChannel);
+        Guild guild = Objects.requireNonNull(event.getGuild());
+
+        ChannelAction<ForumChannel> action;
+        if (chn instanceof Category category) {
+            action = category.createForumChannel("Counting");
+        } else {
+            action = guild.createForumChannel("Counting");
+        }
+        action
+                .setTopic("Kanały do liczenia. Licz na różne sposoby i baw się dobrze!")
+                .setDefaultLayout(ForumChannel.Layout.LIST_VIEW)
+                .setDefaultSortOrder(IPostContainer.SortOrder.CREATION_TIME)
+                .setDefaultReaction(null)
+                .addPermissionOverride(guild.getPublicRole(), allow, deny)
+                .queue(
+                        forum -> Utils.async(() -> openForumChannels(hook, forum, event.getUser(), event.getMember())),
+                        failure -> hook.sendMessage("Failed to create the forum channel: `%s`. Is the community enabled in this guild?".formatted(failure.getMessage())).queue()
+                );
+
+    }
+
+    private void openForumChannels(@NotNull InteractionHook hook, @NotNull ForumChannel forum, @NotNull User user, @Nullable Member member) {
+        DiscordUtils.getOrCreateWebhook(forum)
+                .whenComplete((webhook, e) -> {
+                    if (webhook == null) {
+                        hook.sendMessage("Failed to create a webhook.").queue();
+                        return;
+                    }
+                    withWebhook(hook, forum, webhook, user, member);
+                });
+    }
+
+    private void withWebhook(@NotNull InteractionHook hook, @NotNull ForumChannel forum, @NotNull Webhook webhook, @NotNull User user, @Nullable Member member) {
+        ChannelData.Type[] types = ChannelData.Type.values();
+        ArrayUtils.reverse(types);
+        Arrays.stream(types)
+                .map(type -> openForumChannel(forum, type, webhook, user, member))
+                .reduce((a, b) -> a.thenCombine(b, Integer::sum))
+                .orElse(CompletableFuture.completedFuture(0))
+                .thenAccept(success -> hook.sendMessage("Successfully opened %s counting channel(s) out of %s.".formatted(success, types.length)).queue());
+    }
+
+    private @NotNull CompletableFuture<Integer> openForumChannel(@NotNull ForumChannel forum, @NotNull ChannelData.Type type, @NotNull Webhook webhook, @NotNull User user, @Nullable Member member) {
+        EmbedBuilder eb = DiscordUtils.getOpenChannelEmbed(type, user, member);
+        CompletableFuture<Integer> future = new CompletableFuture<>();
+        forum.createForumPost(
+                type.toString(),
+                MessageCreateData.fromEmbeds(eb.build())
+        ).queue(
+                post -> future.complete(withForumPost(post, type, webhook, user)),
+                failure -> future.complete(0)
+        );
+        return future;
+    }
+
+    private int withForumPost(@NotNull ForumPost post, @NotNull ChannelData.Type type, @NotNull Webhook webhook, @NotNull User user) {
+        post.getMessage().pin().queue();
+
+        ThreadChannel chn = post.getThreadChannel();
+        if (instance.getStorage().addChannel(new ChannelData(chn.getIdLong(), chn.getGuild().getIdLong(), type, webhook)) == Response.SUCCESS) {
+            DiscordUtils.setSlowmode(instance, chn);
+
+            Logs.info(DiscordUtils.getAsTag(user) + " has opened a new counting channel " + chn.getAsMention() + ". (ID: `" + chn.getId() + "`)");
+            return 1;
+        } else {
+            chn.delete().queue();
+        }
+        return 0;
     }
 
     @Override
@@ -150,52 +247,53 @@ public class CountingCommand extends CommandHandler {
                         .findFirst()
                         .orElse(null);
                 if (type == null) {
-                    reply(event, Translation.GENERAL__UNKNOWN_CHANNEL_TYPE.toString());
+                    reply(event, "Unknown counting channel type.");
+                    return;
+                }
+
+                MessageChannelUnion chn = event.getChannel();
+                if (!DiscordUtils.isSupportedChannel(chn)) {
+                    reply(event, "This channel type is not supported.");
                     return;
                 }
 
                 IWebhookContainer webhookChannel = switch (event.getChannelType()) {
-                    case TEXT -> event.getChannel().asTextChannel();
-                    case GUILD_PUBLIC_THREAD -> event.getChannel()
+                    case TEXT -> chn.asTextChannel();
+                    case GUILD_PUBLIC_THREAD -> chn
                             .asThreadChannel()
                             .getParentChannel()
                             .asForumChannel();
                     default -> null;
                 };
                 if (webhookChannel == null) {
-                    reply(event, Translation.GENERAL__UNSUPPORTED_CHANNEL_TYPE.toString());
+                    reply(event, "This channel type is not supported.");
                     return;
                 }
 
-                plugin.getCommandHandler().putCooldown(user, "counting", 5 * Utils.SECOND);
-
-                webhookChannel.retrieveWebhooks().queue(webhooks -> {
-                    if (webhooks.isEmpty()) {
-                        webhookChannel.createWebhook("Counting bot").queue(webhook -> openChannel(event.getChannel().asGuildMessageChannel(), type, webhook, event, user));
-                    } else {
-                        openChannel(event.getChannel().asGuildMessageChannel(), type, webhooks.getFirst(), event, user);
-                    }
-                });
+                DiscordUtils.getOrCreateWebhook(webhookChannel)
+                        .whenComplete((webhook, e) -> {
+                            if (webhook == null) {
+                                reply(event, "Failed to create a webhook.");
+                                return;
+                            }
+                            openChannel(chn.asGuildMessageChannel(), type, webhook, event, user, event.getMember());
+                        });
             });
         }
     }
 
-    private void openChannel(@NotNull GuildMessageChannel chn, ChannelData.Type type, Webhook webhook, @NotNull StringSelectInteraction event, User user) {
-        switch (plugin.getStorage().addChannel(new ChannelData(chn.getIdLong(), chn.getGuild().getIdLong(), type, webhook))) {
+    private void openChannel(@NotNull GuildMessageChannel chn, ChannelData.Type type, Webhook webhook, @NotNull StringSelectInteraction event, @NotNull User user, @Nullable Member member) {
+        switch (instance.getStorage().addChannel(new ChannelData(chn.getIdLong(), chn.getGuild().getIdLong(), type, webhook))) {
             case SUCCESS -> {
-                reply(event, Translation.COMMANDS__SELECT_MENU__SUCCESS.toString());
-                EmbedBuilder eb = new EmbedBuilder();
-                eb.setTitle(Translation.GENERAL__OPEN_EMBED__TITLE.toString());
-                eb.setDescription(Translation.GENERAL__OPEN_EMBED__DESCRIPTION.getFormatted(type, type.getDescription()));
-                eb.setColor(Color.GREEN);
-                eb.setTimestamp(Instant.now());
-                eb.setFooter(DiscordUtils.getMemberAsTag(user, event.getMember()),DiscordUtils.getAvatar(user, event.getMember()));
+                EmbedBuilder eb = DiscordUtils.getOpenChannelEmbed(type, user, member);
                 chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
+                DiscordUtils.setSlowmode(instance, chn);
 
-                Logs.info(DiscordUtils.getAsTag(user) + " opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
+                reply(event, "Successfully opened a new counting channel.");
+                Logs.info(DiscordUtils.getAsTag(user) + " has opened a new counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
             }
-            case NO_CHANGES -> reply(event, Translation.COMMANDS__SELECT_MENU__NO_CHANGES.toString());
-            case FAILURE -> reply(event, Translation.COMMANDS__SELECT_MENU__FAILURE.toString());
+            case NO_CHANGES -> reply(event, "This counting channel is already opened!");
+            case FAILURE -> reply(event, "Failed to open this counting channel.");
         }
     }
 

@@ -3,15 +3,17 @@ package me.matiego.counting;
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
+import lombok.Getter;
 import me.matiego.counting.commands.*;
-import me.matiego.counting.utils.*;
+import me.matiego.counting.utils.DiscordUtils;
+import me.matiego.counting.utils.Logs;
+import me.matiego.counting.utils.Response;
+import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Webhook;
 import net.dv8tion.jda.api.entities.channel.attribute.IWebhookContainer;
-import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -27,37 +29,31 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.concurrent.*;
 
-/**
- * The main class.
- */
 public final class Main extends JavaPlugin {
     public Main() {
         instance = this;
     }
 
-    private static Main instance;
+    @Getter private static Main instance;
     private MySQL mySQL;
-    private Storage storage;
-    private Dictionary dictionary;
+    @Getter private Storage storage;
+    @Getter private Dictionary dictionary;
     private Commands commands;
-    private UserRanking userRanking;
+    @Getter private UserRanking userRanking;
 
     private JDA jda;
     private boolean isJdaEnabled = false;
     private ExecutorService callbackThreadPool;
 
-    /**
-     * The plugin enable logic.
-     */
     @Override
     public void onEnable() {
         long time = Utils.now();
-        //noinspection ResultOfMethodCallIgnored - generating prime numbers
+        //noinspection ResultOfMethodCallIgnored - generate prime numbers
         Primes.isPrime(2);
 
         //Implementation checks
         if (ChannelData.Type.values().length > 25 || ChannelData.Type.values().length == 0) {
-            Logs.error("Zero or too many types of the counting channels are implemented. Please contact the developer");
+            Logs.error("Zero or too many types of the counting channels are implemented. Please contact the developer.");
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
@@ -65,16 +61,15 @@ public final class Main extends JavaPlugin {
         //Save config file
         saveDefaultConfig();
 
-        //Check translations
-        checkTranslations();
-
         //Add console command
         PluginCommand command = getCommand("counting");
         if (command != null) command.setExecutor((sender, cmd, label, args) -> {
-            reloadConfig();
-            checkTranslations();
-            sender.sendRichMessage("<green>Successfully reloaded config.");
-            sendGuildsMessage();
+            JDA jda = getJda();
+            if (jda == null) {
+                sender.sendRichMessage("<red>Discord bot is offline!");
+                return true;
+            }
+            reload(jda).thenRun(() -> sender.sendRichMessage("<green>Reloaded!"));
             return true;
         });
 
@@ -85,7 +80,7 @@ public final class Main extends JavaPlugin {
         try {
             mySQL = new MySQL("jdbc:mysql://" + getConfig().getString("database.host") + ":" + getConfig().getString("database.port") + "/" + getConfig().getString("database.database") + "?user=" + username + "&password=" + password, username, password);
         } catch (Exception e) {
-            Logs.error("An error occurred while opening the MySQL connection.", e);
+            Logs.error("Failed to open the MySQL connection.", e);
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
@@ -112,7 +107,7 @@ public final class Main extends JavaPlugin {
                 jda.shutdownNow();
                 callbackThreadPool.shutdownNow();
             } catch (Exception e) {
-                Logs.error("An error occurred while shutting down the Discord bot.", e);
+                Logs.error("Failed to shut down previous instance of the Discord bot.", e);
             }
             jda = null;
             callbackThreadPool = null;
@@ -124,7 +119,7 @@ public final class Main extends JavaPlugin {
                 worker.setName("Counting - JDA Callback " + worker.getPoolIndex());
                 return worker;
             }, null, true);
-            jda = JDABuilder.create(DiscordUtils.getIntents())
+            JDABuilder builder = JDABuilder.create(DiscordUtils.getIntents())
                     .setToken(getConfig().getString("bot-token", ""))
                     .setMemberCachePolicy(MemberCachePolicy.NONE)
                     .setCallbackPool(callbackThreadPool, false)
@@ -137,32 +132,43 @@ public final class Main extends JavaPlugin {
                     .setEnableShutdownHook(false)
                     .setContextEnabled(false)
                     .disableCache(DiscordUtils.getDisabledCacheFlag())
-                    .setActivity(Activity.customStatus(Translation.GENERAL__STATUS.toString()))
                     .addEventListeners(new ListenerAdapter() {
                         @Override
                         public void onReady(@NotNull ReadyEvent event) {
                             Main.getInstance().onDiscordBotReady();
                             event.getJDA().removeEventListener(this);
                         }
-                    })
-                    .build();
+                    });
+
+            String activity = getConfig().getString("activity", "Counting...");
+            try {
+                builder.setActivity(Activity.customStatus(activity));
+            } catch (IllegalArgumentException e) {
+                Logs.warning("Failed to set bot's activity.", e);
+            }
+
+            jda = builder.build();
         } catch (Exception e) {
-            Logs.error("An error occurred while enabling the Discord bot." + (e instanceof InvalidTokenException ? " Is the provided bot token correct?" : ""), e);
+            Logs.error("Failed to enable the Discord bot." + (e instanceof InvalidTokenException ? " Is the provided bot token correct?" : ""), e);
             Bukkit.getPluginManager().disablePlugin(this);
             return;
         }
 
-        Logs.quietInfo("Plugin enabled in " + (Utils.now() - time) + "ms.");
+        Logs.infoLocal("Plugin enabled in " + (Utils.now() - time) + "ms.");
     }
 
-    private void checkTranslations() {
-        if (!getConfig().getBoolean("do-not-check-translations")) {
-            for (Translation translation : Translation.values()) {
-                if (!getConfig().isSet(translation.getConfigPath())) {
-                    Logs.warning("Translation for " + translation.name() + " is not set in the config file! (To disable this message set `do-not-check-translations` to `false`)");
-                }
+    public @NotNull CompletableFuture<Void> reload(@NotNull JDA jda) {
+        reloadConfig();
+        sendGuildsMessage();
+        checkPermissions();
+        int removed = removeNonExistentChannels(jda);
+        if (removed > 0) Logs.info("Removed " + removed + " unknown counting channel(s).");
+        return refreshWebhooks(jda).thenAccept(refreshedWebhooks -> {
+            if (refreshedWebhooks > 0) {
+                Logs.info("Refreshed " + refreshedWebhooks + " unknown webhook(s).");
             }
-        }
+            Logs.info("Reloaded!");
+        });
     }
 
     private void sendGuildsMessage() {
@@ -180,108 +186,120 @@ public final class Main extends JavaPlugin {
         Logs.info("Discord bot enabled!");
 
         //Check permissions
+        checkPermissions();
+
+        //Check channels
+        int removed = removeNonExistentChannels(jda);
+        if (removed > 0) Logs.info("Removed " + removed + " unknown counting channel(s).");
+
+        //Check webhooks
+        refreshWebhooks(jda).thenAccept(refreshedWebhooks -> {
+
+            if (refreshedWebhooks > 0) Logs.info("Refreshed " + refreshedWebhooks + " unknown webhook(s).");
+
+            //Add event listeners
+            commands = new Commands(jda,
+                    new AboutCommand(this),
+                    new BlockCommand(this),
+                    new CountingCommand(this),
+                    new DeleteMessageCommand(this),
+                    new DeleteMessageContextCommand(this),
+                    new DictionaryCommand(this),
+                    new FeedbackCommand(this),
+                    new PingCommand(this),
+                    new RankingCommand(this),
+                    new RankingContextCommand(this),
+                    new ReloadCommand(this),
+                    new UnblockCommand(this),
+                    new WordListCommand(this)
+            );
+            jda.addEventListener(
+                    new MessageHandler(this),
+                    commands
+            );
+
+            Logs.info("Checks performed in " + (Utils.now() - time) + "ms.");
+
+            sendGuildsMessage();
+        });
+    }
+
+    public void checkPermissions() {
         jda.getGuilds().forEach(guild -> {
             if (!guild.getSelfMember().hasPermission(DiscordUtils.getRequiredPermissions())) {
                 Logs.warning("The Discord bot does not have all the required permissions in the " + guild.getName() + " guild. Add the bot to it again.");
             }
         });
+    }
 
-        //Check channels
-        List<ChannelData> channels = getStorage().getChannels();
-        int removed = (int) channels.stream()
+    public int removeNonExistentChannels(@NotNull JDA jda) {
+        return (int) getStorage().getChannels().stream()
                 .map(ChannelData::getChannelId)
-                .filter(id -> jda.getTextChannelById(id) == null && jda.getThreadChannelById(id) == null)
+                .filter(id -> DiscordUtils.getSupportedChannelById(jda, id) == null)
                 .map(id -> getStorage().removeChannel(id))
                 .filter(response -> response == Response.SUCCESS)
                 .count();
-        if (removed > 0) Logs.info("Successfully removed " + removed + " unknown counting channel(s).");
-
-        //Check webhooks
-        List<Pair<CompletableFuture<Webhook>, ChannelData>> futures = channels.stream()
-                .map(data -> new Pair<>(jda.retrieveWebhookById(data.getWebhookId()).submit(), data))
-                .toList();
-        int refreshedWebhooks = 0;
-        for (Pair<CompletableFuture<Webhook>, ChannelData> future : futures) {
-            try {
-                future.getFirst().get();
-            } catch (Exception e) {
-                if (refreshWebhook(future.getSecond())) refreshedWebhooks++;
-            }
-        }
-        if (refreshedWebhooks > 0) Logs.info("Successfully refreshed " + refreshedWebhooks + " unknown webhook(s).");
-
-        //Add event listeners
-        commands = new Commands(this,
-                new AboutCommand(this),
-                new BlockCommand(this),
-                new CountingCommand(this),
-                new DeleteMessageCommand(this),
-                new DictionaryCommand(this),
-                new FeedbackCommand(this),
-                new GameCommand(this),
-                new WordListCommand(this),
-                new PingCommand(this),
-                new RankingCommand(this),
-                new RankingContextCommand(),
-                new UnblockCommand(this)
-        );
-        jda.addEventListener(
-                new MessageHandler(this),
-                commands
-        );
-
-        Logs.info("Checks performed in " + (Utils.now() - time) + "ms.");
-
-        sendGuildsMessage();
     }
 
-    private boolean refreshWebhook(@NotNull ChannelData data) {
+    public @NotNull CompletableFuture<Integer> refreshWebhooks(@NotNull JDA jda) {
+        return getStorage().getChannels().stream()
+                .map(data -> jda.retrieveWebhookById(data.getWebhookId()).submit()
+                        .handle((webhook, e) -> {
+                            if (webhook != null) return CompletableFuture.completedFuture(0);
+                            return refreshWebhook(jda, data);
+                        })
+                        .thenCompose(f -> f)
+                )
+                .reduce((a, b) -> a.thenCombine(b, Integer::sum))
+                .orElseGet(() -> CompletableFuture.completedFuture(0));
+    }
+
+    private @NotNull CompletableFuture<Integer> refreshWebhook(@NotNull JDA jda, @NotNull ChannelData data) {
+        CompletableFuture<Integer> failure = CompletableFuture.completedFuture(0);
+
         long id = data.getChannelId();
-        if (getStorage().removeChannel(id) == Response.FAILURE) return false;
+        if (getStorage().removeChannel(id) == Response.FAILURE) return failure;
 
-        IWebhookContainer webhookChannel = jda.getTextChannelById(id);
-
-        if (webhookChannel == null) {
-            ThreadChannel chn = jda.getThreadChannelById(id);
-            if (chn == null) return false;
-            webhookChannel = chn.getParentChannel().asForumChannel();
-        }
-
-        List<Webhook> webhooks = webhookChannel.retrieveWebhooks().complete();
-        Webhook webhook = webhooks.isEmpty() ? webhookChannel.createWebhook("Counting bot").complete() : webhooks.getFirst();
-
-        if (getStorage().addChannel(new ChannelData(id, data.getGuildId(), data.getType(), webhook)) != Response.FAILURE) return true;
-        Logs.warning("An error occurred while refreshing an unknown webhook. The counting channel will be removed.");
-        getStorage().removeChannel(id);
-        return false;
+        if (!(DiscordUtils.getSupportedChannelById(jda, id) instanceof IWebhookContainer chn)) return failure;
+        return DiscordUtils.getOrCreateWebhook(chn)
+                .handle((webhook, e) -> {
+                    if (e == null) {
+                        if (getStorage().addChannel(new ChannelData(id, data.getGuildId(), data.getType(), webhook)) != Response.FAILURE) return 1;
+                    }
+                    Logs.warning("Failed to refresh an unknown webhook. The counting channel will be removed.", e);
+                    getStorage().removeChannel(id);
+                    return 0;
+                });
     }
 
-    /**
-     * The plugin disable logic.
-     */
     @Override
     public void onDisable() {
         long time = Utils.now();
+
         //shut down JDA
         if (jda != null) {
             jda.getRegisteredListeners().forEach(listener -> jda.removeEventListener(listener));
 
-            Logs.infoWithBlock("Shutting down Discord bot...");
+            try {
+                Logs.infoWithBlock("Shutting down Discord bot...").get(10, TimeUnit.SECONDS);
+            } catch (Exception ignored) {}
 
             isJdaEnabled = false;
             try {
                 disableDiscordBot();
             } catch (Exception e) {
-                Logs.error("An error occurred while shutting down Discord bot.", e);
+                Logs.error("Failed to shut down Discord bot.", e);
             }
         }
         if (callbackThreadPool != null) {
             callbackThreadPool.shutdownNow();
             callbackThreadPool = null;
         }
+
         //close MySQL connection
         if (mySQL != null) mySQL.close();
-        Logs.info("Plugin disabled in " + (Utils.now() - time) + "ms.");
+
+        Logs.info("Disabled in " + (Utils.now() - time) + "ms.");
     }
 
     private void disableDiscordBot() throws Exception {
@@ -294,53 +312,12 @@ public final class Main extends JavaPlugin {
         jda = null;
     }
 
-    /**
-     * Returns an instance of the Main class.
-     * @return the instance of the Main class
-     */
-    public static Main getInstance() {
-        return instance;
-    }
-
-    /**
-     * Returns a mysql connection.
-     * @return the mysql connection
-     * @throws SQLException if an error occurred while fetching the connection
-     */
     public @NotNull Connection getMySQLConnection() throws SQLException {
         if (mySQL == null) throw new SQLException("The MySQL database has not been opened yet.");
         return mySQL.getConnection();
     }
 
-    /**
-     * Returns the data storage.
-     * @return the data storage
-     */
-    public Storage getStorage() {
-        return storage;
-    }
-
-    /**
-     * Returns the Discord bot instance.
-     * @return the Discord bot instance
-     */
     public synchronized JDA getJda() {
         return isJdaEnabled ? jda : null;
-    }
-
-    /**
-     * Returns the dictionary.
-     * @return the dictionary
-     */
-    public Dictionary getDictionary() {
-        return dictionary;
-    }
-
-    public Commands getCommandHandler() {
-        return commands;
-    }
-
-    public UserRanking getUserRanking() {
-        return userRanking;
     }
 }

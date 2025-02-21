@@ -2,7 +2,6 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.Dictionary;
 import me.matiego.counting.Main;
-import me.matiego.counting.Translation;
 import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
@@ -20,143 +19,135 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class DictionaryCommand extends CommandHandler {
-    public DictionaryCommand(@NotNull Main plugin) {
-        this.plugin = plugin;
+    public DictionaryCommand(@NotNull Main instance) {
+        this.instance = instance;
     }
-    private final Main plugin;
+    private final Main instance;
 
-
-    /**
-     * Returns the slash command.
-     *
-     * @return the slash command
-     */
     @Override
     public @NotNull SlashCommandData getCommand() {
         OptionData languageOption = createOption(
                 "language",
+                "The dictionary type",
                 OptionType.STRING,
-                true,
-                Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__NAME,
-                Translation.COMMANDS__DICTIONARY__OPTIONS__LANGUAGE__DESCRIPTION
+                true
         ).addChoices(
                 Arrays.stream(Dictionary.Type.values())
-                        .map(Dictionary.Type::getTranslation)
+                        .map(Dictionary.Type::toString)
                         .map(value -> new Command.Choice(value, value))
                         .toList()
         );
         OptionData wordOption = createOption(
                 "word",
+                "The word to add/remove",
                 OptionType.STRING,
-                true,
-                Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__NAME,
-                Translation.COMMANDS__DICTIONARY__OPTIONS__WORD__DESCRIPTION
+                true
         );
 
-        return createSlashCommand("dictionary", true, Permission.MANAGE_CHANNEL)
-                .addSubcommands(
-                        createSubcommand(
-                                "add",
-                                Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__NAME,
-                                Translation.COMMANDS__DICTIONARY__OPTIONS__ADD__DESCRIPTION
-                        ).addOptions(
-                                languageOption,
-                                ADMIN_KEY_OPTION,
-                                wordOption
-                        ),
-                        createSubcommand(
-                                "remove",
-                                Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__NAME,
-                                Translation.COMMANDS__DICTIONARY__OPTIONS__REMOVE__DESCRIPTION
-                        ).addOptions(
-                                languageOption,
-                                ADMIN_KEY_OPTION,
-                                wordOption
-                        ),
-                        createSubcommand(
-                                "load",
-                                Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__NAME,
-                                Translation.COMMANDS__DICTIONARY__OPTIONS__LOAD__DESCRIPTION
-                        ).addOptions(
-                                languageOption,
-                                ADMIN_KEY_OPTION,
-                                createOption(
-                                        "file",
-                                        OptionType.STRING,
-                                        true,
-                                        Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__NAME,
-                                        Translation.COMMANDS__DICTIONARY__OPTIONS__FILE__DESCRIPTION
-                                )
+        return createSlashCommand(
+                "dictionary",
+                "Manages dictionaries",
+                true,
+                Permission.ADMINISTRATOR
+        ).addSubcommands(
+                createSubcommand(
+                        "add",
+                        "Adds a word to the dictionary",
+                        languageOption,
+                        ADMIN_KEY_OPTION,
+                        wordOption
+                ),
+                createSubcommand(
+                        "remove",
+                        "Removes a word from the dictionary",
+                        languageOption,
+                        ADMIN_KEY_OPTION,
+                        wordOption
+                ),
+                createSubcommand(
+                        "load",
+                        "Loads the dictionary from a file",
+                        languageOption,
+                        ADMIN_KEY_OPTION,
+                        createOption(
+                                "file",
+                                "The file's path",
+                                OptionType.STRING,
+                                true
                         )
-                );
+                )
+        );
     }
 
     @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
+    public @NotNull CompletableFuture<Integer> onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         long time = Utils.now();
-        event.deferReply(true).queue();
-        InteractionHook hook = event.getHook();
         User user = event.getUser();
 
+        event.deferReply(true).queue();
+        InteractionHook hook = event.getHook();
 
-        if (!DiscordUtils.checkAdminKey(event.getOption("admin-key", "", OptionMapping::getAsString), user)) {
-            reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.GENERAL__INCORRECT_ADMIN_KEY.toString());
-            return;
+        if (!DiscordUtils.checkAdminKey(event.getOption("admin-key", OptionMapping::getAsString), user)) {
+            hook.sendMessage("Incorrect administrator key!").queue();
+            return CompletableFuture.completedFuture(3);
         }
 
-        Dictionary.Type type = Dictionary.Type.getByTranslation(event.getOption("language", "null", OptionMapping::getAsString).toUpperCase());
+        Dictionary.Type type = Dictionary.Type.getByString(event.getOption("language", "null", OptionMapping::getAsString).toUpperCase());
         if (type == null) {
-            hook.sendMessage(Translation.GENERAL__UNKNOWN_LANGUAGE.toString()).queue();
-            return;
+            hook.sendMessage("Unknown dictionary type.").queue();
+            return CompletableFuture.completedFuture(3);
         }
 
         String word = event.getOption("word", "null", OptionMapping::getAsString);
+        CompletableFuture<Integer> cooldown = new CompletableFuture<>();
 
         Utils.async(() -> {
-            switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
+            switch (String.valueOf(event.getSubcommandName())) {
                 case "add" -> {
-                    if (plugin.getDictionary().addWordToDictionary(type, word)) {
-                        reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__SUCCESS.getFormatted(Utils.now() - time));
+                    if (instance.getDictionary().addWordToDictionary(type, word)) {
+                        hook.sendMessage("Successfully added this word to the dictionary. (%s ms)".formatted(Utils.now() - time)).queue();
+                        cooldown.complete(5);
                         Logs.info(DiscordUtils.getAsTag(user) + " added the word `" + word + "` to the `" + type + "` dictionary.");
                     } else {
-                        reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__ADD__FAILURE.toString());
+                        hook.sendMessage("Failed to add this word to the dictionary.").queue();
+                        cooldown.complete(5);
                     }
                 }
                 case "remove" -> {
-                    if (plugin.getDictionary().removeWordFromDictionary(type, event.getOption("word", "null", OptionMapping::getAsString))) {
-                        reply(hook, user, event.getName(), 7 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__SUCCESS.getFormatted(Utils.now() - time));
+                    if (instance.getDictionary().removeWordFromDictionary(type, event.getOption("word", "null", OptionMapping::getAsString))) {
+                        hook.sendMessage("Successfully removed this word from the dictionary. (%s ms)".formatted(Utils.now() - time)).queue();
+                        cooldown.complete(5);
                         Logs.info(DiscordUtils.getAsTag(user) + " removed the word `" + word + "` from the `" + type + "` dictionary.");
                     } else {
-                        reply(hook, user, event.getName(), 3 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__REMOVE__FAILURE.toString());
+                        hook.sendMessage("Failed to remove this word from the dictionary.").queue();
+                        cooldown.complete(5);
                     }
                 }
                 case "load" -> {
-                    File file = new File(plugin.getDataFolder() + File.separator + event.getOption("file", OptionMapping::getAsString));
+                    File file = new File(instance.getDataFolder() + File.separator + event.getOption("file", OptionMapping::getAsString));
                     Logs.info(DiscordUtils.getAsTag(user) + " started loading a new `" + type + "` dictionary from file `" + file + "`.");
-                    switch (plugin.getDictionary().loadDictionaryFromFile(file, type)) {
+                    switch (instance.getDictionary().loadDictionaryFromFile(file, type, () -> cooldown.complete(30))) {
                         case SUCCESS -> {
-                            reply(hook, user, event.getName(), 30 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__SUCCESS.getFormatted(Utils.now() - time));
+                            hook.sendMessage("Successfully loaded the dictionary from this file. (%s ms)".formatted(Utils.now() - time)).queue();
                             Logs.info(DiscordUtils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **Success**");
                         }
                         case NO_CHANGES -> {
-                            reply(hook, user, event.getName(), 5 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__NO_CHANGES.getFormatted(Utils.now() - time));
+                            hook.sendMessage("This file doesn't exist. (%s ms)".formatted(Utils.now() - time)).queue();
                             Logs.info(DiscordUtils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **File does not exist**");
+                            cooldown.complete(5);
                         }
                         case FAILURE -> {
-                            reply(hook, user, event.getName(), 15 * Utils.SECOND, Translation.COMMANDS__DICTIONARY__LOAD__FAILURE.getFormatted(Utils.now() - time));
+                            hook.sendMessage("Failed to load the dictionary from this file. Does chosen language supports dictionary? (%s ms)".formatted(Utils.now() - time)).queue();
                             Logs.info(DiscordUtils.getAsTag(user) + " finished loading a new `" + type + "` dictionary from file `" + file + "` - **Failure**");
+                            cooldown.complete(5);
                         }
                     }
                 }
             }
         });
-    }
-
-    private void reply(@NotNull InteractionHook hook, @NotNull User user, @NotNull String command, long time, @NotNull String message) {
-        hook.sendMessage(message).queue();
-        plugin.getCommandHandler().putCooldown(user, command, time);
+        return cooldown;
     }
 }

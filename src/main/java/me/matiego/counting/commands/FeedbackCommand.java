@@ -2,14 +2,9 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
-import me.matiego.counting.Translation;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
-import net.dv8tion.jda.api.JDA;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -21,44 +16,45 @@ import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
 import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalInteraction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.time.Instant;
-import java.util.List;
+import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class FeedbackCommand extends CommandHandler {
-    private final Main plugin;
-
-    public FeedbackCommand(@NotNull Main plugin) {
-        this.plugin = plugin;
+    public FeedbackCommand(@NotNull Main instance) {
+        this.instance = instance;
     }
+    private final Main instance;
 
-    /**
-     * Returns the slash command.
-     *
-     * @return the slash command
-     */
     @Override
     public @NotNull SlashCommandData getCommand() {
-        return createSlashCommand("feedback", false);
+        return createSlashCommand(
+                "feedback",
+                "Zgłoś błąd, zaproponuj zmianę lub podziel się swoją opinią o tym bocie",
+                false
+        );
     }
 
     @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
+    public @NotNull CompletableFuture<Integer> onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         event.replyModal(
-                Modal.create("feedback-modal", Translation.COMMANDS__FEEDBACK__TITLE.toString())
+                Modal.create("feedback-modal", "Wyślij opinię")
                         .addComponents(
-                                ActionRow.of(TextInput.create("subject", Translation.COMMANDS__FEEDBACK__SUBJECT.toString(), TextInputStyle.SHORT)
+                                ActionRow.of(TextInput.create("subject", "Tytuł", TextInputStyle.SHORT)
                                         .setRequired(true)
-                                        .setPlaceholder(Translation.COMMANDS__FEEDBACK__SUBJECT_PLACEHOLDER.toString())
+                                        .setPlaceholder("np. zgłoszenie błędu, propozycja, opinia")
                                         .build()),
-                                ActionRow.of(TextInput.create("description", Translation.COMMANDS__FEEDBACK__MODAL_DESCRIPTION.toString(), TextInputStyle.PARAGRAPH)
+                                ActionRow.of(TextInput.create("description", "Opis", TextInputStyle.PARAGRAPH)
                                         .setRequired(true)
                                         .build())
                         )
                         .build()
         ).queue();
+        return CompletableFuture.completedFuture(2);
     }
 
     @Override
@@ -75,8 +71,7 @@ public class FeedbackCommand extends CommandHandler {
                 Category category = guild.getCategoryById(description);
                 if (category == null) break openChannels;
                 event.deferReply(true).queue();
-                Member member = event.getMember();
-                Utils.async(() -> openChannels(category, event.getHook(), DiscordUtils.getMemberAsTag(user, member), DiscordUtils.getAvatar(user, member), user));
+                Utils.async(() -> openChannels(category, event.getHook(), user, event.getMember()));
                 return;
             }
 
@@ -88,47 +83,53 @@ public class FeedbackCommand extends CommandHandler {
             eb.setAuthor(DiscordUtils.getAsTag(user), null, user.getEffectiveAvatarUrl());
             eb.setFooter("Received at", event.getJDA().getSelfUser().getEffectiveAvatarUrl());
 
-            JDA jda = plugin.getJda();
-            if (jda == null) {
-                event.reply(Translation.COMMANDS__FEEDBACK__FAILURE.toString()).setEphemeral(true).queue();
-                return;
-            }
-
-            TextChannel chn = jda.getTextChannelById(plugin.getConfig().getLong("logs-channel-id"));
+            TextChannel chn = event.getJDA().getTextChannelById(instance.getConfig().getLong("logs-channel-id"));
             if (chn != null) {
-                chn.sendMessageEmbeds(eb.build()).queue();
-                event.reply(Translation.COMMANDS__FEEDBACK__SUCCESS.toString()).setEphemeral(true).queue();
+                chn.sendMessageEmbeds(eb.build()).queue(
+                        success -> event.reply("Dziękuję za twoją opinię! :)").setEphemeral(true).queue(),
+                        failure -> event.reply(DiscordUtils.checkLength("Napotkano niespodziewany błąd przy wysyłaniu twojej opinii:\n```\n" + description, Message.MAX_CONTENT_LENGTH - 10) + "\n```").queue()
+                );
             } else {
-                event.reply(Translation.COMMANDS__FEEDBACK__FAILURE.toString()).setEphemeral(true).queue();
+                event.reply(DiscordUtils.checkLength("Napotkano niespodziewany błąd przy wysyłaniu twojej opinii:\n```\n" + description, Message.MAX_CONTENT_LENGTH - 10) + "\n```").queue();
             }
-
-            plugin.getCommandHandler().putCooldown(user, "feedback", 15 * Utils.SECOND);
         }
     }
 
-    private void openChannels(@NotNull Category category, @NotNull InteractionHook hook, @NotNull String footer, @NotNull String footerUrl, @NotNull User user) {
-        int success = 0;
-        for (ChannelData.Type type : ChannelData.Type.values()) {
-            TextChannel chn = category.createTextChannel(type.toString()).complete();
-
-            List<Webhook> webhooks = chn.retrieveWebhooks().complete();
-            Webhook webhook = webhooks.isEmpty() ? chn.createWebhook("Counting bot").complete() : webhooks.getFirst();
-
-            if (plugin.getStorage().addChannel(new ChannelData(chn.getIdLong(), chn.getGuild().getIdLong(), type, webhook)) == Response.SUCCESS) {
-                EmbedBuilder eb = new EmbedBuilder();
-                eb.setTitle(Translation.GENERAL__OPEN_EMBED__TITLE.toString());
-                eb.setDescription(Translation.GENERAL__OPEN_EMBED__DESCRIPTION.getFormatted(type, type.getDescription()));
-                eb.setColor(Color.GREEN);
-                eb.setTimestamp(Instant.now());
-                eb.setFooter(footer, footerUrl);
-                chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
-
-                Logs.info(DiscordUtils.getAsTag(user) + " opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
-
-                success++;
-            }
-        }
-        hook.sendMessage(Translation.COMMANDS__FEEDBACK__OPEN_CHANNELS.getFormatted(success, ChannelData.Type.values().length)).queue();
+    private void openChannels(@NotNull Category category, @NotNull InteractionHook hook, @NotNull User user, @Nullable Member member) {
+        Arrays.stream(ChannelData.Type.values())
+                .map(type -> openChannel(category, type, user, member))
+                .reduce((a, b) -> a.thenCombine(b, Integer::sum))
+                .orElseGet(() -> CompletableFuture.completedFuture(0))
+                .thenAccept(success -> hook.sendMessage("Successfully opened %s counting channel(s) out of %s.".formatted(success, ChannelData.Type.values().length)).queue());
     }
 
+    private @NotNull CompletableFuture<Integer> openChannel(@NotNull Category category, @NotNull ChannelData.Type type, @NotNull User user, @Nullable Member member) {
+        CompletableFuture<Integer> future = new CompletableFuture<>();
+        category.createTextChannel(type.toString()).queue(
+                chn -> DiscordUtils.getOrCreateWebhook(chn)
+                        .whenComplete((webhook, e) -> {
+                            if (webhook == null) {
+                                future.complete(0);
+                                return;
+                            }
+                            future.complete(withWebhook(chn, webhook, type, user, member));
+                        }),
+                failure -> future.complete(0)
+        );
+        return future;
+    }
+
+    private int withWebhook(@NotNull TextChannel chn, @NotNull Webhook webhook, @NotNull ChannelData.Type type, @NotNull User user, @Nullable Member member) {
+        if (instance.getStorage().addChannel(new ChannelData(chn.getIdLong(), chn.getGuild().getIdLong(), type, webhook)) == Response.SUCCESS) {
+            EmbedBuilder eb = DiscordUtils.getOpenChannelEmbed(type, user, member);
+            chn.sendMessageEmbeds(eb.build()).queue(message -> message.pin().queue());
+            DiscordUtils.setSlowmode(instance, chn);
+
+            Logs.info(DiscordUtils.getAsTag(user) + " has opened counting channel " + chn.getAsMention() + " (ID: `" + chn.getId() + "`)");
+            return 1;
+        } else {
+            chn.delete().queue();
+        }
+        return 0;
+    }
 }

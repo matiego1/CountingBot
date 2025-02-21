@@ -9,13 +9,6 @@ import java.math.BigInteger;
 import java.util.List;
 
 public class PalindromicCounting implements ChannelHandler {
-    /**
-     * Checks if sent a message is correct.
-     *
-     * @param message the message sent by the user.
-     * @param history the last messages from the channel - see {@link #getAmountOfMessages()}
-     * @return {@code null} if the message is not correct, otherwise a new content of this message
-     */
     @Override
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
         if (history.isEmpty()) return message.getContentDisplay().equals("1") ? "1" : null;
@@ -35,12 +28,7 @@ public class PalindromicCounting implements ChannelHandler {
         return getNext(a.toString()).equals(b.toString()) ? b.toString() : null;
     }
 
-    /**
-     * Returns the next palindrome number after the given one. <br>
-     * Based on <a href="https://stackoverflow.com/questions/7934519/a-better-algorithm-to-find-the-next-palindrome-of-a-number-string">this</a> article.
-     * @param number the number
-     * @return the next palindrome number
-     */
+    // https://stackoverflow.com/questions/7934519/a-better-algorithm-to-find-the-next-palindrome-of-a-number-string
     public static @NotNull String getNext(@NotNull String number) {
         int len = number.length();
         String left = number.substring(0, len / 2);
@@ -53,11 +41,6 @@ public class PalindromicCounting implements ChannelHandler {
         return next.substring(0, left.length() + middle.length()) + reverse(next).substring(middle.length());
     }
 
-    /**
-     * Reverses a string
-     * @param string the string
-     * @return the reversed string
-     */
     private static @NotNull String reverse(@NotNull String string) {
         return new StringBuilder(string).reverse().toString();
     }

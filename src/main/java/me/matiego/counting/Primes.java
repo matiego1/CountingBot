@@ -19,12 +19,7 @@ public class Primes {
         }
     }
 
-    /**
-     * Checks whether the given number is a prime number. <br>
-     * If the number is greater than {@link #MAX_PRIME}, it will have a complexity of O(sqrt(n)), otherwise O(1).
-     * @param number the number
-     * @return {@code true} or {@code false}
-     */
+    // O(1) for numbers <= MAX_PRIME; O(sqrt(n)) otherwise
     public static boolean isPrime(long number) {
         if (number <= MAX_PRIME) return primes[(int) number];
         for (long i = 2; i * i < number; i++) {
@@ -33,11 +28,6 @@ public class Primes {
         return true;
     }
 
-    /**
-     * Checks whether the given number is a semi-prime number.
-     * @param number the number
-     * @return {@code true} or {@code false}
-     */
     public static boolean isSemiPrime(long number) {
         if (isPrime(number)) return false;
         for (long i = 2; i * i <= number; i++) {
@@ -46,11 +36,6 @@ public class Primes {
         return false;
     }
 
-    /**
-     * Checks whether the given number is a sphenic number.
-     * @param number the number
-     * @return {@code true} or {@code false}
-     */
     public static boolean isSphenic(long number) {
         if (isPrime(number)) return false;
         for (long i = 2; i * i <= number; i++) {
@@ -59,18 +44,15 @@ public class Primes {
         return false;
     }
 
-    /**
-     * Checks whether the given number is a semi-prime number and: <br>
-     * - divisors are different from each other <br>
-     * - divisors are different from {@code different} param
-     * @param number the number
-     * @param different the number from which the divisors must be different
-     * @return {@code true} or {@code false}
-     */
     private static boolean isSemiPrimeDifferent(long number, long different) {
         if (isPrime(number)) return false;
         for (long i = 2; i * i < number; i++) {
-            if (number % i == 0 && isPrime(i) && isPrime(number / i) && i != different && number / i != different) return true;
+            if (number % i != 0) continue;
+            if (!isPrime(i)) continue;
+            if (!isPrime(number / i)) continue;
+            if (i == different) continue;
+            if (number / i == different) continue;
+            return true;
         }
         return false;
     }

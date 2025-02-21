@@ -1,5 +1,6 @@
 package me.matiego.counting;
 
+import lombok.Getter;
 import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Response;
 import org.jetbrains.annotations.NotNull;
@@ -9,26 +10,22 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 public class Dictionary {
     private static final int ER_DUP_ENTRY = 1062;
 
-    /**
-     * Loads the dictionary from the file.
-     * <b>Execution of this method may block the thread for a long time!</b>
-     * @param file the file
-     * @param type the type of the dictionary
-     * @return {@code Response.SUCCESS} if a file was loaded successfully, {@code Response.NO_CHANGES} if the file does not exist, {@code Response.FAILURE} if an error occurred.
-     */
-    public @NotNull Response loadDictionaryFromFile(@NotNull File file, @NotNull Type type) {
+    public @NotNull Response loadDictionaryFromFile(@NotNull File file, @NotNull Type type, @NotNull Runnable afterChecks) {
         if (!type.isDictionarySupported()) return Response.FAILURE;
         if (!file.exists()) return Response.NO_CHANGES;
+
+        afterChecks.run();
 
         try (Connection conn = Main.getInstance().getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("TRUNCATE counting_" + type + "_dict")) {
             stmt.execute();
         } catch (SQLException e) {
-            Logs.error("An error occurred while loading the dictionary (" + type + ").", e);
+            Logs.error("Failed to load the dictionary from file (" + type + ").", e);
             return Response.FAILURE;
         }
 
@@ -43,17 +40,11 @@ public class Dictionary {
             stmt.execute();
             return Response.SUCCESS;
         } catch (SQLException e) {
-            Logs.error("An error occurred while loading the dictionary (" + type + ").", e);
+            Logs.error("Failed to load the dictionary from file (" + type + ").", e);
         }
         return Response.FAILURE;
     }
 
-    /**
-     * Adds a word to the dictionary
-     * @param type the type of the dictionary
-     * @param word the word
-     * @return {@code true} if the word was added successfully otherwise {@code false}
-     */
     public boolean addWordToDictionary(@NotNull Type type, @NotNull String word) {
         if (!type.isDictionarySupported()) return false;
         try (Connection conn = Main.getInstance().getMySQLConnection();
@@ -63,17 +54,11 @@ public class Dictionary {
             stmt.execute();
             return true;
         } catch (SQLException e) {
-            Logs.error("An error occurred while adding the word to the dictionary (" + type + ").", e);
+            Logs.error("Failed to add word to the dictionary (" + type + ").", e);
         }
         return false;
     }
 
-    /**
-     * Removes a word from the dictionary
-     * @param type the type of the dictionary
-     * @param word the word
-     * @return {@code true} if the word was removed successfully otherwise {@code false}
-     */
     public boolean removeWordFromDictionary(@NotNull Type type, @NotNull String word) {
         if (!type.isDictionarySupported()) return false;
         try (Connection conn = Main.getInstance().getMySQLConnection();
@@ -82,7 +67,7 @@ public class Dictionary {
             stmt.execute();
             return true;
         } catch (SQLException e) {
-            Logs.error("An error occurred while removing the word from the dictionary (" + type + ").", e);
+            Logs.error("Failed to remove word from the dictionary (" + type + ").", e);
         }
         return false;
     }
@@ -94,17 +79,11 @@ public class Dictionary {
             stmt.setString(1, word);
             return stmt.executeQuery().next();
         } catch (SQLException e) {
-            Logs.error("An error occurred while removing the word from the dictionary (" + type + ").", e);
+            Logs.error("Failed to check if word exists in the dictionary (" + type + ").", e);
         }
         return false;
     }
 
-    /**
-     * Marks a word as used.
-     * @param type the type of the dictionary
-     * @param word the word
-     * @return {@code Response.SUCCESS} if the word was marked successfully, {@code Response.NO_CHANGES} if the word has already been marked or {@code Response.FAILURE} if an error occurred
-     */
     public @NotNull Response markWordAsUsed(@NotNull Type type, long guildId, @NotNull String word) {
         if (type == Type.POLISH && word.equalsIgnoreCase("yeti")) return Response.SUCCESS;
         try (Connection conn = Main.getInstance().getMySQLConnection();
@@ -115,7 +94,7 @@ public class Dictionary {
             return Response.SUCCESS;
         } catch (SQLException e) {
             if (e.getErrorCode() == ER_DUP_ENTRY) return Response.NO_CHANGES;
-            Logs.error("An error occurred while modifying the dictionary (" + type + ").", e);
+            Logs.error("Failed to mark word as used (" + type + ").", e);
         }
         return Response.FAILURE;
     }
@@ -128,11 +107,12 @@ public class Dictionary {
             stmt.execute();
             return true;
         } catch (SQLException e) {
-            Logs.error("An error occurred while modifying the dictionary (" + type + ").", e);
+            Logs.error("Failed to unmark word as used (" + type + ").", e);
         }
         return false;
     }
 
+    @Getter
     public enum Type {
         POLISH,
         ENGLISH,
@@ -141,32 +121,20 @@ public class Dictionary {
         TAUTOLOGIES(false),
         MINECRAFT_ITEM(false);
 
+        Type(boolean dictionarySupported) {
+            this.dictionarySupported = dictionarySupported;
+        }
         Type() {
             this(true);
         }
-        Type(boolean dictionary) {
-            this.dictionary = dictionary;
-        }
 
-        private final boolean dictionary;
-        public boolean isDictionarySupported() {
-            return dictionary;
-        }
+        private final boolean dictionarySupported;
 
-        public @NotNull String getTranslation() {
-            try {
-                return Translation.valueOf("COMMANDS__DICTIONARY__TYPES__" + name()).toString();
-            } catch (IllegalArgumentException ignored) {}
-            return "COMMANDS__DICTIONARY__TYPES__" + name();
-        }
-
-        static public @Nullable Type getByTranslation(@NotNull String string) {
-            for (Type type : values()) {
-                if (type.getTranslation().equalsIgnoreCase(string)) {
-                    return type;
-                }
-            }
-            return null;
+        public static @Nullable Type getByString(@NotNull String string) {
+            return Arrays.stream(values())
+                    .filter(v -> v.toString().equalsIgnoreCase(string))
+                    .findFirst()
+                    .orElse(null);
         }
 
         @Override

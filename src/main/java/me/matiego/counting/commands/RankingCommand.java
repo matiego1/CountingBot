@@ -1,7 +1,6 @@
 package me.matiego.counting.commands;
 
 import me.matiego.counting.Main;
-import me.matiego.counting.Translation;
 import me.matiego.counting.UserRanking;
 import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
@@ -16,65 +15,64 @@ import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.jetbrains.annotations.NotNull;
 
-import java.awt.*;
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 
 public class RankingCommand extends CommandHandler {
-    public RankingCommand(@NotNull Main plugin) {
-        this.plugin = plugin;
+    public RankingCommand(@NotNull Main instance) {
+        this.instance = instance;
     }
-    private final Main plugin;
+    private final Main instance;
 
-    /**
-     * Returns the slash command.
-     *
-     * @return the slash command
-     */
     @Override
     public @NotNull CommandData getCommand() {
-        return createSlashCommand("ranking", true)
-                .addOptions(
-                        EPHEMERAL_OPTION,
-                        createOption(
-                                "amount",
-                                OptionType.INTEGER,
-                                false,
-                                Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__NAME,
-                                Translation.COMMANDS__RANKING__OPTIONS__AMOUNT__DESCRIPTION
-                        ).setRequiredRange(5, 30)
-                );
+        return createSlashCommand(
+                "ranking",
+                "Pokazuje ranking użytkowników",
+                true
+        ).addOptions(
+                EPHEMERAL_OPTION,
+                createOption(
+                        "amount",
+                        "Ilość miejsc do pokazania",
+                        OptionType.INTEGER,
+                        false
+                ).setRequiredRange(5, 30)
+        );
     }
 
     @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
+    public @NotNull CompletableFuture<Integer> onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         boolean ephemeral = event.getOption("ephemeral", "False", OptionMapping::getAsString).equals("True");
-        if (plugin.getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
-        event.deferReply(ephemeral).queue();
+        if (instance.getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
 
-        User user = event.getUser();
+        event.deferReply(ephemeral).queue();
         InteractionHook hook = event.getHook();
 
+        User user = event.getUser();
         int option = event.getOption("amount", 10, OptionMapping::getAsInt);
 
+        CompletableFuture<Integer> cooldown = new CompletableFuture<>();
         Utils.async(() -> {
             EmbedBuilder eb = new EmbedBuilder();
             eb.setTimestamp(Instant.now());
             eb.setFooter(DiscordUtils.getMemberAsTag(user, event.getMember()), DiscordUtils.getAvatar(user, event.getMember()));
-            eb.setColor(Color.YELLOW);
+            eb.setColor(Utils.YELLOW);
 
-            List<UserRanking.Data> top = plugin.getUserRanking().getTop(Objects.requireNonNull(event.getGuild()).getIdLong(), option);
+            List<UserRanking.Data> top = instance.getUserRanking().getTop(Objects.requireNonNull(event.getGuild()).getIdLong(), option);
 
             if (top.size() <= 1) {
-                hook.sendMessage(Translation.COMMANDS__RANKING__EMPTY.toString()).queue();
-                plugin.getCommandHandler().putCooldown(event.getUser(), event.getName(), 3 * Utils.SECOND);
+                hook.sendMessage("Ranking jest pusty albo napotkano niespodziewany błąd.").queue();
+                cooldown.complete(10);
                 return;
             }
 
             int total = 0, total_guild = 0;
             StringBuilder builder = new StringBuilder();
 
+            // TODO: rewrite - add pages
             for (UserRanking.Data data : top) {
                 if (data.getUser().getIdLong() == 0) {
                     total = data.getScore();
@@ -88,19 +86,20 @@ public class RankingCommand extends CommandHandler {
                     case 3 -> ":third_place:";
                     default -> data.getRank() + ".";
                 };
-                builder.append(Translation.COMMANDS__RANKING__ROW.getFormatted("**" + place + "**", data.getUser().getAsMention(), data.getScore())).append("\n");
+                builder.append("**%s** %s - %s message(s)\n".formatted(place, data.getUser().getAsMention(), data.getScore()));
             }
 
-            String description = DiscordUtils.checkLength(Translation.COMMANDS__RANKING__HEADER.getFormatted(total, total_guild) + builder, MessageEmbed.DESCRIPTION_MAX_LENGTH);
+            String description = DiscordUtils.checkLength("**Łącznie `%s` wiadomości, w tym `%s` na tym serwerze**\n\n".formatted(total, total_guild) + builder, MessageEmbed.DESCRIPTION_MAX_LENGTH);
             if (description.endsWith("...")) {
                 description = description.substring(0, description.lastIndexOf("\n") + 1) + "...";
             }
 
             eb.setDescription(description);
-            eb.setTitle(Translation.COMMANDS__RANKING__TITLE.getFormatted(top.size() - 1));
+            eb.setTitle("**" + (top.size() - 1) + " najlepszych miejsc**");
 
             hook.sendMessageEmbeds(eb.build()).queue();
-            plugin.getCommandHandler().putCooldown(event.getUser(), event.getName(), 5 * Utils.SECOND);
+            cooldown.complete(10);
         });
+        return cooldown;
     }
 }

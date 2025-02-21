@@ -9,19 +9,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-/**
- * A MySQL database.
- */
 public class MySQL {
     private final HikariDataSource ds;
 
-    /**
-     * Initials the database.
-     * @param url a jdbc url
-     * @param user a user
-     * @param password a password
-     * @throws SQLException thrown if connection has failed.
-     */
     public MySQL(@NotNull String url, @NotNull String user, @NotNull String password) throws SQLException {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(url);
@@ -45,26 +35,14 @@ public class MySQL {
         getConnection(); //test connection
     }
 
-    /**
-     * Closes the database connection.
-     */
     public void close() {
         ds.close();
     }
 
-    /**
-     * Returns the database connection.
-     * @return the database connection.
-     * @throws SQLException thrown if connection has failed.
-     */
     public @NotNull Connection getConnection() throws SQLException {
         return ds.getConnection();
     }
 
-    /**
-     * Creates the database tables.
-     * @return {@code true} if tables creation was successful otherwise {@code false}
-     */
     public boolean createTables() {
         try (Connection conn = getConnection()) {
             try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_channels(chn VARCHAR(20) NOT NULL, guild VARCHAR(20) NOT NULL, type VARCHAR(30) NOT NULL, url VARCHAR(200) NOT NULL, PRIMARY KEY (chn))")) {
@@ -84,7 +62,7 @@ public class MySQL {
                 }
             }
         } catch (SQLException e) {
-            Logs.error("An error occurred while creating the database tables.", e);
+            Logs.error("Failed to create database tables.", e);
             return false;
         }
         return true;

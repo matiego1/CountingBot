@@ -10,30 +10,23 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 
-/**
- * Counting channels storage
- */
 public class Storage {
-    private Storage(@NotNull Main plugin, @NotNull HashMap<Long, ChannelData> cache) {
-        this.plugin = plugin;
+    private Storage(@NotNull Main instance, @NotNull HashMap<Long, ChannelData> cache) {
+        this.instance = instance;
         this.cache = cache;
     }
 
-    private final Main plugin;
+    private final Main instance;
     private final HashMap<Long, ChannelData> cache;
 
-    /**
-     * Adds a new counting channel.
-     * @param data the channel data
-     * @return {@code Response.SUCCESS} if the channel was added successfully, otherwise {@code Response.FAILURE}
-     */
     public synchronized @NotNull Response addChannel(@NotNull ChannelData data) {
         if (cache.containsKey(data.getChannelId())) return Response.NO_CHANGES;
-        try (Connection conn = plugin.getMySQLConnection();
+        try (Connection conn = instance.getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO counting_channels(chn, guild, type, url) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE chn = chn, guild = ?, type = ?, url = ?")) {
             stmt.setString(1, String.valueOf(data.getChannelId()));
             stmt.setString(2, String.valueOf(data.getGuildId()));
@@ -48,51 +41,33 @@ public class Storage {
             cache.put(data.getChannelId(), data);
             return Response.SUCCESS;
         } catch (SQLException e) {
-            Logs.error("An error occurred while saving the channel to the storage", e);
+            Logs.error("Failed to add the counting channel to the storage.", e);
         }
         return Response.FAILURE;
     }
 
-    /**
-     * Remove the counting channel.
-     * @param id id of the channel
-     * @return {@code Response.SUCCESS} if the channel was removed successfully, {@code Response.NO_CHANGES} if the channel has not been added yet or {@code Response.FAILURE} if an error occurred
-     */
     public synchronized @NotNull Response removeChannel(long id) {
         if (!cache.containsKey(id)) return Response.NO_CHANGES;
-        try (Connection conn = plugin.getMySQLConnection();
+        try (Connection conn = instance.getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("DELETE FROM counting_channels WHERE chn = ?;")) {
             stmt.setString(1, String.valueOf(id));
             stmt.execute();
             cache.remove(id);
             return Response.SUCCESS;
         } catch (SQLException e) {
-            Logs.error("An error occurred while removing the channel from the storage", e);
+            Logs.error("Failed to remove the counting channel from the storage.", e);
         }
         return Response.FAILURE;
     }
 
-    /**
-     * Returns a channel data.
-     * @param id id of the channel
-     * @return the channel data
-     */
     public synchronized @Nullable ChannelData getChannel(long id) {
         return cache.get(id);
     }
 
-    /**
-     * Returns a list of all added channels.
-     * @return the list of all added channels
-     */
     public synchronized @NotNull List<ChannelData> getChannels() {
-        return cache.values().stream().toList();
+        return new ArrayList<>(cache.values());
     }
 
-    /**
-     * Loads counting channels from the database.
-     * @return a new instance of this class with loaded channels.
-     */
     public static @Nullable Storage load(@NotNull Main plugin) {
         try (Connection conn = plugin.getMySQLConnection();
              PreparedStatement stmt = conn.prepareStatement("SELECT chn, guild, type, url FROM counting_channels")) {
@@ -114,12 +89,12 @@ public class Storage {
                             )
                     );
                 } catch (Exception e) {
-                    Logs.warning("An error occurred while loading the counting channels: " + e.getMessage());
+                    Logs.warning("Failed to load one of the counting channels from the storage.", e);
                 }
             }
             return new Storage(plugin, cache);
         } catch (SQLException e) {
-            Logs.error("An error occurred while loading the storage", e);
+            Logs.error("Failed to load the storage.", e);
         }
         return null;
     }

@@ -4,15 +4,24 @@ import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
+import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
+import net.dv8tion.jda.api.entities.channel.attribute.ISlowmodeChannel;
+import net.dv8tion.jda.api.entities.channel.attribute.IWebhookContainer;
+import net.dv8tion.jda.api.entities.channel.concrete.ThreadChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
-import net.dv8tion.jda.api.interactions.DiscordLocale;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.dv8tion.jda.internal.utils.IOUtil;
@@ -28,7 +37,9 @@ import org.minidns.record.Record;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.Instant;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -229,14 +240,6 @@ public class DiscordUtils {
         return getName(user, member) + (tag.equals("0000") ? "" : "#" + tag);
     }
 
-    public static @NotNull Map<DiscordLocale, String> getAllLocalizations(@NotNull String string) {
-        Map<DiscordLocale, String> result = new HashMap<>();
-        for (DiscordLocale value : DiscordLocale.values()) {
-            if (value != DiscordLocale.UNKNOWN) result.put(value, string);
-        }
-        return result;
-    }
-
     public static boolean hasRequiredPermissions(@NotNull MessageChannelUnion union) {
         if (!union.getType().isGuild()) return union.canTalk();
         GuildChannel chn = union.asGuildMessageChannel();
@@ -247,11 +250,60 @@ public class DiscordUtils {
         return user.getDiscriminator().equals("0000") ? user.getName() : user.getAsTag();
     }
 
-    public static boolean checkAdminKey(@NotNull String string, @NotNull User user) {
+    public static boolean checkAdminKey(@Nullable String string, @NotNull User user) {
+        if (string == null) return false;
         if (string.equals(Main.getInstance().getConfig().getString("admin-key"))) {
             Logs.info(getAsTag(user) + " successfully used admin key.");
             return true;
         }
         return false;
+    }
+
+    public static boolean isSupportedChannel(@NotNull MessageChannel channel) {
+        if (channel.getType() == ChannelType.TEXT) return true;
+        if (channel.getType() == ChannelType.GUILD_PUBLIC_THREAD && channel instanceof ThreadChannel chn) {
+            return chn.getParentChannel().getType() == ChannelType.FORUM;
+        }
+        return false;
+    }
+
+    public static @Nullable GuildMessageChannel getSupportedChannelById(@NotNull JDA jda, long id) {
+        GuildMessageChannel chn = jda.getChannelById(GuildMessageChannel.class, id);
+        if (chn == null) return null;
+        if (isSupportedChannel(chn)) return chn;
+        return null;
+    }
+
+    public static @NotNull CompletableFuture<Webhook> getOrCreateWebhook(IWebhookContainer channel) {
+        return channel.retrieveWebhooks().submit()
+                .thenCompose(webhooks -> {
+                    if (webhooks.isEmpty()) {
+                        return channel.createWebhook("Counting Bot").submit();
+                    }
+                    return CompletableFuture.completedFuture(webhooks.getFirst());
+                });
+    }
+
+    public static void setSlowmode(@NotNull Main plugin, @NotNull GuildMessageChannel chn) {
+        if (chn instanceof ISlowmodeChannel slowmodeChannel) {
+            slowmodeChannel.getManager().setSlowmode(Math.max(0, Math.min(ISlowmodeChannel.MAX_SLOWMODE, plugin.getConfig().getInt("slowmode")))).queue();
+        }
+    }
+
+    public static @NotNull EmbedBuilder getOpenChannelEmbed(@NotNull ChannelData.Type type, @NotNull User user, @Nullable Member member) {
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle("**Kanał do liczenia został otwarty!**");
+        eb.setDescription("""
+                **Dołącz się do wspólnego liczenia!**
+                
+                Typ kanału: `%s`
+                Opis: `%s`
+                (Szczegółowe opisy kanałów znajdziesz [tutaj](<https://github.com/matiego1/CountingBot/blob/master/README.md>))"""
+                .formatted(type, type.getDescription())
+        );
+        eb.setColor(Utils.GREEN);
+        eb.setTimestamp(Instant.now());
+        eb.setFooter(DiscordUtils.getMemberAsTag(user, member), DiscordUtils.getAvatar(user, member));
+        return eb;
     }
 }

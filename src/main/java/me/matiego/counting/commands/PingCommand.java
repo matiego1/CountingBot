@@ -8,27 +8,27 @@ import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.concurrent.CompletableFuture;
+
 public class PingCommand extends CommandHandler {
-    public PingCommand(@NotNull Main plugin) {
-        this.plugin = plugin;
+    public PingCommand(@NotNull Main instance) {
+        this.instance = instance;
     }
-    private final Main plugin;
-    
-    /**
-     * Returns the slash command.
-     *
-     * @return the slash command
-     */
+    private final Main instance;
+
     @Override
     public @NotNull SlashCommandData getCommand() {
-        return createSlashCommand("ping", false)
-                .addOptions(EPHEMERAL_OPTION);
+        return createSlashCommand(
+                "ping",
+                "Pokazuje obecny ping bota",
+                false
+        ).addOptions(EPHEMERAL_OPTION);
     }
 
     @Override
-    public void onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
+    public @NotNull CompletableFuture<Integer> onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
         boolean ephemeral = event.getOption("ephemeral", "False", OptionMapping::getAsString).equals("True");
-        if (plugin.getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
+        if (instance.getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
 
         long time = Utils.now();
         event.reply("Pong!")
@@ -36,6 +36,6 @@ public class PingCommand extends CommandHandler {
                 .flatMap(v -> event.getHook().editOriginalFormat("Pong: %d ms", Utils.now() - time))
                 .queue();
 
-        plugin.getCommandHandler().putCooldown(event.getUser(), event.getName(), 2 * Utils.SECOND);
+        return CompletableFuture.completedFuture(3);
     }
 }

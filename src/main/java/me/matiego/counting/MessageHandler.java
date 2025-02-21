@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
-import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -16,15 +15,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-/**
- * A Discord messages handler
- */
 public class MessageHandler extends ListenerAdapter {
-    public MessageHandler(@NotNull Main plugin) {
-        this.plugin = plugin;
+    public MessageHandler(@NotNull Main instance) {
+        this.instance = instance;
     }
 
-    private final Main plugin;
+    private final Main instance;
     private final HashMap<String, Pair<Integer, Long>> cooldown = Utils.createLimitedSizeMap(1000);
 
     @Override
@@ -32,10 +28,10 @@ public class MessageHandler extends ListenerAdapter {
         Utils.async(() -> {
             long time = Utils.now();
 
-            if (!event.isFromType(ChannelType.TEXT) && !event.isFromType(ChannelType.GUILD_PUBLIC_THREAD)) return;
+            MessageChannelUnion channel = event.getChannel();
+            if (!DiscordUtils.isSupportedChannel(channel)) return;
 
-            MessageChannelUnion chn = event.getChannel();
-            ChannelData data = plugin.getStorage().getChannel(chn.getIdLong());
+            ChannelData data = instance.getStorage().getChannel(channel.getIdLong());
             if (data == null) return;
 
             User user = event.getAuthor();
@@ -47,55 +43,68 @@ public class MessageHandler extends ListenerAdapter {
                 return;
             }
 
-            int minTime = plugin.getConfig().getInt("anti-spam.time"), maxCount = plugin.getConfig().getInt("anti-spam.count");
-            if (checkCooldown(user, chn.getIdLong(), time, minTime * 1000, maxCount)) {
+            int minTime = instance.getConfig().getInt("anti-spam.time"), maxCount = instance.getConfig().getInt("anti-spam.count");
+            if (checkCooldown(user, channel.getIdLong(), time, minTime * 1000, maxCount)) {
                 message.delete().queue();
-                DiscordUtils.sendPrivateMessage(user, Translation.GENERAL__DO_NOT_SPAM.getFormatted(maxCount, minTime));
+                DiscordUtils.sendPrivateMessage(user, "Nie spamuj na kanałach do liczenia! Możesz wysłać tylko %s wiadomości w odstępie mniejszym niż %s sekund między każdą.".formatted(maxCount, minTime));
                 return;
             }
 
             ChannelHandler handler = data.getHandler();
             int amount = handler.getAmountOfMessages();
-            List<Message> history = amount == 0
-                    ? new ArrayList<>()
-                    : chn.getHistory().retrievePast(amount + 1).complete();
-            if (!history.isEmpty()) {
-                history.removeFirst();
-            }
-
-            message.delete().queue();
-
-            String correctMsg = handler.check(
-                    message,
-                    history.stream()
-                            .filter(Message::isWebhookMessage)
-                            .toList()
-            );
-            if (correctMsg == null) return;
-
-            Member member = event.getMember();
-            CountingMessageSendEvent countingMessageSendEvent = new CountingMessageSendEvent(data, user, DiscordUtils.getName(user, member), history.isEmpty() ? null : history.getFirst().getIdLong());
-            Bukkit.getPluginManager().callEvent(countingMessageSendEvent);
-            if (countingMessageSendEvent.isCancelled()) return;
-
-            boolean success = switch (chn.getType()) {
-                case TEXT -> DiscordUtils.sendWebhook(data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg);
-                case GUILD_PUBLIC_THREAD -> DiscordUtils.sendWebhookToThread(chn.getIdLong(), data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg);
-                default -> false;
-            };
-
-            if (success) {
-                plugin.getUserRanking().add(user, event.getGuild().getIdLong());
-                countingMessageSendEvent.getOnSuccess().run();
+            if (amount == 0) {
+                withRetrievedHistory(event, data, new ArrayList<>(), time);
             } else {
-                DiscordUtils.sendPrivateMessage(user, Translation.GENERAL__NOT_SENT.toString());
-            }
-
-            time = Utils.now() - time;
-            if (time >= 1000) {
-                Logs.warning("The message verification time exceeded 1 second! (Time: " + time + "ms; Channel: " + chn.getName() + "; ID: " + event.getChannel().getId() + ")");
+                channel.getHistory().retrievePast(amount + 1).queue(
+                        h -> withRetrievedHistory(event, data, new ArrayList<>(), time),
+                        f -> message.delete().queue()
+                );
             }
         });
+    }
+
+    private void withRetrievedHistory(@NotNull MessageReceivedEvent event, @NotNull ChannelData data, @NotNull List<Message> history, long time) {
+        if (!history.isEmpty()) {
+            history.removeFirst();
+        }
+
+        Message message = event.getMessage();
+        message.delete().queue();
+
+        String correctMsg = data.getHandler().check(
+                message,
+                history.stream()
+                        .filter(Message::isWebhookMessage)
+                        .toList()
+        );
+        if (correctMsg == null) return;
+
+        User user = event.getAuthor();
+        Member member = event.getMember();
+        CountingMessageSendEvent countingMessageSendEvent = new CountingMessageSendEvent(data, user, DiscordUtils.getName(user, member), history.isEmpty() ? null : history.getFirst().getIdLong());
+        Bukkit.getPluginManager().callEvent(countingMessageSendEvent);
+        if (countingMessageSendEvent.isCancelled()) return;
+
+        MessageChannelUnion chn = event.getChannel();
+        boolean success = switch (chn.getType()) {
+            case TEXT -> DiscordUtils.sendWebhook(data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg);
+            case GUILD_PUBLIC_THREAD -> DiscordUtils.sendWebhookToThread(chn.getIdLong(), data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg);
+            default -> false;
+        };
+
+        if (success) {
+            if (!instance.getUserRanking().add(user, event.getGuild().getIdLong())) {
+                DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy zwiększaniu twojego wyniku w rankingu. Poproś administratora bota o jego zwiększenie.");
+            }
+            countingMessageSendEvent.getOnSuccess().run();
+        } else {
+            DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy wysyłaniu twojej wiadomości. Spróbuj później.");
+        }
+
+        time = Utils.now() - time;
+        if (time >= 1000) {
+            Logs.warning("The message verification time exceeded 1 second! (Time: " + time + "ms; Channel: " + chn.getName() + "; ID: " + event.getChannel().getId() + ")");
+        }
     }
 
     public synchronized boolean checkCooldown(@NotNull UserSnowflake user, long chn, long now, int minTime, int maxCount) {

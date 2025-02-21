@@ -1,101 +1,96 @@
 package me.matiego.counting.commands;
 
 import me.matiego.counting.Main;
-import me.matiego.counting.Translation;
 import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
-import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Message;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
+import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
+import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
+import net.dv8tion.jda.api.interactions.commands.OptionType;
+import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
-import net.dv8tion.jda.api.interactions.commands.context.MessageContextInteraction;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
-import net.dv8tion.jda.api.interactions.modals.Modal;
-import net.dv8tion.jda.api.interactions.modals.ModalInteraction;
-import net.dv8tion.jda.api.interactions.modals.ModalMapping;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
+import java.util.concurrent.CompletableFuture;
 
 public class DeleteMessageCommand extends CommandHandler {
-    public DeleteMessageCommand(@NotNull Main plugin) {
-        this.plugin = plugin;
+    public DeleteMessageCommand(@NotNull Main instance) {
+        this.instance = instance;
     }
-    private final Main plugin;
-    private final HashMap<Long, Long> messages = Utils.createLimitedSizeMap(1000);
+    private final Main instance;
 
-    /**
-     * Returns the slash command.
-     *
-     * @return the slash command
-     */
     @Override
     public @NotNull CommandData getCommand() {
-        return Commands.message("delete this message")
-                .setNameLocalizations(DiscordUtils.getAllLocalizations(Translation.COMMANDS__DELETE_MESSAGE__NAME.toString()))
-                .setDefaultPermissions(DefaultMemberPermissions.enabledFor(Permission.MANAGE_CHANNEL))
-                .setGuildOnly(true);
-    }
-
-    @Override
-    public void onMessageContextInteraction(@NotNull MessageContextInteraction event) {
-        if (!event.getName().equals("delete this message")) return;
-        MessageChannelUnion union = event.getChannel();
-        if (union == null || plugin.getStorage().getChannel(union.getIdLong()) == null) {
-            event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__NO_PERMISSION.toString()).setEphemeral(true).queue();
-            return;
-        }
-        messages.put(event.getUser().getIdLong(), event.getTarget().getIdLong());
-        event.replyModal(
-                Modal.create("delete-msg-modal", Translation.COMMANDS__DELETE_MESSAGE__MODAL__NAME.toString())
-                        .addComponents(
-                                ActionRow.of(TextInput.create("admin-key", Translation.COMMANDS__DELETE_MESSAGE__MODAL__OPTION.toString(), TextInputStyle.SHORT)
-                                        .setRequired(true)
-                                        .build())
-                        )
-                        .build()
-        ).queue();
-    }
-
-    @Override
-    public void onModalInteraction(@NotNull ModalInteraction event) {
-        if (!event.getModalId().equals("delete-msg-modal")) return;
-        User user = event.getUser();
-
-        ModalMapping mapping = event.getValue("admin-key");
-        if (mapping == null) return;
-        String key = mapping.getAsString();
-        if (key.equalsIgnoreCase("null")) {
-            event.reply(Translation.GENERAL__INCORRECT_ADMIN_KEY.toString()).setEphemeral(true).queue();
-            return;
-        }
-        if (!DiscordUtils.checkAdminKey(key, user)) {
-            event.reply(Translation.GENERAL__INCORRECT_ADMIN_KEY.toString()).setEphemeral(true).queue();
-            return;
-        }
-
-        Long messageId = messages.remove(user.getIdLong());
-        if (messageId == null) {
-            event.reply(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE.toString()).setEphemeral(true).queue();
-            return;
-        }
-
-        event.deferReply(true).queue();
-        event.getChannel().retrieveMessageById(messageId).queue(
-                message -> {
-                    message.delete().queue();
-                    event.getHook().sendMessage(Translation.COMMANDS__DELETE_MESSAGE__SUCCESS.toString()).queue();
-
-                    Logs.info(DiscordUtils.checkLength(DiscordUtils.getAsTag(user) + " deleted `" + DiscordUtils.getAsTag(message.getAuthor()) + "`'s message in channel " + message.getChannel().getAsMention() + " (ID: `" + message.getChannelId() + "`). Message's content: ```\n" + message.getContentDisplay().replace("```", "\\`\\`\\`"), Message.MAX_CONTENT_LENGTH - 5) + "\n```");
-                },
-                failure -> event.getHook().sendMessage(Translation.COMMANDS__DELETE_MESSAGE__FAILURE__RETRIEVE_MESSAGE.toString()).queue()
+        return createSlashCommand(
+                "delete-message",
+                "Delete message",
+                true,
+                Permission.MESSAGE_MANAGE
+        ).addOptions(
+                ADMIN_KEY_OPTION,
+                createOption(
+                        "channel",
+                        "Channel ID",
+                        OptionType.STRING,
+                        true
+                ),
+                createOption(
+                        "message",
+                        "Message ID",
+                        OptionType.STRING,
+                        true
+                )
         );
+    }
+
+    @Override
+    public @NotNull CompletableFuture<Integer> onSlashCommandInteraction(@NotNull SlashCommandInteraction event) {
+        InteractionHook hook = event.getHook();
+        event.deferReply(true).queue();
+
+        String adminKey = event.getOption("admin-key", OptionMapping::getAsString);
+        if (!DiscordUtils.checkAdminKey(adminKey, event.getUser())) {
+            hook.sendMessage("Incorrect administrator key.").queue();
+            return CompletableFuture.completedFuture(3);
+        }
+
+        long channelId;
+        long messageId;
+        try {
+            channelId = event.getOption("channel", 0L, OptionMapping::getAsLong);
+            messageId = event.getOption("message", 0L, OptionMapping::getAsLong);
+        } catch (Exception e) {
+            hook.sendMessage("Incorrect IDs.").queue();
+            return CompletableFuture.completedFuture(3);
+        }
+
+        MessageChannel chn = event.getJDA().getChannelById(MessageChannel.class, channelId);
+        if (chn == null) {
+            hook.sendMessage("Channel with provided ID either doesn't exist or isn't the message channel.").queue();
+            return CompletableFuture.completedFuture(3);
+        }
+
+        try {
+            chn.retrieveMessageById(messageId).queue(
+                    message -> {
+                        if (message.getAuthor().getIdLong() != event.getJDA().getSelfUser().getIdLong() && instance.getStorage().getChannel(chn.getIdLong()) == null) {
+                            hook.sendMessage("You cannot delete this message. It isn't bot's message and it isn't in the counting channel.").queue();
+                            return;
+                        }
+
+                        message.delete().queue();
+                        event.getHook().sendMessage("Successfully deleted this message.").queue();
+
+                        Logs.info(DiscordUtils.checkLength(DiscordUtils.getAsTag(event.getUser()) + " has deleted `" + DiscordUtils.getAsTag(message.getAuthor()) + "`'s message in channel " + message.getChannel().getAsMention() + " (ID: `" + message.getChannelId() + "`). Message's content: ```\n" + message.getContentDisplay().replace("```", "\\`\\`\\`"), Message.MAX_CONTENT_LENGTH - 5) + "\n```");
+                    },
+                    failure -> event.getHook().sendMessage("Failed to retrieve the message.").queue()
+            );
+        } catch (Exception e) {
+            hook.sendMessage("Failed to retrieve the message.").queue();
+        }
+        return CompletableFuture.completedFuture(3);
     }
 }

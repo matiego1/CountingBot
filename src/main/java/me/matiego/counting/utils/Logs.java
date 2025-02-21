@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.concurrent.CompletableFuture;
 
 public class Logs {
     private static final Main plugin;
@@ -21,42 +22,26 @@ public class Logs {
         plugin = Main.getInstance();
     }
 
-    /**
-     * Sends info to the console and Discord logs channel.
-     * @param message the message to send
-     */
     public static void info(@NotNull String message) {
         plugin.getLogger().info(message);
         discord("INFO", message, null);
     }
 
-    /**
-     * Sends info to the console and Discord logs channel. This method will block the current thread until a message is sent to Discord.
-     * @param message the message to send
-     */
-    public static void infoWithBlock(@NotNull String message) {
+    public static @NotNull CompletableFuture<Void> infoWithBlock(@NotNull String message) {
         plugin.getLogger().info(message);
-        discordWithBlock("INFO", message, null);
+        CompletableFuture<Message> future = discord("INFO", message, null);
+        if (future == null) return CompletableFuture.completedFuture(null);
+        return future.thenAccept(m -> {});
     }
 
-    public static void quietInfo(@NotNull String message) {
+    public static void infoLocal(@NotNull String message) {
         plugin.getLogger().info(message);
     }
 
-    /**
-     * Sends a warning to the console and Discord logs channel.
-     * @param message the message to send
-     */
     public static void warning(@NotNull String message) {
         warning(message, null);
     }
 
-    /**
-     * Sends a warning to the console and Discord logs channel.
-     * This will also send a throwable stack trace.
-     * @param message the message to send
-     * @param throwable the throwable whose stack trace is to be sent to the console
-     */
     public static void warning(@NotNull String message, @Nullable Throwable throwable) {
         plugin.getLogger().warning(message);
 
@@ -75,20 +60,10 @@ public class Logs {
         discord("__WARNING__", message, embed);
     }
 
-    /**
-     * Sends a warning to the console and Discord logs channel.
-     * @param message the message to send
-     */
     public static void error(@NotNull String message) {
         error(message, null);
     }
 
-    /**
-     * Sends an error to the console and Discord logs channel.
-     * This will also send a throwable stack trace.
-     * @param message the message to send
-     * @param throwable the throwable whose stack trace is to be sent to the console
-     */
     public static void error(@NotNull String message, @Nullable Throwable throwable) {
         plugin.getLogger().severe(message);
 
@@ -107,26 +82,14 @@ public class Logs {
         discord("__ERROR__", message, embed);
     }
 
-    private static void discordWithBlock(@NotNull String type, @NotNull String message, @Nullable MessageEmbed embed) {
-        MessageCreateAction action = getMessageCreateAction(type, message, embed);
-        if (action == null) return;
-        action.complete();
-    }
-
-    private static void discord(@NotNull String type, @NotNull String message, @Nullable MessageEmbed embed) {
-        MessageCreateAction action = getMessageCreateAction(type, message, embed);
-        if (action == null) return;
-        action.queue();
-    }
-
-    private static @Nullable MessageCreateAction getMessageCreateAction(@NotNull String type, @NotNull String message, @Nullable MessageEmbed embed) {
+    private static @Nullable CompletableFuture<Message> discord(@NotNull String type, @NotNull String message, @Nullable MessageEmbed embed) {
         TextChannel chn = getConsoleChannel();
         if (chn == null) return null;
         MessageCreateAction action = chn.sendMessage(DiscordUtils.checkLength("**[<t:" + (Utils.now() / 1000) + ":T> " + type + "]:** " + message, Message.MAX_CONTENT_LENGTH));
         if (embed != null) {
             action.setEmbeds(embed);
         }
-        return action;
+        return action.submit();
     }
 
     private static @Nullable TextChannel getConsoleChannel() {
