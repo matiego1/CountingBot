@@ -90,7 +90,7 @@ public class DictionaryCommand extends CommandHandler {
         event.deferReply(true).queue();
         InteractionHook hook = event.getHook();
 
-        if (!DiscordUtils.checkAdminKey(event.getOption("admin-key", OptionMapping::getAsString), user)) {
+        if (!Utils.checkAdminKey(event.getOption("admin-key", OptionMapping::getAsString), user)) {
             hook.sendMessage("Incorrect administrator key!").queue();
             return CompletableFuture.completedFuture(3);
         }

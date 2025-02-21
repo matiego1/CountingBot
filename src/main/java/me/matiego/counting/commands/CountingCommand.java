@@ -5,10 +5,7 @@ import me.matiego.counting.Main;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
-import net.dv8tion.jda.api.entities.Guild;
-import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
-import net.dv8tion.jda.api.entities.Webhook;
+import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.attribute.IPostContainer;
 import net.dv8tion.jda.api.entities.channel.attribute.IWebhookContainer;
@@ -27,6 +24,7 @@ import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectInteraction;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.requests.restaction.ChannelAction;
+import net.dv8tion.jda.api.utils.SplitUtil;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
 import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
@@ -133,7 +131,7 @@ public class CountingCommand extends CommandHandler {
 
     private void handleListSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
         long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
-        boolean isAdmin = DiscordUtils.checkAdminKey(event.getOption("admin-key", OptionMapping::getAsString), event.getUser());
+        boolean isAdmin = Utils.checkAdminKey(event.getOption("admin-key", OptionMapping::getAsString), event.getUser());
 
         List<String> channels = new ArrayList<>();
         for (ChannelData data : instance.getStorage().getChannels()) {
@@ -145,20 +143,36 @@ public class CountingCommand extends CommandHandler {
             }
         }
 
-        // TODO: rewrite - add pages
-        final int maxSize = 35;
-        int totalSize = channels.size();
-        if (totalSize > maxSize) {
-            int more = totalSize - maxSize;
-            channels = channels.subList(0, maxSize);
-            channels.add("... and %s more channel(s)".formatted(more));
-        }
-
         if (channels.isEmpty()) {
             hook.sendMessage("No counting channel has been opened yet. Open a new one with command `/counting open`").queue();
-        } else {
-            hook.sendMessage("**__Open Counting Channels (%s in total):__**".formatted(totalSize) + "\n" + String.join("\n", channels)).queue();
+            return;
         }
+
+        List<String> chunks = SplitUtil.split(
+                "**__Open Counting Channels (%s in total):__**".formatted(channels.size()) + "\n" + String.join("\n", channels),
+                Message.MAX_CONTENT_LENGTH,
+                SplitUtil.Strategy.NEWLINE
+        );
+        String message = chunks.getFirst();
+
+        if (chunks.size() > 1) {
+            final String moreLine = "... and %s more channel(s)";
+            final int maxMoreLineLength = moreLine.length() + 10;
+
+            List<String> lines = Arrays.asList(message.split("\n"));
+
+            int removedCharacters = 0;
+            do {
+                removedCharacters += lines.removeLast().length();
+            } while (removedCharacters < maxMoreLineLength);
+
+            int more = channels.size() - (lines.size() - 1);
+            lines.add(moreLine.formatted(more));
+
+            message = String.join("\n", lines);
+        }
+
+        hook.sendMessage(message).queue();
     }
 
     private void handleCreateForumSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {

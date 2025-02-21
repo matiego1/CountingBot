@@ -68,12 +68,12 @@ public class Commands extends ListenerAdapter {
 
         //execute command
         try {
-            cooldown.put(cooldownKey, Utils.now() + (10 * 1000L));
+            cooldown.put(cooldownKey, Utils.now() + (15 * 1000L));
             handler.onSlashCommandInteraction(event.getInteraction())
                     .thenAccept(time -> cooldown.put(cooldownKey, Utils.now() + (time * 1000L)));
         } catch (Exception e) {
             Logs.error("Failed to execute the slash command.", e);
-            cooldown.put(cooldownKey, Utils.now() + (3 * 1000L));
+            cooldown.put(cooldownKey, Utils.now() + (5 * 1000L));
             event.reply("Napotkano niespodziewany błąd. Spróbuj później.").setEphemeral(true).queue(s -> {}, f -> {});
         }
     }

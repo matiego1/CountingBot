@@ -6,6 +6,7 @@ import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.InteractionHook;
@@ -16,6 +17,7 @@ import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -56,50 +58,61 @@ public class RankingCommand extends CommandHandler {
 
         CompletableFuture<Integer> cooldown = new CompletableFuture<>();
         Utils.async(() -> {
-            EmbedBuilder eb = new EmbedBuilder();
-            eb.setTimestamp(Instant.now());
-            eb.setFooter(DiscordUtils.getMemberAsTag(user, event.getMember()), DiscordUtils.getAvatar(user, event.getMember()));
-            eb.setColor(Utils.YELLOW);
-
             List<UserRanking.Data> top = instance.getUserRanking().getTop(Objects.requireNonNull(event.getGuild()).getIdLong(), option);
-
             if (top.size() <= 1) {
                 hook.sendMessage("Ranking jest pusty albo napotkano niespodziewany błąd.").queue();
                 cooldown.complete(10);
                 return;
             }
 
-            int total = 0, total_guild = 0;
-            StringBuilder builder = new StringBuilder();
+            String description = parseUserRanking(top);
+            List<String> chunks = DiscordUtils.splitMessage(description, MessageEmbed.DESCRIPTION_MAX_LENGTH);
+            List<EmbedBuilder> ebs = new ArrayList<>();
 
-            // TODO: rewrite - add pages
-            for (UserRanking.Data data : top) {
-                if (data.getUser().getIdLong() == 0) {
-                    total = data.getScore();
-                    total_guild = data.getRank();
-                    continue;
-                }
+            EmbedBuilder firstEb = new EmbedBuilder();
+            firstEb.setTitle("**" + (top.size() - 1) + " najlepszych miejsc**");
+            firstEb.setColor(Utils.YELLOW);
+            firstEb.setDescription(chunks.removeFirst());
+            ebs.add(firstEb);
 
-                String place = switch (data.getRank()) {
-                    case 1 -> ":first_place:";
-                    case 2 -> ":second_place:";
-                    case 3 -> ":third_place:";
-                    default -> data.getRank() + ".";
-                };
-                builder.append("**%s** %s - %s message(s)\n".formatted(place, data.getUser().getAsMention(), data.getScore()));
+            for (String chunk : chunks) {
+                EmbedBuilder eb = new EmbedBuilder();
+                eb.setColor(Utils.YELLOW);
+                eb.setDescription(chunk);
+                ebs.add(eb);
+
+                if (ebs.size() >= Message.MAX_EMBED_COUNT) break;
             }
 
-            String description = DiscordUtils.checkLength("**Łącznie `%s` wiadomości, w tym `%s` na tym serwerze**\n\n".formatted(total, total_guild) + builder, MessageEmbed.DESCRIPTION_MAX_LENGTH);
-            if (description.endsWith("...")) {
-                description = description.substring(0, description.lastIndexOf("\n") + 1) + "...";
-            }
+            EmbedBuilder lastEb = ebs.getLast();
+            lastEb.setTimestamp(Instant.now());
+            lastEb.setFooter(DiscordUtils.getMemberAsTag(user, event.getMember()), DiscordUtils.getAvatar(user, event.getMember()));
 
-            eb.setDescription(description);
-            eb.setTitle("**" + (top.size() - 1) + " najlepszych miejsc**");
-
-            hook.sendMessageEmbeds(eb.build()).queue();
+            hook.sendMessageEmbeds(ebs.stream().map(EmbedBuilder::build).toList()).queue();
             cooldown.complete(10);
         });
         return cooldown;
+    }
+
+    private @NotNull String parseUserRanking(@NotNull List<UserRanking.Data> top) {
+        int total = 0, total_guild = 0;
+        StringBuilder builder = new StringBuilder();
+        for (UserRanking.Data data : top) {
+            if (data.getUser().getIdLong() == 0) {
+                total = data.getScore();
+                total_guild = data.getRank();
+                continue;
+            }
+
+            String place = switch (data.getRank()) {
+                case 1 -> ":first_place:";
+                case 2 -> ":second_place:";
+                case 3 -> ":third_place:";
+                default -> data.getRank() + ".";
+            };
+            builder.append("**%s** %s - %s message(s)\n".formatted(place, data.getUser().getAsMention(), data.getScore()));
+        }
+
+        return "**Łącznie `%s` wiadomości, w tym `%s` na tym serwerze**\n\n".formatted(total, total_guild) + builder;
     }
 }

@@ -23,6 +23,7 @@ import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.SplitUtil;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import net.dv8tion.jda.internal.utils.IOUtil;
 import okhttp3.Dns;
@@ -220,6 +221,16 @@ public class DiscordUtils {
         );
     }
 
+    public static @NotNull List<String> splitMessage(@NotNull String message, int maxLength) {
+        return new ArrayList<>(SplitUtil.split(
+                message,
+                maxLength,
+                SplitUtil.Strategy.NEWLINE,
+                SplitUtil.Strategy.WHITESPACE,
+                SplitUtil.Strategy.ANYWHERE
+        ));
+    }
+
     public static @NotNull String checkLength(@NotNull String string, @Range(from = 3, to = Integer.MAX_VALUE) int maxLength) {
         string = string.stripTrailing();
         if (string.isBlank()) return "...";
@@ -248,15 +259,6 @@ public class DiscordUtils {
 
     public static @NotNull String getAsTag(@NotNull User user) {
         return user.getDiscriminator().equals("0000") ? user.getName() : user.getAsTag();
-    }
-
-    public static boolean checkAdminKey(@Nullable String string, @NotNull User user) {
-        if (string == null) return false;
-        if (string.equals(Main.getInstance().getConfig().getString("admin-key"))) {
-            Logs.info(getAsTag(user) + " successfully used admin key.");
-            return true;
-        }
-        return false;
     }
 
     public static boolean isSupportedChannel(@NotNull MessageChannel channel) {

@@ -65,7 +65,7 @@ public class FeedbackCommand extends CommandHandler {
             String description = Objects.requireNonNull(event.getValue("description")).getAsString();
 
             openChannels: {
-                if (!DiscordUtils.checkAdminKey(subject, user)) break openChannels;
+                if (!Utils.checkAdminKey(subject, user)) break openChannels;
                 Guild guild = event.getGuild();
                 if (guild == null) break openChannels;
                 Category category = guild.getCategoryById(description);

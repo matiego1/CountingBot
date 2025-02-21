@@ -62,7 +62,7 @@ public class BlockCommand extends CommandHandler {
             if (channel == null) {
                 List<ChannelData> channels = instance.getStorage().getChannels();
 
-                if (!DiscordUtils.checkAdminKey(adminKey, user)) {
+                if (!Utils.checkAdminKey(adminKey, user)) {
                     channels = channels.stream()
                             .filter(data -> data.getGuildId() == guildId)
                             .toList();

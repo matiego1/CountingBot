@@ -2,7 +2,7 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.Main;
 import me.matiego.counting.utils.CommandHandler;
-import me.matiego.counting.utils.DiscordUtils;
+import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.OptionMapping;
@@ -34,7 +34,7 @@ public class ReloadCommand extends CommandHandler {
         InteractionHook hook = event.getHook();
 
         String adminKey = event.getOption("admin-key", OptionMapping::getAsString);
-        if (!DiscordUtils.checkAdminKey(adminKey, event.getUser())) {
+        if (!Utils.checkAdminKey(adminKey, event.getUser())) {
             hook.sendMessage("Incorrect administrator key!").queue();
             return CompletableFuture.completedFuture(5);
         }

@@ -1,9 +1,11 @@
 package me.matiego.counting.utils;
 
 import me.matiego.counting.Main;
+import net.dv8tion.jda.api.entities.User;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.IllegalPluginAccessException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.HashMap;
@@ -40,5 +42,14 @@ public class Utils {
     public static @NotNull String getVersion() {
         //noinspection deprecation
         return Main.getInstance().getDescription().getVersion();
+    }
+
+    public static boolean checkAdminKey(@Nullable String string, @NotNull User user) {
+        if (string == null) return false;
+        if (string.equals(Main.getInstance().getConfig().getString("admin-key"))) {
+            Logs.info(DiscordUtils.getAsTag(user) + " successfully used the administrator key.");
+            return true;
+        }
+        return false;
     }
 }

@@ -73,7 +73,7 @@ public class DeleteMessageContextCommand extends CommandHandler {
         ModalMapping mapping = event.getValue("admin-key");
         if (mapping == null) return;
         String key = mapping.getAsString();
-        if (!DiscordUtils.checkAdminKey(key, user)) {
+        if (!Utils.checkAdminKey(key, user)) {
             hook.sendMessage("Incorrect administrator key.").queue();
             return;
         }
