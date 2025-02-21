@@ -52,9 +52,13 @@ public abstract class CommandHandler {
     public void onButtonInteraction(@NotNull ButtonInteraction event) {}
 
     public static @NotNull SlashCommandData createSlashCommand(@NotNull String name, @NotNull String description, boolean guildOnly, @NotNull Permission... permissions) {
-        return Commands.slash(name, description)
-                .setContexts(guildOnly ? InteractionContextType.GUILD : InteractionContextType.BOT_DM)
+        SlashCommandData data = Commands.slash(name, description)
                 .setDefaultPermissions(permissions.length == 0 ? DefaultMemberPermissions.ENABLED : DefaultMemberPermissions.enabledFor(permissions));
+        if (guildOnly) {
+            return data.setContexts(InteractionContextType.GUILD);
+        } else {
+            return data.setContexts(InteractionContextType.GUILD, InteractionContextType.BOT_DM);
+        }
     }
 
     public static @NotNull SubcommandData createSubcommand(@NotNull String name, @NotNull String description, @NotNull OptionData... options) {
