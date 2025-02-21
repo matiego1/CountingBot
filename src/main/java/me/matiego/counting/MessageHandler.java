@@ -43,7 +43,7 @@ public class MessageHandler extends ListenerAdapter {
                 return;
             }
 
-            int minTime = instance.getConfig().getInt("anti-spam.time"), maxCount = instance.getConfig().getInt("anti-spam.count");
+            int minTime = instance.getConfig().getInt("anti-spam.time", 0), maxCount = instance.getConfig().getInt("anti-spam.count", Integer.MAX_VALUE);
             if (checkCooldown(user, channel.getIdLong(), time, minTime * 1000, maxCount)) {
                 message.delete().queue();
                 DiscordUtils.sendPrivateMessage(user, "Nie spamuj na kanałach do liczenia! Możesz wysłać tylko %s wiadomości w odstępie mniejszym niż %s sekund między każdą.".formatted(maxCount, minTime));

@@ -15,6 +15,15 @@ public class AboutCommand extends CommandHandler {
         this.instance = instance;
     }
     private final Main instance;
+    private final String DEFAULT_ABOUT_MESSAGE = """
+                **__Counting bot__**
+                Licz na różne sposoby i baw się dobrze!
+                
+                Opisy kanałów: [tutaj](<https://github.com/matiego1/CountingBot/blob/master/README.md>)
+                
+                **Autor:** `matiego`
+                **Data kompilacji:** `<version>`
+                """;
 
     @Override
     public @NotNull SlashCommandData getCommand() {
@@ -31,15 +40,8 @@ public class AboutCommand extends CommandHandler {
 
         if (instance.getStorage().getChannel(event.getChannel().getIdLong()) != null) ephemeral = true;
 
-        String message = instance.getConfig().getString("about-message", """
-                **__Counting bot__**
-                Licz na różne sposoby i baw się dobrze!
-                
-                Opisy kanałów: [tutaj](<https://github.com/matiego1/CountingBot/blob/master/README.md>)
-                
-                **Autor:** `matiego`
-                **Data kompilacji:** `<version>`
-                """);
+        String message = instance.getConfig().getString("about-message", "");
+        if (message.isBlank()) message = DEFAULT_ABOUT_MESSAGE;
 
         message = message.replace("<version>", Utils.getVersion());
 
