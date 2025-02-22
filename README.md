@@ -17,7 +17,7 @@ Discord bot for counting in many ways.
 - [Factorial counting](https://oeis.org/A000142)
 - [Alphabet](https://en.wikipedia.org/wiki/ISO_basic_Latin_alphabet)
 - [Tautologies](https://matifilip.w.staszic.waw.pl/)
-- [Minecraft item](https://jd.papermc.io/paper/1.20.4/org/bukkit/Material.html)
+- [Minecraft item](https://jd.papermc.io/paper/1.21.4/org/bukkit/Material.html)
 - Polish last letter - your Polish word must start with the last character of the previous one
 - English last letter - the same as above, but in English
 - German last letter - the same as above, but in German
