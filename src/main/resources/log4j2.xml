@@ -20,7 +20,7 @@
     </Appenders>
 
     <Loggers>
-        <Logger name="me.matiego.counting.Logs" level="trace" additivity="false">
+        <Logger name="me.matiego.counting.utils.Logs" level="trace" additivity="false">
             <AppenderRef ref="consoleLogs" level="info"/>
             <AppenderRef ref="fileLogs"/>
         </Logger>

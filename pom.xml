@@ -62,11 +62,6 @@
     </build>
 
     <repositories>
-        <!--        &lt;!&ndash;PaperMC API&ndash;&gt;-->
-        <!--        <repository>-->
-        <!--            <id>papermc-repo</id>-->
-        <!--            <url>https://repo.papermc.io/repository/maven-public/</url>-->
-        <!--        </repository>-->
         <!-- JDA -->
         <repository>
             <id>dv8tion</id>
@@ -81,13 +76,6 @@
     </repositories>
 
     <dependencies>
-        <!--        &lt;!&ndash;PaperMC API&ndash;&gt;-->
-        <!--        <dependency>-->
-        <!--            <groupId>io.papermc.paper</groupId>-->
-        <!--            <artifactId>paper-api</artifactId>-->
-        <!--            <version>1.21.4-R0.1-SNAPSHOT</version>-->
-        <!--            <scope>provided</scope>-->
-        <!--        </dependency>-->
         <!-- Discord -->
         <dependency>
             <groupId>net.dv8tion</groupId>
