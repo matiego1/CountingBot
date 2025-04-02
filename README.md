@@ -17,15 +17,15 @@ Discord bot for counting in many ways.
 - [Factorial counting](https://oeis.org/A000142)
 - [Alphabet](https://en.wikipedia.org/wiki/ISO_basic_Latin_alphabet)
 - [Tautologies](https://matifilip.w.staszic.waw.pl/)
-- [Minecraft item](https://jd.papermc.io/paper/1.20.4/org/bukkit/Material.html)
+- [Minecraft item](https://jd.papermc.io/paper/1.21.4/org/bukkit/Material.html)
 - Polish last letter - your Polish word must start with the last character of the previous one
 - English last letter - the same as above, but in English
 - German last letter - the same as above, but in German
 - Spanish last letter - the same as above, but in Spanish
 
 ### Used dictionaries
-- Polish: [sjp-odm-20240219.zip](https://sjp.pl/sl/odmiany/)
+- Polish: [sjp-odm-20250201.zip](https://sjp.pl/sl/odmiany/)
 - English: [words_alpha.txt](https://github.com/dwyl/english-words/blob/master/words_alpha.txt)
 - Spanish: [index.json](https://github.com/words/an-array-of-spanish-words/blob/master/index.json)
 - German: [german.7z](https://sourceforge.net/projects/germandict/files/)
-<br>(Last update: 09.06.2024)
+<br>(Last update: 22.02.2025)
