@@ -2,6 +2,7 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.Dictionary;
 import me.matiego.counting.Main;
+import me.matiego.counting.Tasks;
 import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
@@ -104,7 +105,7 @@ public class DictionaryCommand extends CommandHandler {
         String word = event.getOption("word", "null", OptionMapping::getAsString);
         CompletableFuture<Integer> cooldown = new CompletableFuture<>();
 
-        Utils.async(() -> {
+        Tasks.async(() -> {
             switch (String.valueOf(event.getSubcommandName())) {
                 case "add" -> {
                     if (instance.getDictionary().addWordToDictionary(type, word)) {
@@ -127,7 +128,7 @@ public class DictionaryCommand extends CommandHandler {
                     }
                 }
                 case "load" -> {
-                    File file = new File(instance.getDataFolder() + File.separator + event.getOption("file", OptionMapping::getAsString));
+                    File file = new File(Main.PATH + File.separator + event.getOption("file", OptionMapping::getAsString));
                     Logs.info(DiscordUtils.getAsTag(user) + " started loading a new `" + type + "` dictionary from file `" + file + "`.");
                     switch (instance.getDictionary().loadDictionaryFromFile(file, type, () -> cooldown.complete(30))) {
                         case SUCCESS -> {

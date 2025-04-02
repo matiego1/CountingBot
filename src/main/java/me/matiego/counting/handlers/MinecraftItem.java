@@ -6,12 +6,10 @@ import me.matiego.counting.utils.ChannelHandler;
 import me.matiego.counting.utils.DiscordUtils;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
-import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class MinecraftItem implements ChannelHandler {
@@ -40,17 +38,19 @@ public class MinecraftItem implements ChannelHandler {
     }
 
     private boolean doesItemNotExist(@NotNull String name) {
-        return Arrays.stream(Material.values())
-                .map(Enum::name)
-                .filter(item -> {
-                    try {
-                        return !Material.class.getField(item).isAnnotationPresent(Deprecated.class);
-                    } catch (Exception e) {
-                        return true;
-                    }
-                })
-                .map(String::toLowerCase)
-                .map(item -> item.replace("_", " "))
-                .noneMatch(item -> item.equals(name));
+        // TODO: doesItemNotExist
+        return true;
+//        return Arrays.stream(Material.values())
+//                .map(Enum::name)
+//                .filter(item -> {
+//                    try {
+//                        return !Material.class.getField(item).isAnnotationPresent(Deprecated.class);
+//                    } catch (Exception e) {
+//                        return true;
+//                    }
+//                })
+//                .map(String::toLowerCase)
+//                .map(item -> item.replace("_", " "))
+//                .noneMatch(item -> item.equals(name));
     }
 }

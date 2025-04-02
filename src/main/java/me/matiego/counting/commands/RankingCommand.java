@@ -1,6 +1,7 @@
 package me.matiego.counting.commands;
 
 import me.matiego.counting.Main;
+import me.matiego.counting.Tasks;
 import me.matiego.counting.UserRanking;
 import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
@@ -57,7 +58,7 @@ public class RankingCommand extends CommandHandler {
         int option = event.getOption("amount", 10, OptionMapping::getAsInt);
 
         CompletableFuture<Integer> cooldown = new CompletableFuture<>();
-        Utils.async(() -> {
+        Tasks.async(() -> {
             List<UserRanking.Data> top = instance.getUserRanking().getTop(Objects.requireNonNull(event.getGuild()).getIdLong(), option);
             if (top.size() <= 1) {
                 hook.sendMessage("Ranking jest pusty albo napotkano niespodziewany błąd.").queue();

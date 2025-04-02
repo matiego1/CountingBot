@@ -19,23 +19,26 @@ import net.dv8tion.jda.api.exceptions.InvalidTokenException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
-import org.bukkit.Bukkit;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.plugin.java.JavaPlugin;
+import org.apache.logging.log4j.LogManager;
 import org.jetbrains.annotations.NotNull;
+import org.simpleyaml.configuration.file.YamlFile;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.*;
 
-public final class Main extends JavaPlugin {
-    public Main() {
-        instance = this;
-    }
+public final class Main {
+    public final static String PATH = "counting";
 
     @Getter private static Main instance;
+    @Getter private static long startTime;
+
+    @Getter private boolean enabled = false;
+
+    private Config config;
     private MySQL mySQL;
     @Getter private Storage storage;
     @Getter private Dictionary dictionary;
@@ -46,73 +49,90 @@ public final class Main extends JavaPlugin {
     private boolean isJdaEnabled = false;
     private ExecutorService callbackThreadPool;
 
-    @Override
-    public void onEnable() {
-        long time = Utils.now();
+    public static void main(String[] args) {
+        startTime = Utils.now();
+        instance = new Main();
+
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                Main instance = getInstance();
+                if (instance == null) return;
+                if (instance.isEnabled()) instance.onDisable();
+            } finally {
+                LogManager.shutdown();
+            }
+        }));
+
+        try {
+            instance.enabled = instance.onEnable();
+        } catch (Exception e) {
+            // try to disable instance and then throw exception
+            try {
+                instance.onDisable();
+            } catch (Exception ignored) {}
+            throw e;
+        }
+
+        if (!instance.enabled) {
+            instance.onDisable();
+
+            instance = null;
+            System.exit(0);
+        }
+    }
+
+    public boolean onEnable() {
+        Logs.infoLocal("Version: " + Utils.getVersion());
+
         //noinspection ResultOfMethodCallIgnored - generate prime numbers
         Primes.isPrime(2);
 
-        //Implementation checks
+        // Implementation checks
         if (ChannelData.Type.values().length > 25 || ChannelData.Type.values().length == 0) {
-            Logs.error("Zero or too many types of the counting channels are implemented. Please contact the developer.");
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
+            Logs.errorLocal("Zero or too many types of the counting channels are implemented. Please contact the developer.");
+            return false;
         }
 
-        //Save config file
-        saveDefaultConfig();
-
-        //Add console command
-        PluginCommand command = getCommand("counting");
-        if (command != null) command.setExecutor((sender, cmd, label, args) -> {
-            JDA jda = getJda();
-            if (jda == null) {
-                sender.sendRichMessage("<red>Discord bot is offline!");
-                return true;
-            }
-            reload(jda).thenRun(() -> sender.sendRichMessage("<green>Reloaded!"));
-            return true;
-        });
+        // Load the config file
+        try {
+            config = Config.loadConfig(PATH + File.separator + "config.yml");
+        } catch (Exception e) {
+            Logs.errorLocal("Failed to load the config", e);
+            return false;
+        }
 
         //Open MySQL connection
-        Logs.info("Opening the MySQL connection...");
+        Logs.infoLocal("Opening the MySQL connection...");
         String username = getConfig().getString("database.username", "");
         String password = getConfig().getString("database.password", "");
         try {
-            mySQL = new MySQL("jdbc:mysql://" + getConfig().getString("database.host") + ":" + getConfig().getString("database.port") + "/" + getConfig().getString("database.database") + "?user=" + username + "&password=" + password, username, password);
+            mySQL = new MySQL("jdbc:mysql://" + getConfig().getString("database.host") + ":" + getConfig().getInt("database.port", 3306) + "/" + getConfig().getString("database.database") + "?user=" + username + "&password=" + password, username, password);
         } catch (Exception e) {
-            Logs.error("Failed to open the MySQL connection.", e);
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
+            Logs.errorLocal("Failed to open the MySQL connection.", e);
+            return false;
         }
-        if (!mySQL.createTables()) {
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
-        }
+        if (!mySQL.createTables()) return false;
 
         //Load storages
-        Logs.info("Loading saved channels...");
+        Logs.infoLocal("Loading saved channels...");
         storage = Storage.load(this);
-        if (storage == null) {
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
-        }
+        if (storage == null) return false;
+
         dictionary = new Dictionary();
         userRanking = new UserRanking();
 
         //Enable Discord bot
         RestAction.setDefaultFailure(throwable -> Logs.error("An error occurred!", throwable));
-        Logs.info("Enabling the Discord bot...");
+        Logs.infoLocal("Enabling the Discord bot...");
         if (jda != null) {
             try {
                 jda.shutdownNow();
                 callbackThreadPool.shutdownNow();
             } catch (Exception e) {
-                Logs.error("Failed to shut down previous instance of the Discord bot.", e);
+                Logs.errorLocal("Failed to shut down previous instance of the Discord bot.", e);
             }
             jda = null;
             callbackThreadPool = null;
-            Logs.warning("Restart the server instead of reloading it. It may break this plugin.");
         }
         try {
             callbackThreadPool = new ForkJoinPool(Runtime.getRuntime().availableProcessors(), pool -> {
@@ -145,21 +165,30 @@ public final class Main extends JavaPlugin {
             try {
                 builder.setActivity(Activity.customStatus(activity));
             } catch (IllegalArgumentException e) {
-                Logs.warning("Failed to set bot's activity.", e);
+                Logs.warningLocal("Failed to set bot's activity.", e);
             }
 
             jda = builder.build();
         } catch (Exception e) {
-            Logs.error("Failed to enable the Discord bot." + (e instanceof InvalidTokenException ? " Is the provided bot token correct?" : ""), e);
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
+            Logs.errorLocal("Failed to enable the Discord bot." + (e instanceof InvalidTokenException ? " Is the provided bot token correct?" : ""), e);
+            return false;
         }
 
-        Logs.infoLocal("Plugin enabled in " + (Utils.now() - time) + "ms.");
+        Logs.infoLocal("Enabled in " + (Utils.now() - getStartTime()) + "ms.");
+        return true;
     }
 
     public @NotNull CompletableFuture<Void> reload(@NotNull JDA jda) {
-        reloadConfig();
+        Config newConfig = null;
+        try {
+            newConfig = Config.loadConfig(PATH + File.separator + "config.yml");
+        } catch (Exception e) {
+            Logs.error("Failed to load the config", e);
+        }
+        if (newConfig != null) {
+            config = newConfig;
+        }
+
         sendGuildsMessage();
         checkPermissions();
         int removed = removeNonExistentChannels(jda);
@@ -285,7 +314,6 @@ public final class Main extends JavaPlugin {
                 .forEach(chn -> DiscordUtils.setSlowmode(this, chn));
     }
 
-    @Override
     public void onDisable() {
         long time = Utils.now();
 
@@ -332,5 +360,9 @@ public final class Main extends JavaPlugin {
 
     public synchronized JDA getJda() {
         return isJdaEnabled ? jda : null;
+    }
+
+    public @NotNull YamlFile getConfig() {
+        return config.getConfig();
     }
 }

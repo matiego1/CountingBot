@@ -2,6 +2,7 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
+import me.matiego.counting.Tasks;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
@@ -26,15 +27,11 @@ import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.utils.SplitUtil;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
-import org.apache.commons.lang3.ArrayUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class CountingCommand extends CommandHandler {
@@ -82,7 +79,7 @@ public class CountingCommand extends CommandHandler {
         event.deferReply(true).queue();
         InteractionHook hook = event.getHook();
 
-        Utils.async(() -> {
+        Tasks.async(() -> {
             if (!DiscordUtils.isSupportedChannel(event.getChannel())) {
                 hook.sendMessage("This channel type is not supported.").queue();
                 return;
@@ -221,13 +218,13 @@ public class CountingCommand extends CommandHandler {
     }
 
     private void withWebhook(@NotNull InteractionHook hook, @NotNull ForumChannel forum, @NotNull Webhook webhook, @NotNull User user, @Nullable Member member) {
-        ChannelData.Type[] types = ChannelData.Type.values();
-        ArrayUtils.reverse(types);
-        Arrays.stream(types)
+        List<ChannelData.Type> types = Arrays.asList(ChannelData.Type.values());
+        Collections.reverse(types);
+        types.stream()
                 .map(type -> openForumChannel(forum, type, webhook, user, member))
                 .reduce((a, b) -> a.thenCombine(b, Integer::sum))
                 .orElse(CompletableFuture.completedFuture(0))
-                .thenAccept(success -> hook.sendMessage("Successfully opened %s counting channel(s) out of %s.".formatted(success, types.length)).queue());
+                .thenAccept(success -> hook.sendMessage("Successfully opened %s counting channel(s) out of %s.".formatted(success, types.size())).queue());
     }
 
     private @NotNull CompletableFuture<Integer> openForumChannel(@NotNull ForumChannel forum, @NotNull ChannelData.Type type, @NotNull Webhook webhook, @NotNull User user, @Nullable Member member) {
@@ -270,7 +267,7 @@ public class CountingCommand extends CommandHandler {
         User user = event.getUser();
         if (event.getComponentId().equals("counting-type")) {
             event.deferReply(true).queue();
-            Utils.async(() -> {
+            Tasks.async(() -> {
                 ChannelData.Type type = Arrays.stream(ChannelData.Type.values())
                         .filter(value -> value.toString().equals(event.getValues().getFirst()))
                         .findFirst()

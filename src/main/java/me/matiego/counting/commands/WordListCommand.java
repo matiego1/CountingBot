@@ -2,6 +2,7 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.Dictionary;
 import me.matiego.counting.Main;
+import me.matiego.counting.Tasks;
 import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
@@ -86,7 +87,7 @@ public class WordListCommand extends CommandHandler {
 
         String word = event.getOption("word", "null", OptionMapping::getAsString);
 
-        Utils.async(() -> {
+        Tasks.async(() -> {
             switch (Objects.requireNonNullElse(event.getSubcommandName(), "null")) {
                 case "add" -> addWord(type, guildId, word, hook, user, time);
                 case "remove" -> removeWord(type, guildId, word, hook, user, time);

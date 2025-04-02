@@ -8,7 +8,6 @@ import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import org.bukkit.Bukkit;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -25,7 +24,7 @@ public class MessageHandler extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
-        Utils.async(() -> {
+        Tasks.async(() -> {
             long time = Utils.now();
 
             MessageChannelUnion channel = event.getChannel();
@@ -81,14 +80,11 @@ public class MessageHandler extends ListenerAdapter {
 
         User user = event.getAuthor();
         Member member = event.getMember();
-        CountingMessageSendEvent countingMessageSendEvent = new CountingMessageSendEvent(data, user, DiscordUtils.getName(user, member), history.isEmpty() ? null : history.getFirst().getIdLong());
-        Bukkit.getPluginManager().callEvent(countingMessageSendEvent);
-        if (countingMessageSendEvent.isCancelled()) return;
-
         MessageChannelUnion chn = event.getChannel();
+
         boolean success = switch (chn.getType()) {
-            case TEXT -> DiscordUtils.sendWebhook(data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg);
-            case GUILD_PUBLIC_THREAD -> DiscordUtils.sendWebhookToThread(chn.getIdLong(), data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), countingMessageSendEvent.getDisplayName(), correctMsg);
+            case TEXT -> DiscordUtils.sendWebhook(data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), DiscordUtils.getName(user, member), correctMsg);
+            case GUILD_PUBLIC_THREAD -> DiscordUtils.sendWebhookToThread(chn.getIdLong(), data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), DiscordUtils.getName(user, member), correctMsg);
             default -> false;
         };
 
@@ -96,7 +92,6 @@ public class MessageHandler extends ListenerAdapter {
             if (!instance.getUserRanking().add(user, event.getGuild().getIdLong())) {
                 DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy zwiększaniu twojego wyniku w rankingu. Poproś administratora bota o jego zwiększenie.");
             }
-            countingMessageSendEvent.getOnSuccess().run();
         } else {
             DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy wysyłaniu twojej wiadomości. Spróbuj później.");
         }

@@ -15,7 +15,7 @@ public class AboutCommand extends CommandHandler {
         this.instance = instance;
     }
     private final Main instance;
-    private final String DEFAULT_ABOUT_MESSAGE = """
+    public static final String DEFAULT_ABOUT_MESSAGE = """
                 **__Counting bot__**
                 Licz na różne sposoby i baw się dobrze!
                 

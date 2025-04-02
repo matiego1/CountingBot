@@ -21,28 +21,36 @@
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.12.1</version>
-                <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.5.1</version>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <executions>
                     <execution>
                         <phase>package</phase>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>single</goal>
                         </goals>
                         <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <archive>
+                                <manifest>
+                                    <mainClass>me.matiego.counting.Main</mainClass>
+                                </manifest>
+                                <manifestEntries>
+                                    <Multi-Release>true</Multi-Release>
+                                </manifestEntries>
+                            </archive>
+                            <descriptorRefs>
+                                <descriptorRef>jar-with-dependencies</descriptorRef>
+                            </descriptorRefs>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>21</source>
+                    <target>21</target>
+                </configuration>
             </plugin>
         </plugins>
         <resources>
@@ -54,32 +62,37 @@
     </build>
 
     <repositories>
-        <!--PaperMC API-->
-        <repository>
-            <id>papermc-repo</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
-        </repository>
-        <!--JDA-->
+        <!--        &lt;!&ndash;PaperMC API&ndash;&gt;-->
+        <!--        <repository>-->
+        <!--            <id>papermc-repo</id>-->
+        <!--            <url>https://repo.papermc.io/repository/maven-public/</url>-->
+        <!--        </repository>-->
+        <!-- JDA -->
         <repository>
             <id>dv8tion</id>
             <name>m2-dv8tion</name>
             <url>https://m2.dv8tion.net/releases</url>
         </repository>
+        <!-- APIs from GitHub -->
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
-        <!--PaperMC API-->
-        <dependency>
-            <groupId>io.papermc.paper</groupId>
-            <artifactId>paper-api</artifactId>
-            <version>1.21.4-R0.1-SNAPSHOT</version>
-            <scope>provided</scope>
-        </dependency>
-        <!--JDA-->
+        <!--        &lt;!&ndash;PaperMC API&ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>io.papermc.paper</groupId>-->
+        <!--            <artifactId>paper-api</artifactId>-->
+        <!--            <version>1.21.4-R0.1-SNAPSHOT</version>-->
+        <!--            <scope>provided</scope>-->
+        <!--        </dependency>-->
+        <!-- Discord -->
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.3.0</version>
+            <version>5.3.1</version>
             <exclusions>
                 <exclusion>
                     <groupId>club.minnced</groupId>
@@ -87,30 +100,56 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--Discord's webhooks-->
         <dependency>
             <groupId>club.minnced</groupId>
             <artifactId>discord-webhooks</artifactId>
             <version>0.8.4</version>
             <scope>compile</scope>
         </dependency>
-        <!--DNS for Utils class-->
         <dependency>
             <groupId>org.minidns</groupId>
             <artifactId>minidns-hla</artifactId>
             <version>1.0.4</version>
         </dependency>
-        <!--MySQL-->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.0.1-android</version>
+        </dependency>
+        <!-- MySQL -->
         <dependency>
             <groupId>com.zaxxer</groupId>
             <artifactId>HikariCP</artifactId>
             <version>5.0.1</version>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>8.0.33</version>
+        </dependency>
+        <!-- Annotations -->
+        <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>1.18.30</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>24.0.0</version>
+        </dependency>
+        <!-- YAML -->
+        <dependency>
+            <groupId>com.github.Carleslc.Simple-YAML</groupId>
+            <artifactId>Simple-Yaml</artifactId>
+            <version>1.8.4</version>
+        </dependency>
+        <!-- log4j and slf4j -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j2-impl</artifactId>
+            <version>2.23.1</version>
         </dependency>
     </dependencies>
 </project>

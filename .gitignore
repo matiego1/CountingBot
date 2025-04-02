@@ -113,3 +113,4 @@ buildNumber.properties
 run/
 
 /src/test/java/Test.java
+/counting/

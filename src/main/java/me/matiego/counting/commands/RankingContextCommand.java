@@ -1,6 +1,7 @@
 package me.matiego.counting.commands;
 
 import me.matiego.counting.Main;
+import me.matiego.counting.Tasks;
 import me.matiego.counting.UserRanking;
 import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
@@ -42,7 +43,7 @@ public class RankingContextCommand extends CommandHandler {
         User target = event.getTarget();
         User user = event.getUser();
 
-        Utils.async(() -> {
+        Tasks.async(() -> {
             UserRanking.Data data = instance.getUserRanking().get(target, Objects.requireNonNull(event.getGuild()).getIdLong());
             if (data == null) {
                 hook.sendMessage("Ten użytkownik nie wysłał jeszcze żadnej wiadomości albo napotkano niespodziewany błąd.").queue();

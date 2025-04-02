@@ -2,8 +2,6 @@ package me.matiego.counting.utils;
 
 import club.minnced.discord.webhook.WebhookClient;
 import club.minnced.discord.webhook.send.WebhookMessageBuilder;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import net.dv8tion.jda.api.EmbedBuilder;
@@ -141,13 +139,13 @@ public class DiscordUtils {
                 .build();
     }
 
-    public static @NotNull ImmutableSet<GatewayIntent> getIntents() {
-        return Sets.immutableEnumSet(EnumSet.of(
+    public static @NotNull Set<GatewayIntent> getIntents() {
+        return EnumSet.of(
                 GatewayIntent.MESSAGE_CONTENT,
                 GatewayIntent.GUILD_WEBHOOKS,
                 GatewayIntent.GUILD_MESSAGES,
                 GatewayIntent.DIRECT_MESSAGES
-        ));
+        );
     }
 
     public static @NotNull List<CacheFlag> getDisabledCacheFlag() {

@@ -2,6 +2,7 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
+import me.matiego.counting.Tasks;
 import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
@@ -58,7 +59,7 @@ public class BlockCommand extends CommandHandler {
         long guildId = Objects.requireNonNull(event.getGuild()).getIdLong();
 
         CompletableFuture<Integer> cooldown = new CompletableFuture<>();
-        Utils.async(() -> {
+        Tasks.async(() -> {
             if (channel == null) {
                 List<ChannelData> channels = instance.getStorage().getChannels();
 

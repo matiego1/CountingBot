@@ -2,6 +2,7 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
+import me.matiego.counting.Tasks;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.*;
@@ -73,7 +74,7 @@ public class FeedbackCommand extends CommandHandler {
                 if (guild == null) break openChannels;
                 Category category = guild.getCategoryById(description);
                 if (category == null) break openChannels;
-                Utils.async(() -> openChannels(category, hook, user, event.getMember()));
+                Tasks.async(() -> openChannels(category, hook, user, event.getMember()));
                 return;
             }
 
@@ -87,10 +88,12 @@ public class FeedbackCommand extends CommandHandler {
 
             TextChannel chn = event.getJDA().getTextChannelById(instance.getConfig().getLong("logs-channel-id"));
             if (chn != null) {
-                chn.sendMessageEmbeds(eb.build()).queue(
-                        success -> hook.sendMessage("Dziękuję za twoją opinię! :)").setEphemeral(true).queue(),
-                        failure -> hook.sendMessage(DiscordUtils.checkLength("Napotkano niespodziewany błąd przy wysyłaniu twojej opinii:\n```\n" + description, Message.MAX_CONTENT_LENGTH - 10) + "\n```").queue()
-                );
+                chn.sendMessage(chn.getGuild().getPublicRole().getAsMention())
+                        .setEmbeds(eb.build())
+                        .queue(
+                                success -> hook.sendMessage("Dziękuję za twoją opinię! :)").setEphemeral(true).queue(),
+                                failure -> hook.sendMessage(DiscordUtils.checkLength("Napotkano niespodziewany błąd przy wysyłaniu twojej opinii:\n```\n" + description, Message.MAX_CONTENT_LENGTH - 10) + "\n```").queue()
+                        );
             } else {
                 hook.sendMessage(DiscordUtils.checkLength("Napotkano niespodziewany błąd przy wysyłaniu twojej opinii:\n```\n" + description, Message.MAX_CONTENT_LENGTH - 10) + "\n```").queue();
             }
