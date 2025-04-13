@@ -29,3 +29,4 @@ Discord bot for counting in many ways.
 - Spanish: [index.json](https://github.com/words/an-array-of-spanish-words/blob/master/index.json)
 - German: [german.7z](https://sourceforge.net/projects/germandict/files/)
 <br>(Last update: 22.02.2025)
+
