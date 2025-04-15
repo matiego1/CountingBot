@@ -40,7 +40,7 @@ public class Commands extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         User user = event.getUser();
-        String command = event.getCommandString();
+        String command = event.getName();
 
         Logs.info(DiscordUtils.getAsTag(user) + " [" + user.getId() + "]: /" + event.getFullCommandName());
 
