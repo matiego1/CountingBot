@@ -14,9 +14,7 @@ import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.entities.Activity;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.attribute.IWebhookContainer;
-import net.dv8tion.jda.api.events.session.ReadyEvent;
 import net.dv8tion.jda.api.exceptions.InvalidTokenException;
-import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.requests.RestAction;
 import net.dv8tion.jda.api.utils.MemberCachePolicy;
 import org.apache.logging.log4j.LogManager;
@@ -152,14 +150,7 @@ public final class Main {
                     .setBulkDeleteSplittingEnabled(false)
                     .setEnableShutdownHook(false)
                     .setContextEnabled(false)
-                    .disableCache(DiscordUtils.getDisabledCacheFlag())
-                    .addEventListeners(new ListenerAdapter() {
-                        @Override
-                        public void onReady(@NotNull ReadyEvent event) {
-                            Main.getInstance().onDiscordBotReady();
-                            event.getJDA().removeEventListener(this);
-                        }
-                    });
+                    .disableCache(DiscordUtils.getDisabledCacheFlag());
 
             String activity = getConfig().getString("activity", "Counting...");
             try {
@@ -169,6 +160,9 @@ public final class Main {
             }
 
             jda = builder.build();
+
+            jda.awaitReady();
+            onDiscordBotReady();
         } catch (Exception e) {
             Logs.errorLocal("Failed to enable the Discord bot." + (e instanceof InvalidTokenException ? " Is the provided bot token correct?" : ""), e);
             return false;
@@ -220,8 +214,9 @@ public final class Main {
         checkPermissions();
 
         //Check channels
-        int removed = removeNonExistentChannels(jda);
-        if (removed > 0) Logs.info("Removed " + removed + " unknown counting channel(s).");
+        // TODO: fix for forum posts
+//        int removed = removeNonExistentChannels(jda);
+//        if (removed > 0) Logs.info("Removed " + removed + " unknown counting channel(s).");
 
         //Check webhooks
         refreshWebhooks(jda).thenAccept(refreshedWebhooks -> {
@@ -340,7 +335,7 @@ public final class Main {
         //close MySQL connection
         if (mySQL != null) mySQL.close();
 
-        Logs.info("Disabled in " + (Utils.now() - time) + "ms.");
+        Logs.info("Disabled in " + (Utils.now() - time) + "ms. The program was running for " + Utils.parseMillisToString(Utils.now() - getStartTime(), true));
     }
 
     private void disableDiscordBot() throws Exception {
