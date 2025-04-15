@@ -56,4 +56,33 @@ public class Utils {
         }
         return false;
     }
+
+    public static @NotNull String parseMillisToString(long time, boolean useMilliseconds) {
+        time = Math.round((double) time / (useMilliseconds ? 1 : 1000));
+        int x = useMilliseconds ? 1000 : 1;
+        String result = "";
+
+        //days
+        int d = (int) (time / (3600 * 24 * x));
+        time -= (long) d * 3600 * 24 * x;
+        if (d != 0) result += d + "d ";
+        //hours
+        int h = (int) (time / (3600 * x));
+        time -= (long) h * 3600 * x;
+        if (h != 0) result += h + "h ";
+        //minutes
+        int m = (int) (time / (60 * x));
+        time -= (long) m * 60 * x;
+        if (m != 0) result += m + "m ";
+        //seconds
+        int s = (int) (time / x);
+        time -= (long) s * x;
+        if (s != 0) result += s + "s ";
+        //milliseconds
+        int ms = (int) (time);
+        if (ms != 0) result += ms + "ms ";
+
+        if (result.isEmpty()) return useMilliseconds ? "0ms" : "0s";
+        return result.substring(0, result.length() - 1);
+    }
 }

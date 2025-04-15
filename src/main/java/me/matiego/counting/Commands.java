@@ -40,9 +40,9 @@ public class Commands extends ListenerAdapter {
     @Override
     public void onSlashCommandInteraction(@NotNull SlashCommandInteractionEvent event) {
         User user = event.getUser();
-        String command = event.getName();
+        String command = event.getCommandString();
 
-        Logs.info(DiscordUtils.getAsTag(user) + " [" + user.getId() + "]: /" + command);
+        Logs.info(DiscordUtils.getAsTag(user) + " [" + user.getId() + "]: /" + event.getFullCommandName());
 
         //check permissions
         if (!DiscordUtils.hasRequiredPermissions(event.getChannel())) {

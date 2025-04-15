@@ -49,12 +49,6 @@ public class MessageHandler extends ListenerAdapter {
                 return;
             }
 
-            if (data.getType() == ChannelData.Type.MINECRAFT_ITEM) {
-                message.delete().queue();
-                DiscordUtils.sendPrivateMessage(user, "Ten kanał jest tymczasowo wyłączony. Przepraszam.");
-                return;
-            }
-
             ChannelHandler handler = data.getHandler();
             int amount = handler.getAmountOfMessages();
             if (amount == 0) {

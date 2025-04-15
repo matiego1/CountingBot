@@ -280,7 +280,7 @@ public class DiscordUtils {
         return null;
     }
 
-    public static @NotNull CompletableFuture<Webhook> getOrCreateWebhook(IWebhookContainer channel) {
+    public static @NotNull CompletableFuture<Webhook> getOrCreateWebhook(@NotNull IWebhookContainer channel) {
         return channel.retrieveWebhooks().submit()
                 .thenCompose(webhooks -> {
                     if (webhooks.isEmpty()) {

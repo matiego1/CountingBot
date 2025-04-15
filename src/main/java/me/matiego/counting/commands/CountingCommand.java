@@ -230,15 +230,11 @@ public class CountingCommand extends CommandHandler {
     private @NotNull CompletableFuture<Integer> openForumChannel(@NotNull ForumChannel forum, @NotNull ChannelData.Type type, @NotNull Webhook webhook, @NotNull User user, @Nullable Member member) {
         EmbedBuilder eb = DiscordUtils.getOpenChannelEmbed(type, user, member);
         CompletableFuture<Integer> future = new CompletableFuture<>();
-        Logs.infoLocal("[DEBUG] tworze");
         forum.createForumPost(
                 type.toString(),
                 MessageCreateData.fromEmbeds(eb.build())
         ).queue(
-                post -> {
-                    Logs.infoLocal("[DEBUG] juz");
-                    future.complete(withForumPost(post, type, webhook, user));
-                },
+                post -> future.complete(withForumPost(post, type, webhook, user)),
                 failure -> {
                     Logs.warning("Failed to open the forum channel", failure);
                     future.complete(0);

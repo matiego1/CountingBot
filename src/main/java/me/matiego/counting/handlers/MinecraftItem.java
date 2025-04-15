@@ -23,6 +23,11 @@ public class MinecraftItem implements ChannelHandler {
         User user = message.getAuthor();
         String content = message.getContentDisplay().toLowerCase().replace("_", " ");
 
+        if (true) {
+            DiscordUtils.sendPrivateMessage(user, "Ten kanał jest tymczasowo wyłączony. Przepraszam.");
+            return null;
+        }
+
         if (doesItemNotExist(content)) {
             DiscordUtils.sendPrivateMessage(user, "**Ups!** Ten przedmiot nie istnieje.");
             return null;
