@@ -214,9 +214,8 @@ public final class Main {
         checkPermissions();
 
         //Check channels
-        // TODO: fix for forum posts
-//        int removed = removeNonExistentChannels(jda);
-//        if (removed > 0) Logs.info("Removed " + removed + " unknown counting channel(s).");
+        int removed = removeNonExistentChannels(jda);
+        if (removed > 0) Logs.info("Removed " + removed + " unknown counting channel(s).");
 
         //Check webhooks
         refreshWebhooks(jda).thenAccept(refreshedWebhooks -> {
@@ -262,12 +261,14 @@ public final class Main {
     }
 
     public int removeNonExistentChannels(@NotNull JDA jda) {
-        return (int) getStorage().getChannels().stream()
-                .map(ChannelData::getChannelId)
-                .filter(id -> DiscordUtils.getSupportedChannelById(jda, id) == null)
-                .map(id -> getStorage().removeChannel(id))
-                .filter(response -> response == Response.SUCCESS)
-                .count();
+        // TODO: fix removing random thread channels, even if they exist
+        return 0;
+//        return (int) getStorage().getChannels().stream()
+//                .map(ChannelData::getChannelId)
+//                .filter(id -> DiscordUtils.getSupportedChannelById(jda, id) == null)
+//                .map(id -> getStorage().removeChannel(id))
+//                .filter(response -> response == Response.SUCCESS)
+//                .count();
     }
 
     public @NotNull CompletableFuture<Integer> refreshWebhooks(@NotNull JDA jda) {
