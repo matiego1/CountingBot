@@ -115,6 +115,7 @@ public final class Main {
         Logs.infoLocal("Loading saved channels...");
         storage = Storage.load(this);
         if (storage == null) return false;
+        Logs.infoLocal("Loaded " + storage.getChannels().size() + " channel(s).");
 
         dictionary = new Dictionary();
         userRanking = new UserRanking();
@@ -219,7 +220,6 @@ public final class Main {
 
         //Check webhooks
         refreshWebhooks(jda).thenAccept(refreshedWebhooks -> {
-
             if (refreshedWebhooks > 0) Logs.info("Refreshed " + refreshedWebhooks + " unknown webhook(s).");
 
             //Add event listeners
@@ -261,7 +261,7 @@ public final class Main {
     }
 
     public int removeNonExistentChannels(@NotNull JDA jda) {
-        // TODO: fix removing random thread channels, even if they exist
+        // TODO: fix removing "old" forum posts
         return 0;
 //        return (int) getStorage().getChannels().stream()
 //                .map(ChannelData::getChannelId)
