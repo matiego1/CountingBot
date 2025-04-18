@@ -23,12 +23,7 @@ public class MinecraftItem implements ChannelHandler {
         User user = message.getAuthor();
         String content = message.getContentDisplay().toLowerCase().replace("_", " ");
 
-        if (true) {
-            DiscordUtils.sendPrivateMessage(user, "Ten kanał jest tymczasowo wyłączony. Przepraszam.");
-            return null;
-        }
-
-        if (doesItemNotExist(content)) {
+        if (!Main.getInstance().getDictionary().isWordInDictionary(Dictionary.Type.MINECRAFT_ITEM, content)) {
             DiscordUtils.sendPrivateMessage(user, "**Ups!** Ten przedmiot nie istnieje.");
             return null;
         }
@@ -42,20 +37,24 @@ public class MinecraftItem implements ChannelHandler {
         return success ? content : null;
     }
 
-    private boolean doesItemNotExist(@NotNull String name) {
-        // TODO: doesItemNotExist
-        return true;
-//        return Arrays.stream(Material.values())
-//                .map(Enum::name)
-//                .filter(item -> {
-//                    try {
-//                        return !Material.class.getField(item).isAnnotationPresent(Deprecated.class);
-//                    } catch (Exception e) {
-//                        return true;
-//                    }
-//                })
-//                .map(String::toLowerCase)
-//                .map(item -> item.replace("_", " "))
-//                .noneMatch(item -> item.equals(name));
-    }
+    //<editor-fold desc="Generate minecraft item dictionary" defaultstate="collapsed">
+//    public static void main(String[] args) throws IOException {
+//        System.out.println("Generating...");
+//        try (PrintWriter writer = new PrintWriter(new File(Main.PATH, "minecraft-dict.txt"), StandardCharsets.UTF_8)) {
+//            Arrays.stream(Material.values())
+//                    .map(Enum::name)
+//                    .filter(item -> {
+//                        try {
+//                            return !Material.class.getField(item).isAnnotationPresent(Deprecated.class);
+//                        } catch (Exception e) {
+//                            return true;
+//                        }
+//                    })
+//                    .map(String::toLowerCase)
+//                    .map(item -> item.replace("_", " "))
+//                    .forEach(i -> writer.print(i + "\n")); // force using unix line endings
+//        }
+//        System.out.println("Generated!");
+//    }
+    //</editor-fold>
 }

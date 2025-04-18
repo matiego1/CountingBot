@@ -119,7 +119,7 @@ public class Dictionary {
         GERMAN,
         SPANISH,
         TAUTOLOGIES(false),
-        MINECRAFT_ITEM(false);
+        MINECRAFT_ITEM;
 
         Type(boolean dictionarySupported) {
             this.dictionarySupported = dictionarySupported;
