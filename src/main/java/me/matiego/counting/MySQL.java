@@ -61,6 +61,9 @@ public class MySQL {
                     }
                 }
             }
+            try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_minecraft_accounts(discord VARCHAR(20) NOT NULL PRIMARY KEY, minecraft VARCHAR(36) NOT NULL, server VARCHAR(20) NOT NULL, UNIQUE KEY unique_discord (discord));")) {
+                stmt.execute();
+            }
         } catch (SQLException e) {
             Logs.error("Failed to create database tables.", e);
             return false;
