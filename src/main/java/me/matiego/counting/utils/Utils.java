@@ -30,15 +30,19 @@ public class Utils {
         };
     }
 
+    private static String version;
     public static @NotNull String getVersion() {
+        if (version != null) return version;
         try (InputStream stream = Main.class.getClassLoader().getResourceAsStream("version.properties")) {
             Properties properties = new Properties();
             properties.load(stream);
-            return properties.getProperty("version", "<unknown version>");
+            version = properties.getProperty("version", "<unknown version>");
+            return version;
         } catch (Exception e) {
             Logs.warningLocal("Failed to get project version", e);
         }
-        return "<unknown version>";
+        version = "<unknown version>";
+        return version;
     }
 
     public static String DEFAULT_ADMIN_KEY = "REPLACE_ME";

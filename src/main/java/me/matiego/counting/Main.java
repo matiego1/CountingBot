@@ -5,7 +5,8 @@ import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import lombok.Getter;
 import me.matiego.counting.commands.*;
-import me.matiego.counting.minecraft.MinecraftAccounts;
+import me.matiego.counting.minecraft.McAccounts;
+import me.matiego.counting.minecraft.McApiRequests;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Response;
@@ -43,7 +44,8 @@ public final class Main {
     @Getter private Dictionary dictionary;
     private Commands commands;
     @Getter private UserRanking userRanking;
-    @Getter private MinecraftAccounts minecraftAccounts;
+    @Getter private McAccounts mcAccounts;
+    @Getter private McApiRequests mcApiRequests;
 
     private JDA jda;
     private boolean isJdaEnabled = false;
@@ -121,7 +123,12 @@ public final class Main {
 
         dictionary = new Dictionary();
         userRanking = new UserRanking();
-        minecraftAccounts = new MinecraftAccounts(instance);
+        mcAccounts = new McAccounts(instance);
+        mcApiRequests = new McApiRequests(instance);
+
+        //Initialize http client
+        Logs.infoLocal("Initializing http client");
+        mcApiRequests.initiateHttpClient();
 
         //Enable Discord bot
         RestAction.setDefaultFailure(throwable -> Logs.error("An error occurred!", throwable));
@@ -316,6 +323,8 @@ public final class Main {
 
     public void onDisable() {
         long time = Utils.now();
+
+        if (mcApiRequests != null) mcApiRequests.closeHttpClient();
 
         //shut down JDA
         if (jda != null) {

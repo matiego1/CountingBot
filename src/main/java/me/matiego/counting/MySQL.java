@@ -61,7 +61,7 @@ public class MySQL {
                     }
                 }
             }
-            try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_minecraft_accounts(discord VARCHAR(20) NOT NULL PRIMARY KEY, minecraft VARCHAR(36) NOT NULL, server VARCHAR(20) NOT NULL, UNIQUE KEY unique_discord (discord));")) {
+            try (PreparedStatement stmt = conn.prepareStatement("CREATE TABLE IF NOT EXISTS counting_minecraft_accounts(discord VARCHAR(20) NOT NULL PRIMARY KEY, minecraft VARCHAR(36) NOT NULL, UNIQUE KEY unique_minecraft (minecraft));")) {
                 stmt.execute();
             }
         } catch (SQLException e) {

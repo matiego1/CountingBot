@@ -2,15 +2,20 @@ package me.matiego.counting.commands;
 
 import me.matiego.counting.Main;
 import me.matiego.counting.Tasks;
+import me.matiego.counting.minecraft.McException;
 import me.matiego.counting.utils.CommandHandler;
-import me.matiego.counting.utils.Pair;
+import me.matiego.counting.utils.Utils;
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.MessageEmbed;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.interactions.InteractionHook;
+import net.dv8tion.jda.api.interactions.commands.OptionMapping;
 import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Instant;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,7 +48,7 @@ public class MinecraftCommand extends CommandHandler {
                         "Odłącz swoje konto Minecraft"
                 ),
                 createSubcommand(
-                        "list",
+                        "info",
                         "Wyświetl swoje połączone konto Minecraft"
                 )
         );
@@ -54,39 +59,76 @@ public class MinecraftCommand extends CommandHandler {
         event.deferReply(true).queue();
         InteractionHook hook = event.getHook();
 
-        CompletableFuture<Integer> cooldown = new CompletableFuture<>();
-        Tasks.async(() -> cooldown.complete(switch (String.valueOf(event.getSubcommandName())) {
-            case "link" -> handleLinkSubcommand(event, hook);
-            case "unlink" -> handleUnlinkSubcommand(event, hook);
-            case "list" -> handleListSubcommand(event, hook);
-            default -> 3;
-        }));
-        return cooldown;
+        Tasks.async(() -> {
+            switch (String.valueOf(event.getSubcommandName())) {
+                case "link" -> handleLinkSubcommand(event, hook);
+                case "unlink" -> handleUnlinkSubcommand(event, hook);
+                case "info" -> handleInfoSubcommand(event, hook);
+            }
+        });
+        return CompletableFuture.completedFuture(10);
     }
 
-    private int handleLinkSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
-        // TODO
-        hook.sendMessage("Już wkrótce!").queue();
-        return 3;
-    }
-
-    private int handleUnlinkSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
-        // TODO
-        hook.sendMessage("Już wkrótce!").queue();
-        return 3;
-    }
-
-    private int handleListSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
+    private void handleLinkSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
         User user = event.getUser();
-        Pair<UUID, Long> account = instance.getMinecraftAccounts().getMinecraftAccount(user);
+
+        String code = event.getOption("code", OptionMapping::getAsString);
+        if (code == null) return;
+
+        if (instance.getMcAccounts().hasMinecraftAccount(user)) {
+            hook.sendMessage("Już połączyłeś swojego konto.").queue();
+            return;
+        }
+
+        UUID account;
+        try {
+            account = instance.getMcApiRequests().getUuidByCode(code);
+        } catch (McException e) {
+            hook.sendMessage("Napotkano błąd: `" + e.getMessage()).queue();
+            return;
+        }
+
+        if (instance.getMcAccounts().setMinecraftAccount(user, account)) {
+            hook.sendMessage("Pomyślnie połączono twoje konto!")
+                    .setEmbeds(getEmbed(account))
+                    .queue();
+        } else {
+            hook.sendMessage("Napotkano niespodziewany błąd. Spróbuj ponownie później.").queue();
+        }
+    }
+
+    private void handleUnlinkSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
+        User user = event.getUser();
+        if (!instance.getMcAccounts().hasMinecraftAccount(user)) {
+            hook.sendMessage("Nie połączyłeś jeszcze swojego konta albo napotkano niespodziewany błąd. Aby połączyć swoje konto, wejdź na serwer Minecraft i użyj komendy `/linkdiscord`.").queue();
+            return;
+        }
+
+        if (instance.getMcAccounts().removeMinecraftAccount(user)) {
+            hook.sendMessage("Pomyślnie rozłączono twoje konto Minecraft.").queue();
+        } else {
+            hook.sendMessage("Napotkano niespodziewany błąd. Spróbuj ponownie później.").queue();
+        }
+    }
+
+    private void handleInfoSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
+        UUID account = instance.getMcAccounts().getMinecraftAccount(event.getUser());
 
         if (account == null) {
             hook.sendMessage("Nie połączyłeś jeszcze swojego konta albo napotkano niespodziewany błąd. Aby połączyć swoje konto, wejdź na serwer Minecraft i użyj komendy `/linkdiscord`.").queue();
-            return 5;
+            return;
         }
 
-        // TODO
-        hook.sendMessage("Już wkrótce").queue();
-        return 3;
+        hook.sendMessageEmbeds(getEmbed(account)).queue();
+    }
+
+    private @NotNull MessageEmbed getEmbed(@NotNull UUID uuid) {
+        EmbedBuilder eb = new EmbedBuilder();
+        eb.setTitle("Połączone konto Minecraft:");
+        eb.setDescription("[`" + uuid + "`](<https://pl.namemc.com/search?q=" + uuid + ">)");
+        eb.setThumbnail("https://mc-heads.net/avatar/" + uuid + ".png");
+        eb.setColor(Utils.YELLOW);
+        eb.setTimestamp(Instant.now());
+        return eb.build();
     }
 }
