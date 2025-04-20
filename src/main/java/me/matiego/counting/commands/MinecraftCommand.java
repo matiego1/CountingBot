@@ -4,6 +4,8 @@ import me.matiego.counting.Main;
 import me.matiego.counting.Tasks;
 import me.matiego.counting.minecraft.McException;
 import me.matiego.counting.utils.CommandHandler;
+import me.matiego.counting.utils.DiscordUtils;
+import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.entities.MessageEmbed;
@@ -84,11 +86,12 @@ public class MinecraftCommand extends CommandHandler {
         try {
             account = instance.getMcApiRequests().getUuidByCode(code);
         } catch (McException e) {
-            hook.sendMessage("Napotkano błąd: `" + e.getMessage()).queue();
+            hook.sendMessage(e.getMessage()).queue();
             return;
         }
 
         if (instance.getMcAccounts().setMinecraftAccount(user, account)) {
+            Logs.info("User " + DiscordUtils.getAsTag(user) + " has linked account to `" + account + "`");
             hook.sendMessage("Pomyślnie połączono twoje konto!")
                     .setEmbeds(getEmbed(account))
                     .queue();
@@ -105,6 +108,7 @@ public class MinecraftCommand extends CommandHandler {
         }
 
         if (instance.getMcAccounts().removeMinecraftAccount(user)) {
+            Logs.info("User " + DiscordUtils.getAsTag(user) + " has unlinked account.");
             hook.sendMessage("Pomyślnie rozłączono twoje konto Minecraft.").queue();
         } else {
             hook.sendMessage("Napotkano niespodziewany błąd. Spróbuj ponownie później.").queue();
