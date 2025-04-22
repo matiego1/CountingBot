@@ -93,11 +93,7 @@ public class MessageHandler extends ListenerAdapter {
             if (minecraftAccount != null) {
                 reward = instance.getMcRewards().getReward(guildId, user.getIdLong(), chn.getIdLong(), data.getType().name().toLowerCase(), getLastMessageDate(history));
                 if (reward > 0) {
-                    String rewardString = String.valueOf(reward);
-                    if (reward % 1 == 0) {
-                        rewardString = String.valueOf((int) reward);
-                    }
-                    userName = "[" + rewardString + "$] " + userName;
+                    userName = "[" + Utils.doubleToString(reward) + "$] " + userName;
                 }
             }
         }

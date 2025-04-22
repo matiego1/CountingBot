@@ -27,16 +27,32 @@ public class McRewards {
 
         long now = Utils.now();
         long last = getLast(channelId, userId);
-        if (now - last <= Math.max(60, config.getLong("minecraft.interval", 300)) * 1000L) return 0;
+        if (now - last <= getInterval(config)) return 0;
 
-        double reward = config.getDouble("minecraft.types." + channelType);
-        if (now - previousMessageDate >= config.getLong("minecraft.old-message", Long.MAX_VALUE) * 1000L) {
-            reward *= Math.max(1, config.getDouble("minecraft.old-message-multiplier"));
+        double reward = getChannelReward(config, channelType);
+        if (now - previousMessageDate >= getOldMessage(config)) {
+            reward *= getOldMessageMultiplier(config);
         }
         reward = Math.max(0, Math.min(1000 * 1000 * 1000, reward));
 
         if (!setLast(channelId, userId, now)) return 0;
         return reward;
+    }
+
+    public long getInterval(@NotNull FileConfiguration config) {
+        return Math.max(60, config.getLong("minecraft.interval", 600)) * 1000L;
+    }
+
+    public double getChannelReward(@NotNull FileConfiguration config, @NotNull String channelType) {
+        return Math.max(0, Utils.round(config.getDouble("minecraft.types." + channelType), 2));
+    }
+
+    public long getOldMessage(@NotNull FileConfiguration config) {
+        return Math.max(60, config.getLong("minecraft.old-message", Long.MAX_VALUE)) * 1000L;
+    }
+
+    public double getOldMessageMultiplier(@NotNull FileConfiguration config) {
+        return Math.max(1, config.getDouble("minecraft.old-message-multiplier"));
     }
 
     public long getLast(long channelId, long userId) {

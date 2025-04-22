@@ -1,8 +1,10 @@
 package me.matiego.counting.commands;
 
+import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import me.matiego.counting.Tasks;
 import me.matiego.counting.minecraft.McException;
+import me.matiego.counting.minecraft.McRewards;
 import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
@@ -16,6 +18,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
+import org.simpleyaml.configuration.file.FileConfiguration;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -91,7 +94,7 @@ public class MinecraftCommand extends CommandHandler {
         }
 
         if (instance.getMcAccounts().setMinecraftAccount(user, account)) {
-            Logs.info("User " + DiscordUtils.getAsTag(user) + " has linked account to `" + account + "`");
+            Logs.info("User `" + DiscordUtils.getAsTag(user) + "` has linked account to `" + account + "`");
             hook.sendMessage("Pomyślnie połączono twoje konto!")
                     .setEmbeds(getEmbed(account))
                     .queue();
@@ -123,7 +126,20 @@ public class MinecraftCommand extends CommandHandler {
             return;
         }
 
-        hook.sendMessageEmbeds(getEmbed(account)).queue();
+        FileConfiguration config = instance.getConfig();
+        McRewards rewards = instance.getMcRewards();
+
+        String interval = Utils.parseMillisToString(rewards.getInterval(config), false)
+                .replace("m", " minut");
+        StringBuilder message = new StringBuilder("**Nagrody za liczenie:** `(wiadomość / kanał / %s)`\n".formatted(interval));
+
+        for (ChannelData.Type type : ChannelData.Type.values()) {
+            message.append("- %s: `%s$`\n".formatted(type.toString(), Utils.doubleToString(rewards.getChannelReward(config, type.name()))));
+        }
+        message.append("\nJeśli ostatnia wiadomość na kanale została wysłana >%s temu, to nagroda jest zwiększana %s krotnie.".formatted(Utils.parseMillisToString(rewards.getOldMessage(config), false, false), Utils.doubleToString(rewards.getOldMessageMultiplier(config))));
+
+        hook.sendMessage(message.toString())
+                .setEmbeds(getEmbed(account)).queue();
     }
 
     private @NotNull MessageEmbed getEmbed(@NotNull UUID uuid) {

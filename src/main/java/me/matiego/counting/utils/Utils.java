@@ -62,14 +62,19 @@ public class Utils {
     }
 
     public static @NotNull String parseMillisToString(long time, boolean useMilliseconds) {
+        return parseMillisToString(time, useMilliseconds, true);
+    }
+    public static @NotNull String parseMillisToString(long time, boolean useMilliseconds, boolean useDays) {
         time = Math.round((double) time / (useMilliseconds ? 1 : 1000));
         int x = useMilliseconds ? 1000 : 1;
         String result = "";
 
         //days
-        int d = (int) (time / (3600 * 24 * x));
-        time -= (long) d * 3600 * 24 * x;
-        if (d != 0) result += d + "d ";
+        if (useDays) {
+            int d = (int) (time / (3600 * 24 * x));
+            time -= (long) d * 3600 * 24 * x;
+            if (d != 0) result += d + "d ";
+        }
         //hours
         int h = (int) (time / (3600 * x));
         time -= (long) h * 3600 * x;
@@ -88,5 +93,16 @@ public class Utils {
 
         if (result.isEmpty()) return useMilliseconds ? "0ms" : "0s";
         return result.substring(0, result.length() - 1);
+    }
+
+    public static double round(double number, int decimalPlaces) {
+        return (double) Math.round(number * Math.pow(10, decimalPlaces)) / Math.pow(10, decimalPlaces);
+    }
+
+    public static @NotNull String doubleToString(double number) {
+        if (number % 1 == 0) {
+            return String.valueOf((int) number);
+        }
+        return String.valueOf(number);
     }
 }
