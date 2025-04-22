@@ -7,6 +7,7 @@ import lombok.Getter;
 import me.matiego.counting.commands.*;
 import me.matiego.counting.minecraft.McAccounts;
 import me.matiego.counting.minecraft.McApiRequests;
+import me.matiego.counting.minecraft.McRewards;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Response;
@@ -46,6 +47,7 @@ public final class Main {
     @Getter private UserRanking userRanking;
     @Getter private McAccounts mcAccounts;
     @Getter private McApiRequests mcApiRequests;
+    @Getter private McRewards mcRewards;
 
     private JDA jda;
     private boolean isJdaEnabled = false;
@@ -125,6 +127,7 @@ public final class Main {
         userRanking = new UserRanking();
         mcAccounts = new McAccounts(instance);
         mcApiRequests = new McApiRequests(instance);
+        mcRewards = new McRewards(instance);
 
         //Initialize http client
         Logs.infoLocal("Initializing http client");
