@@ -18,6 +18,7 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.simpleyaml.configuration.file.FileConfiguration;
 
 import java.time.Instant;
@@ -81,7 +82,7 @@ public class MinecraftCommand extends CommandHandler {
         if (code == null) return;
 
         if (instance.getMcAccounts().hasMinecraftAccount(user)) {
-            hook.sendMessage("Już połączyłeś swojego konto.").queue();
+            hook.sendMessage("Już połączyłeś swojego konto Minecraft.").queue();
             return;
         }
 
@@ -95,7 +96,7 @@ public class MinecraftCommand extends CommandHandler {
 
         if (instance.getMcAccounts().setMinecraftAccount(user, account)) {
             Logs.info("User `" + DiscordUtils.getAsTag(user) + "` has linked account to `" + account + "`");
-            hook.sendMessage("Pomyślnie połączono twoje konto!")
+            hook.sendMessage("Pomyślnie połączono twoje konto Minecraft!")
                     .setEmbeds(getEmbed(account))
                     .queue();
         } else {
@@ -119,13 +120,6 @@ public class MinecraftCommand extends CommandHandler {
     }
 
     private void handleInfoSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
-        UUID account = instance.getMcAccounts().getMinecraftAccount(event.getUser());
-
-        if (account == null) {
-            hook.sendMessage("Nie połączyłeś jeszcze swojego konta albo napotkano niespodziewany błąd. Aby połączyć swoje konto, wejdź na serwer Minecraft i użyj komendy `/linkdiscord`.").queue();
-            return;
-        }
-
         FileConfiguration config = instance.getConfig();
         McRewards rewards = instance.getMcRewards();
 
@@ -138,16 +132,23 @@ public class MinecraftCommand extends CommandHandler {
         }
         message.append("\nJeśli ostatnia wiadomość na kanale została wysłana >%s temu, to nagroda jest zwiększana %s krotnie.".formatted(Utils.parseMillisToString(rewards.getOldMessage(config), false, false), Utils.doubleToString(rewards.getOldMessageMultiplier(config))));
 
+        UUID account = instance.getMcAccounts().getMinecraftAccount(event.getUser());
         hook.sendMessage(message.toString())
                 .setEmbeds(getEmbed(account)).queue();
     }
 
-    private @NotNull MessageEmbed getEmbed(@NotNull UUID uuid) {
+    private @NotNull MessageEmbed getEmbed(@Nullable UUID uuid) {
         EmbedBuilder eb = new EmbedBuilder();
-        eb.setTitle("Połączone konto Minecraft:");
-        eb.setDescription("[`" + uuid + "`](<https://pl.namemc.com/search?q=" + uuid + ">)");
-        eb.setThumbnail("https://mc-heads.net/avatar/" + uuid + ".png");
-        eb.setColor(Utils.YELLOW);
+        if (uuid == null) {
+            eb.setTitle("Nie połączyłeś jeszcze swojego konta Minecraft!");
+            eb.setDescription("Aby połączyć swoje konto, wejdź na serwer Minecraft i użyj komendy `/linkdiscord`.");
+            eb.setColor(Utils.RED);
+        } else {
+            eb.setTitle("Połączone konto Minecraft:");
+            eb.setDescription("[`" + uuid + "`](<https://pl.namemc.com/search?q=" + uuid + ">)\nAby rozłączyć swoje konto, użyj komendy `/minecraft unlink`.");
+            eb.setThumbnail("https://mc-heads.net/avatar/" + uuid + ".png");
+            eb.setColor(Utils.YELLOW);
+        }
         eb.setTimestamp(Instant.now());
         return eb.build();
     }
