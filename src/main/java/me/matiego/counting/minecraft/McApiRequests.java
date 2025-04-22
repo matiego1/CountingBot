@@ -70,8 +70,12 @@ public class McApiRequests {
         client = null;
     }
 
+    public boolean isEnabled() {
+        return instance.getConfig().getBoolean("minecraft.enabled");
+    }
+
     public @NotNull UUID getUuidByCode(@NotNull String code) throws McException {
-        if (!instance.getConfig().getBoolean("minecraft.enabled")) {
+        if (!isEnabled()) {
             throw new McException("Łączenie kont jest wyłączone. Spróbuj ponownie później.");
         }
         try {
@@ -81,27 +85,33 @@ public class McApiRequests {
                         .uri(getURI("link"));
             } catch (IllegalArgumentException e) {
                 Logs.error("Incorrect Counting-MC API URL", e);
-                throw new McException("Błędna konfiguracja bota. Skontaktuj się z administratorem.");
+                throw new McException("Błędna konfiguracja bota. Zgłoś ten błąd administratorowi.");
             }
+
+            String params = "code=" + code;
 
             HttpRequest request = builder
                     .header("User-Agent", "Counting-Bot (" + Utils.getVersion() + ")")
                     .header("key", String.valueOf(instance.getConfig().getString("minecraft.api.key")))
-                    .POST(HttpRequest.BodyPublishers.ofString("code=" + code))
+                    .POST(HttpRequest.BodyPublishers.ofString(params))
                     .build();
 
             HttpResponse<String> response;
             try {
-                Logs.debug("Sending request to CountingBot-MC API: /link");
+                Logs.debug("Sending request to CountingBot-MC API: /link " + params);
                 response = client.send(request, HttpResponse.BodyHandlers.ofString());
             } catch (ConnectException e) {
                 Logs.error("Failed to get uuid by code", e);
                 throw new McException("Napotkano niespodziewany błąd. Czy serwer Minecraft jest online?");
             }
 
+            if (response.statusCode() == 400) {
+                Logs.error("Failed to get uuid by code: " + getErrorTitle(response.body()));
+                throw new McException("Napotkano niespodziewany błąd. Spróbuj ponownie później.");
+            }
             if (response.statusCode() == 401) {
-                Logs.warning("Counting-MC API key is incorrect");
-                throw new McException("Błędna konfiguracja bota. Skontaktuj się z administratorem.");
+                Logs.error("Counting-MC API key is incorrect");
+                throw new McException("Błędna konfiguracja bota. Zgłoś ten błąd administratorowi.");
             }
             if (response.statusCode() == 404) {
                 throw new McException("Błędny kod weryfikacji. Czy wygenerowałeś swój kod używając komendy `/linkdiscord` na serwerze Minecraft?");
@@ -122,18 +132,80 @@ public class McApiRequests {
         }
     }
 
+    public void giveReward(@NotNull UUID uuid, double amount) throws McException {
+        if (!isEnabled()) {
+            throw new McException("Nagrody za liczenie są wyłączone.");
+        }
+        try {
+            HttpRequest.Builder builder;
+            try {
+                builder = HttpRequest.newBuilder()
+                        .uri(getURI("deposit"));
+            } catch (IllegalArgumentException e) {
+                Logs.error("Incorrect Counting-MC API URL", e);
+                throw new McException("Błędna konfiguracja bota. Zgłoś ten błąd administratorowi.");
+            }
+
+            String params = "uuid=" + uuid + "&amount=" + amount;
+
+            HttpRequest request = builder
+                    .header("User-Agent", "Counting-Bot (" + Utils.getVersion() + ")")
+                    .header("key", String.valueOf(instance.getConfig().getString("minecraft.api.key")))
+                    .POST(HttpRequest.BodyPublishers.ofString(params))
+                    .build();
+
+            HttpResponse<String> response;
+            try {
+                Logs.debug("Sending request to CountingBot-MC API: /deposit " + params);
+                response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            } catch (ConnectException e) {
+                Logs.error("Failed to give a reward for counting", e);
+                throw new McException("Napotkano niespodziewany błąd. Czy serwer Minecraft jest online?");
+            }
+
+            if (response.statusCode() == 200) return;
+            if (response.statusCode() == 400) {
+                Logs.error("Failed to give a reward for counting: " + getErrorTitle(response.body()));
+                throw new McException("Napotkano niespodziewany błąd. Spróbuj ponownie później.");
+            }
+            if (response.statusCode() == 401) {
+                Logs.error("Counting-MC API key is incorrect");
+                throw new McException("Błędna konfiguracja bota. Zgłoś ten błąd administratorowi.");
+            }
+            if (response.statusCode() == 403) {
+                throw new McException("Nagrody za liczenie zostały wyłączone przez administratora serwera Minecraft. Jeżeli nie chcesz otrzymywać tej wiadomości, rozłącz swoje konto Minecraft używając komendy /minecraft unlink.");
+            }
+            if (response.statusCode() == 404) {
+                throw new McException("Serwer Minecraft nie rozpoznał twojego konta Minecraft. Połącz je ponownie.");
+            }
+            if (response.statusCode() == 500) {
+                throw new McException("Serwer Minecraft napotkał błąd przy dawaniu Ci pieniędzy. Zgłoś ten błąd administratorowi.");
+            }
+            if (response.statusCode() == 503) {
+                throw new McException("Błędna konfiguracja serwera Minecraft. Zgłoś ten błąd administratorowi.");
+            }
+
+            throw new IllegalStateException("Unhandled status code: " + response.statusCode() + "; Error message: " + getErrorTitle(response.body()));
+        } catch (McException e) {
+            throw e;
+        } catch (Exception e) {
+            Logs.error("Failed to give a reward for counting", e);
+            throw new McException("Napotkano niespodziewany błąd. Spróbuj ponownie później.");
+        }
+    }
+
     private @NotNull URI getURI(@NotNull String route) throws McException {
         String uri = instance.getConfig().getString("minecraft.api.url");
         if (uri == null) {
             Logs.warning("Counting-MC API URL is not set");
-            throw new McException("Błędna konfiguracja bota. Skontaktuj się z administratorem.");
+            throw new McException("Błędna konfiguracja bota. Zgłoś ten błąd administratorowi.");
         }
 
         try {
             return URI.create(uri + "/" + route);
         } catch (Exception e) {
             Logs.warning("Failed to get URL of Counting-MC API", e);
-            throw new McException("Błędna konfiguracja bota. Skontaktuj się z administratorem.");
+            throw new McException("Błędna konfiguracja bota. Zgłoś ten błąd administratorowi.");
         }
     }
 
