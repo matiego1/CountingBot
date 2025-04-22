@@ -80,6 +80,7 @@ public class MessageHandler extends ListenerAdapter {
         );
         if (correctMsg == null) return;
 
+        long guildId = event.getGuild().getIdLong();
         User user = event.getAuthor();
         Member member = event.getMember();
         MessageChannelUnion chn = event.getChannel();
@@ -87,12 +88,16 @@ public class MessageHandler extends ListenerAdapter {
 
         UUID minecraftAccount = null;
         double reward = 0;
-        if (instance.isEnabled()) {
+        if (instance.getMcApiRequests().isEnabled()) {
             minecraftAccount = instance.getMcAccounts().getMinecraftAccount(user);
             if (minecraftAccount != null) {
-                reward = instance.getMcRewards().getReward();
+                reward = instance.getMcRewards().getReward(guildId, user.getIdLong(), chn.getIdLong(), data.getType().name().toLowerCase(), getLastMessageDate(history));
                 if (reward > 0) {
-                    userName = "[" + reward + "$] " + userName;
+                    String rewardString = String.valueOf(reward);
+                    if (reward % 1 == 0) {
+                        rewardString = String.valueOf((int) reward);
+                    }
+                    userName = "[" + rewardString + "$] " + userName;
                 }
             }
         }
@@ -109,19 +114,25 @@ public class MessageHandler extends ListenerAdapter {
         }
 
         if (success) {
-            if (!instance.getUserRanking().add(user, event.getGuild().getIdLong())) {
+            if (!instance.getUserRanking().add(user, guildId)) {
                 DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy zwiększaniu twojego wyniku w rankingu. Poproś administratora bota o jego zwiększenie.");
             }
             if (reward > 0) {
                 try {
                     instance.getMcApiRequests().giveReward(minecraftAccount, reward);
                 } catch (McException e) {
-                    DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano błąd przy dawaniu nagrody za liczenie: `" + e.getMessage() + "`.");
+                    DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano błąd przy dawaniu nagrody za liczenie: `" + e.getMessage() + "`");
                 }
             }
         } else {
             DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy wysyłaniu twojej wiadomości. Spróbuj później.");
         }
+    }
+
+    private long getLastMessageDate(@NotNull List<Message> history) {
+        if (history.isEmpty()) return Utils.now();
+        // https://discord.com/developers/docs/reference#snowflakes-snowflake-id-format-structure-left-to-right
+        return (history.getFirst().getIdLong() >> 22) + 1420070400000L;
     }
 
     public synchronized boolean checkCooldown(@NotNull UserSnowflake user, long chn, long now, int minTime, int maxCount) {

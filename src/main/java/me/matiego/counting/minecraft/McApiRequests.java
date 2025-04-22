@@ -166,7 +166,7 @@ public class McApiRequests {
             if (response.statusCode() == 200) return;
             if (response.statusCode() == 400) {
                 Logs.error("Failed to give a reward for counting: " + getErrorTitle(response.body()));
-                throw new McException("Napotkano niespodziewany błąd. Spróbuj ponownie później.");
+                throw new McException("Napotkano niespodziewany błąd.");
             }
             if (response.statusCode() == 401) {
                 Logs.error("Counting-MC API key is incorrect");
@@ -190,7 +190,7 @@ public class McApiRequests {
             throw e;
         } catch (Exception e) {
             Logs.error("Failed to give a reward for counting", e);
-            throw new McException("Napotkano niespodziewany błąd. Spróbuj ponownie później.");
+            throw new McException("Napotkano niespodziewany błąd.");
         }
     }
 

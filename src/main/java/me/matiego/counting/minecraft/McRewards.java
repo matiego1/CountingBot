@@ -10,7 +10,8 @@ public class McRewards {
 
     private final Main instance;
 
-    public double getReward() {
-        return 0;
+    public double getReward(long guildId, long userId, long channelId, @NotNull String channelType, long previousMessageDate) {
+        // TODO: implement getReward
+        return 1.69;
     }
 }
