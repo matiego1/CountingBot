@@ -1,5 +1,6 @@
 package me.matiego.counting;
 
+import me.matiego.counting.minecraft.McException;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 public class MessageHandler extends ListenerAdapter {
     public MessageHandler(@NotNull Main instance) {
@@ -24,8 +26,8 @@ public class MessageHandler extends ListenerAdapter {
 
     @Override
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
+        long time = Utils.now();
         Tasks.async(() -> {
-            long time = Utils.now();
 
             MessageChannelUnion channel = event.getChannel();
             if (!DiscordUtils.isSupportedChannel(channel)) return;
@@ -81,24 +83,44 @@ public class MessageHandler extends ListenerAdapter {
         User user = event.getAuthor();
         Member member = event.getMember();
         MessageChannelUnion chn = event.getChannel();
+        String userName = DiscordUtils.getName(user, member);
+
+        UUID minecraftAccount = null;
+        double reward = 0;
+        if (instance.isEnabled()) {
+            minecraftAccount = instance.getMcAccounts().getMinecraftAccount(user);
+            if (minecraftAccount != null) {
+                reward = instance.getMcRewards().getReward();
+                if (reward > 0) {
+                    userName = "[" + reward + "$] " + userName;
+                }
+            }
+        }
 
         boolean success = switch (chn.getType()) {
-            case TEXT -> DiscordUtils.sendWebhook(data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), DiscordUtils.getName(user, member), correctMsg);
-            case GUILD_PUBLIC_THREAD -> DiscordUtils.sendWebhookToThread(chn.getIdLong(), data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), DiscordUtils.getName(user, member), correctMsg);
+            case TEXT -> DiscordUtils.sendWebhook(data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), userName, correctMsg);
+            case GUILD_PUBLIC_THREAD -> DiscordUtils.sendWebhookToThread(chn.getIdLong(), data.getWebhookUrl(), DiscordUtils.getAvatar(user, member), userName, correctMsg);
             default -> false;
         };
+
+        time = Utils.now() - time;
+        if (time >= 1000) {
+            Logs.warning("The message verification time exceeded 1 second! (Time: " + time + "ms; Channel: " + chn.getName() + "; ID: " + event.getChannel().getId() + ")");
+        }
 
         if (success) {
             if (!instance.getUserRanking().add(user, event.getGuild().getIdLong())) {
                 DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy zwiększaniu twojego wyniku w rankingu. Poproś administratora bota o jego zwiększenie.");
             }
+            if (reward > 0) {
+                try {
+                    instance.getMcApiRequests().giveReward(minecraftAccount, reward);
+                } catch (McException e) {
+                    DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano błąd przy dawaniu nagrody za liczenie: `" + e.getMessage() + "`.");
+                }
+            }
         } else {
             DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy wysyłaniu twojej wiadomości. Spróbuj później.");
-        }
-
-        time = Utils.now() - time;
-        if (time >= 1000) {
-            Logs.warning("The message verification time exceeded 1 second! (Time: " + time + "ms; Channel: " + chn.getName() + "; ID: " + event.getChannel().getId() + ")");
         }
     }
 
