@@ -4,16 +4,17 @@ import me.matiego.counting.Main;
 import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 
 import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
+import javax.net.ssl.X509ExtendedTrustManager;
 import java.net.*;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.security.SecureRandom;
 import java.security.cert.X509Certificate;
 import java.util.UUID;
 
@@ -25,6 +26,18 @@ public class McApiRequests {
     private final Main instance;
     private HttpClient client;
 
+    private static final TrustManager SSL_TRUST_MANAGER = new X509ExtendedTrustManager() {
+        public void checkClientTrusted(X509Certificate[] x509Certificates, String s, Socket socket) {}
+        public void checkServerTrusted(X509Certificate[] x509Certificates, String s, Socket socket) {}
+        public void checkClientTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) {}
+        public void checkServerTrusted(X509Certificate[] x509Certificates, String s, SSLEngine sslEngine) {}
+        public void checkClientTrusted(X509Certificate[] x509Certificates, String s) {}
+        public void checkServerTrusted(X509Certificate[] chain, String authType) {}
+        public X509Certificate[] getAcceptedIssuers() {
+            return new X509Certificate[0];
+        }
+    };
+
     public void initiateHttpClient() {
         closeHttpClient();
 
@@ -32,36 +45,19 @@ public class McApiRequests {
         cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
         CookieHandler.setDefault(cookieManager);
 
-        SSLContext sslContext = getSSLContext();
-
         HttpClient.Builder builder = HttpClient.newBuilder()
                 .cookieHandler(CookieHandler.getDefault())
                 .followRedirects(HttpClient.Redirect.ALWAYS);
-        if (sslContext != null) {
-            builder.sslContext(sslContext);
-        }
-        client = builder.build();
-    }
 
-    public @Nullable SSLContext getSSLContext() {
-        // TODO: accept only known certificate
         try {
-            TrustManager[] trustAllCerts = new TrustManager[] {
-                    new X509TrustManager() {
-                        public X509Certificate[] getAcceptedIssuers() {
-                            return new X509Certificate[0];
-                        }
-                        public void checkClientTrusted(X509Certificate[] certs, String authType) {}
-                        public void checkServerTrusted(X509Certificate[] certs, String authType) {}
-                    }
-            };
-
             SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            sslContext.init(null, new TrustManager[]{SSL_TRUST_MANAGER}, new SecureRandom());
+            builder.sslContext(sslContext);
         } catch (Exception e) {
-            Logs.error("Failed to get SSL context", e);
+            Logs.error("Failed to set SSL context", e);
         }
-        return null;
+
+        client = builder.build();
     }
 
     public void closeHttpClient() {
