@@ -44,7 +44,7 @@ public class Rewards {
     }
 
     public double getChannelReward(@NotNull FileConfiguration config, @NotNull String channelType) {
-        return Math.max(0, Utils.round(config.getDouble("minecraft.types." + channelType), 2));
+        return Math.max(0, Utils.round(config.getDouble("minecraft.types." + channelType.toLowerCase()), 2));
     }
 
     public long getOldMessage(@NotNull FileConfiguration config) {
