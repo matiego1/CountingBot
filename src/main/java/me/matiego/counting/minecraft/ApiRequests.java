@@ -129,7 +129,7 @@ public class ApiRequests {
 
     private void handleException(@NotNull Throwable e, @NotNull CompletableFuture<?> result) {
         if (e instanceof TimeoutException) {
-            result.completeExceptionally(new McException("Nie udało się połączyć do serwera Minecraft. Czy jest on online?"));
+            result.completeExceptionally(new McException("Nie udało się połączyć z serwerem Minecraft. Czy jest on online?"));
         }
         Logs.error("Failed to get uuid by code", e);
         result.completeExceptionally(new McException("Napotkano niespodziewany błąd."));

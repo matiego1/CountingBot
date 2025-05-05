@@ -12,6 +12,7 @@ import org.json.JSONObject;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class RequestsHandler {
@@ -22,7 +23,7 @@ public class RequestsHandler {
     private final static int UNAUTHORIZED_CODE = 3000;
     private final static int TIMEOUT_SECONDS = 5;
     private final Main instance;
-    private final List<WsContext> users = Collections.synchronizedList(new ArrayList<>());
+    private final Map<WsContext, String> users = new ConcurrentHashMap<>();
     private final Map<UUID, CompletableFuture<Response>> requests = Collections.synchronizedMap(Utils.createLimitedSizeMap(10_000));
 
     public void handle(@NotNull WsConfig ws) {
@@ -30,20 +31,20 @@ public class RequestsHandler {
             if (!checkAuth(ctx)) return;
 
             String sessionHash = getSessionHash(ctx);
-            users.add(ctx);
+            users.put(ctx, sessionHash);
             Logs.info("User (" + sessionHash + ") has connected to the rewards API");
         });
         ws.onClose(ctx -> {
             if (!checkAuth(ctx)) return;
 
-            users.remove(ctx);
-            Logs.info("User (" + getSessionHash(ctx) + ") has disconnected from the rewards API. Close status: " + ctx.closeStatus());
+            String sessionHash = users.remove(ctx);
+            Logs.info("User (" + sessionHash + ") has disconnected from the rewards API. Close status: " + ctx.closeStatus());
         });
         ws.onError(ctx -> {
             if (!checkAuth(ctx)) return;
 
             Throwable e = ctx.error();
-            Logs.warning("User (" + getSessionHash(ctx) + ") has encountered an error" + (e == null ? "" : ": " + e.getClass().getSimpleName() + ": " + e.getMessage()));
+            Logs.warning("User (" + users.get(ctx) + ") has encountered an error" + (e == null ? "" : ": " + e.getClass().getSimpleName() + ": " + e.getMessage()));
         });
         ws.onMessage(ctx -> {
             if (!checkAuth(ctx)) return;
@@ -51,7 +52,7 @@ public class RequestsHandler {
             String message = ctx.message().trim();
             if (message.equals("ping")) return;
 
-            Logs.debug("Received WebSocket message from " + getSessionHash(ctx) + ": `" + message + "`");
+            Logs.debug("Received WebSocket message from " + users.get(ctx) + ": `" + message + "`");
 
             try {
                 parseMessage(message);
@@ -112,14 +113,14 @@ public class RequestsHandler {
 
         Logs.debug("Sending WebSocket message: " + message);
 
-        users.stream()
+        users.keySet().stream()
                 .filter(ctx -> ctx.session.isOpen())
                 .forEach(ctx -> ctx.send(message.toString()));
         return response;
     }
 
     public void closeSessions() {
-        users.forEach(ctx -> ctx.closeSession(WsCloseStatus.NORMAL_CLOSURE));
+        users.keySet().forEach(ctx -> ctx.closeSession(WsCloseStatus.NORMAL_CLOSURE));
     }
 
     @Getter
