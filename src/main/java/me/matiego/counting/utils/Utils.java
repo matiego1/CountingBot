@@ -2,6 +2,7 @@ package me.matiego.counting.utils;
 
 import me.matiego.counting.Main;
 import net.dv8tion.jda.api.entities.User;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,7 +22,8 @@ public class Utils {
         return System.currentTimeMillis();
     }
 
-    public static <K, V> HashMap<K, V> createLimitedSizeMap(int maxEntries) {
+    @Contract(value = "_ -> new", pure = true)
+    public static <K, V> @NotNull HashMap<K, V> createLimitedSizeMap(int maxEntries) {
         return new LinkedHashMap<>() {
             @Override
             protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {

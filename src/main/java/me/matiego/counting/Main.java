@@ -5,9 +5,7 @@ import com.neovisionaries.ws.client.DualStackMode;
 import com.neovisionaries.ws.client.WebSocketFactory;
 import lombok.Getter;
 import me.matiego.counting.commands.*;
-import me.matiego.counting.minecraft.McAccounts;
-import me.matiego.counting.minecraft.McApiRequests;
-import me.matiego.counting.minecraft.McRewards;
+import me.matiego.counting.minecraft.*;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
 import me.matiego.counting.utils.Response;
@@ -46,8 +44,10 @@ public final class Main {
     private Commands commands;
     @Getter private UserRanking userRanking;
     @Getter private McAccounts mcAccounts;
-    @Getter private McApiRequests mcApiRequests;
-    @Getter private McRewards mcRewards;
+    @Getter private ApiRequests apiRequests;
+    @Getter private Rewards mcRewards;
+    @Getter private WebServer webServer;
+    @Getter private RequestsHandler requestsHandler;
 
     private JDA jda;
     private boolean isJdaEnabled = false;
@@ -97,7 +97,7 @@ public final class Main {
             return false;
         }
 
-        // Load the config file
+        // Load a config file
         try {
             config = Config.loadConfig(PATH + File.separator + "config.yml");
         } catch (Exception e) {
@@ -105,7 +105,7 @@ public final class Main {
             return false;
         }
 
-        //Open MySQL connection
+        // Open a MySQL connection
         Logs.infoLocal("Opening the MySQL connection...");
         String username = getConfig().getString("database.username", "");
         String password = getConfig().getString("database.password", "");
@@ -117,7 +117,7 @@ public final class Main {
         }
         if (!mySQL.createTables()) return false;
 
-        //Load storages
+        // Load storages
         Logs.infoLocal("Loading saved channels...");
         storage = Storage.load(this);
         if (storage == null) return false;
@@ -126,14 +126,22 @@ public final class Main {
         dictionary = new Dictionary();
         userRanking = new UserRanking();
         mcAccounts = new McAccounts(instance);
-        mcApiRequests = new McApiRequests(instance);
-        mcRewards = new McRewards(instance);
+        apiRequests = new ApiRequests(instance);
+        mcRewards = new Rewards(instance);
+        requestsHandler = new RequestsHandler(instance);
 
-        //Initialize http client
-        Logs.infoLocal("Initializing http client");
-        mcApiRequests.initiateHttpClient();
+        // Start a web server
+        Logs.infoLocal("Starting a Rewards API web server...");
+        try {
+            webServer = new WebServer(instance, getConfig());
+            webServer.start();
+            webServer.addRoutes();
+        } catch (Exception e) {
+            Logs.error("Failed to start a Rewards API web server", e);
+            return false;
+        }
 
-        //Enable Discord bot
+        // Enable Discord bot
         RestAction.setDefaultFailure(throwable -> Logs.error("An error occurred!", throwable));
         Logs.infoLocal("Enabling the Discord bot...");
         if (jda != null) {
@@ -327,7 +335,7 @@ public final class Main {
     public void onDisable() {
         long time = Utils.now();
 
-        if (mcApiRequests != null) mcApiRequests.closeHttpClient();
+        if (webServer != null) webServer.stop();
 
         //shut down JDA
         if (jda != null) {

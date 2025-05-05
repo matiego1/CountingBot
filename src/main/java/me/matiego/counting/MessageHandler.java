@@ -1,6 +1,5 @@
 package me.matiego.counting;
 
-import me.matiego.counting.minecraft.McException;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
@@ -88,7 +87,7 @@ public class MessageHandler extends ListenerAdapter {
 
         UUID minecraftAccount = null;
         double reward = 0;
-        if (instance.getMcApiRequests().isEnabled()) {
+        if (instance.getApiRequests().isEnabled()) {
             minecraftAccount = instance.getMcAccounts().getMinecraftAccount(user);
             if (minecraftAccount != null) {
                 reward = instance.getMcRewards().getReward(guildId, user.getIdLong(), chn.getIdLong(), data.getType().name().toLowerCase(), getLastMessageDate(history));
@@ -114,11 +113,12 @@ public class MessageHandler extends ListenerAdapter {
                 DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy zwiększaniu twojego wyniku w rankingu. Poproś administratora bota o jego zwiększenie.");
             }
             if (reward > 0) {
-                try {
-                    instance.getMcApiRequests().giveReward(minecraftAccount, reward);
-                } catch (McException e) {
-                    DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano błąd przy dawaniu nagrody za liczenie: `" + e.getMessage() + "`");
-                }
+                instance.getApiRequests().giveReward(minecraftAccount, reward)
+                        .whenComplete((v, e) -> {
+                            if (e != null) {
+                                DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano błąd przy dawaniu nagrody za liczenie: `" + e.getMessage() + "`");
+                            }
+                        });
             }
         } else {
             DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy wysyłaniu twojej wiadomości. Spróbuj później.");

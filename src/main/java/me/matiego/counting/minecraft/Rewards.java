@@ -9,8 +9,8 @@ import org.simpleyaml.configuration.file.FileConfiguration;
 import java.util.Collections;
 import java.util.Map;
 
-public class McRewards {
-    public McRewards(@NotNull Main instance) {
+public class Rewards {
+    public Rewards(@NotNull Main instance) {
         this.instance = instance;
     }
 
@@ -18,7 +18,7 @@ public class McRewards {
     private final Map<Pair<Long, Long>, Long> cache = Collections.synchronizedMap(Utils.createLimitedSizeMap(5000));
 
     public double getReward(long guildId, long userId, long channelId, @NotNull String channelType, long previousMessageDate) {
-        if (!instance.getMcApiRequests().isEnabled()) return 0;
+        if (!instance.getApiRequests().isEnabled()) return 0;
 
         FileConfiguration config = instance.getConfig();
         if (config.getLongList("minecraft.disabled-ids").contains(guildId)) return 0;

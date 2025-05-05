@@ -3,8 +3,7 @@ package me.matiego.counting.commands;
 import me.matiego.counting.ChannelData;
 import me.matiego.counting.Main;
 import me.matiego.counting.Tasks;
-import me.matiego.counting.minecraft.McException;
-import me.matiego.counting.minecraft.McRewards;
+import me.matiego.counting.minecraft.Rewards;
 import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Logs;
@@ -86,14 +85,21 @@ public class MinecraftCommand extends CommandHandler {
             return;
         }
 
-        UUID account;
-        try {
-            account = instance.getMcApiRequests().getUuidByCode(code);
-        } catch (McException e) {
-            hook.sendMessage(e.getMessage()).queue();
-            return;
-        }
+        instance.getApiRequests().getUuidByCode(code)
+                .whenComplete((account, e) -> {
+                    if (account != null) {
+                        withAccount(user, hook, account);
+                        return;
+                    }
+                    if (e != null) {
+                        hook.sendMessage(e.getMessage()).queue();
+                        return;
+                    }
+                    hook.sendMessage("Napotkano niespodziewany błąd. Spróbuj ponownie później.").queue();
+                });
+    }
 
+    private void withAccount(@NotNull User user, @NotNull InteractionHook hook, @NotNull UUID account) {
         if (instance.getMcAccounts().setMinecraftAccount(user, account)) {
             Logs.info("User `" + DiscordUtils.getAsTag(user) + "` has linked account to `" + account + "`");
             hook.sendMessage("Pomyślnie połączono twoje konto Minecraft!")
@@ -121,11 +127,11 @@ public class MinecraftCommand extends CommandHandler {
 
     private void handleInfoSubcommand(@NotNull SlashCommandInteraction event, @NotNull InteractionHook hook) {
         FileConfiguration config = instance.getConfig();
-        McRewards rewards = instance.getMcRewards();
+        Rewards rewards = instance.getMcRewards();
 
         String interval = Utils.parseMillisToString(rewards.getInterval(config), false)
                 .replace("m", " minut");
-        StringBuilder message = new StringBuilder("**Nagrody za liczenie:** `(wiadomość / kanał / %s)`\n".formatted(interval));
+        StringBuilder message = new StringBuilder("**Nagrody za liczenie:** `(za wiadomość / %s / kanał)`\n".formatted(interval));
 
         for (ChannelData.Type type : ChannelData.Type.values()) {
             message.append("- %s: `%s$`\n".formatted(type.toString(), Utils.doubleToString(rewards.getChannelReward(config, type.name()))));
@@ -141,7 +147,7 @@ public class MinecraftCommand extends CommandHandler {
         EmbedBuilder eb = new EmbedBuilder();
         if (uuid == null) {
             eb.setTitle("Nie połączyłeś jeszcze swojego konta Minecraft!");
-            eb.setDescription("Aby połączyć swoje konto, wejdź na serwer Minecraft i użyj komendy `/linkdiscord`.");
+            eb.setDescription("Aby połączyć swoje konto i otrzymywać nagrody za liczenie, wejdź na serwer Minecraft i użyj komendy `/linkdiscord`.");
             eb.setColor(Utils.RED);
         } else {
             eb.setTitle("Połączone konto Minecraft:");
