@@ -10,11 +10,8 @@ import me.matiego.counting.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.json.JSONObject;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 public class RequestsHandler {
@@ -25,7 +22,7 @@ public class RequestsHandler {
     private final static int UNAUTHORIZED_CODE = 3000;
     private final static int TIMEOUT_SECONDS = 5;
     private final Main instance;
-    private final Map<WsContext, String> users = new ConcurrentHashMap<>();
+    private final List<WsContext> users = Collections.synchronizedList(new ArrayList<>());
     private final Map<UUID, CompletableFuture<Response>> requests = Collections.synchronizedMap(Utils.createLimitedSizeMap(10_000));
 
     public void handle(@NotNull WsConfig ws) {
@@ -33,21 +30,20 @@ public class RequestsHandler {
             if (!checkAuth(ctx)) return;
 
             String sessionHash = getSessionHash(ctx);
-            users.put(ctx, sessionHash);
+            users.add(ctx);
             Logs.info("User (" + sessionHash + ") has connected to the rewards API");
         });
         ws.onClose(ctx -> {
             if (!checkAuth(ctx)) return;
 
-            String sessionHash = users.remove(ctx);
-            Logs.info("User (" + sessionHash + ") has disconnected from the rewards API. Close status: " + ctx.closeStatus());
+            users.remove(ctx);
+            Logs.info("User (" + getSessionHash(ctx) + ") has disconnected from the rewards API. Close status: " + ctx.closeStatus());
         });
         ws.onError(ctx -> {
             if (!checkAuth(ctx)) return;
 
-            String sessionHash = users.get(ctx);
             Throwable e = ctx.error();
-            Logs.warning("User (" + sessionHash + ") has encountered an error" + (e == null ? "" : ": " + e.getClass().getSimpleName() + ": " + e.getMessage()));
+            Logs.warning("User (" + getSessionHash(ctx) + ") has encountered an error" + (e == null ? "" : ": " + e.getClass().getSimpleName() + ": " + e.getMessage()));
         });
         ws.onMessage(ctx -> {
             if (!checkAuth(ctx)) return;
@@ -71,6 +67,7 @@ public class RequestsHandler {
 
     private boolean checkAuth(WsContext ctx) {
         if (instance.getWebServer().checkAuthCookie(ctx)) return true;
+        Logs.warning("User (" + getSessionHash(ctx) + ") used incorrect auth key");
         ctx.closeSession(UNAUTHORIZED_CODE, "Unauthorized key, reference the key existing in config.yml");
         return false;
     }
@@ -115,14 +112,14 @@ public class RequestsHandler {
 
         Logs.debug("Sending WebSocket message: " + message);
 
-        users.keySet().stream()
+        users.stream()
                 .filter(ctx -> ctx.session.isOpen())
                 .forEach(ctx -> ctx.send(message.toString()));
         return response;
     }
 
     public void closeSessions() {
-        users.keySet().forEach(ctx -> ctx.closeSession(WsCloseStatus.NORMAL_CLOSURE));
+        users.forEach(ctx -> ctx.closeSession(WsCloseStatus.NORMAL_CLOSURE));
     }
 
     @Getter
