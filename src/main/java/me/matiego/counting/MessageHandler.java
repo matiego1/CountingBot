@@ -7,7 +7,9 @@ import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.api.exceptions.ErrorResponseException;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
+import net.dv8tion.jda.api.requests.ErrorResponse;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -27,7 +29,6 @@ public class MessageHandler extends ListenerAdapter {
     public void onMessageReceived(@NotNull MessageReceivedEvent event) {
         long time = Utils.now();
         Tasks.async(() -> {
-
             MessageChannelUnion channel = event.getChannel();
             if (!DiscordUtils.isSupportedChannel(channel)) return;
 
@@ -69,7 +70,10 @@ public class MessageHandler extends ListenerAdapter {
         }
 
         Message message = event.getMessage();
-        message.delete().queue();
+        message.delete().queue(s -> {}, f -> {
+            if (f instanceof ErrorResponseException e && e.getErrorResponse() == ErrorResponse.UNKNOWN_MESSAGE) return;
+            Logs.error("Failed to delete a message!", f);
+        });
 
         String correctMsg = data.getHandler().check(
                 message,
@@ -123,6 +127,8 @@ public class MessageHandler extends ListenerAdapter {
         } else {
             DiscordUtils.sendPrivateMessage(user, "**Ups!** Napotkano niespodziewany błąd przy wysyłaniu twojej wiadomości. Spróbuj później.");
         }
+
+        Logs.debug("Handled message in the channel " + data.getType() + " (`" + data.getChannelId() + "`) sent by user " + userName + " (`" + user.getIdLong() + "`).");
     }
 
     private long getLastMessageDate(@NotNull List<Message> history) {
