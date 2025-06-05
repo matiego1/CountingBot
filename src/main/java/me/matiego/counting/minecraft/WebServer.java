@@ -109,6 +109,8 @@ public class WebServer {
 
     public void addRoutes() {
         javalin.ws("", instance.getRequestsHandler()::handle);
+
+        javalin.get("/ping", handler -> handler.status(200).json("ok"));
     }
 
     public void start() {
