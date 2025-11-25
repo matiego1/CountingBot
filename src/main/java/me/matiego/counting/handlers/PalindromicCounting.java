@@ -16,16 +16,24 @@ public class PalindromicCounting implements ChannelHandler {
         BigInteger a, b;
         try {
             a = new BigInteger(history.getFirst().getContentDisplay());
+            System.out.println("XD1" + a);
         } catch (NumberFormatException e) {
+            System.out.println("XD2" + e.getMessage());
             return message.getContentDisplay().equals("1") ? "1" : null;
         }
         try {
             b = new BigInteger(message.getContentDisplay());
+            System.out.println("XD3" + b);
         } catch (NumberFormatException ignored) {
+            System.out.println("XD4");
             return null;
         }
 
-        return getNext(a.toString()).equals(b.toString()) ? b.toString() : null;
+        System.out.println("XD5" + getNext(a.toString()));
+
+        String res = getNext(a.toString()).equals(b.toString()) ? b.toString() : null;
+        System.out.println("XD6" + res);
+        return res;
     }
 
     // https://stackoverflow.com/questions/7934519/a-better-algorithm-to-find-the-next-palindrome-of-a-number-string

@@ -7,6 +7,8 @@ import me.matiego.counting.utils.CommandHandler;
 import me.matiego.counting.utils.DiscordUtils;
 import me.matiego.counting.utils.Utils;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.buttons.Button;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.MessageChannel;
@@ -15,7 +17,6 @@ import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.build.CommandData;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.context.UserContextInteraction;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
 import net.dv8tion.jda.api.interactions.components.buttons.ButtonInteraction;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,9 +57,9 @@ public class RankingContextCommand extends CommandHandler {
             eb.setColor(Utils.YELLOW);
             eb.setDescription("%s wysłał `%s` wiadomości - `%s` miejsce w rankingu.".formatted(target.getAsMention(), data.getScore(), data.getRank()));
             hook.sendMessageEmbeds(eb.build())
-                    .addActionRow(
+                    .setComponents(ActionRow.of(
                             Button.success("not-ephemeral", "Pokaż tę wiadomość wszystkim")
-                    ).queue();
+                    )).queue();
         });
     }
 

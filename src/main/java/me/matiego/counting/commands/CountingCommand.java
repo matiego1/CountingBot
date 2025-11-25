@@ -6,6 +6,8 @@ import me.matiego.counting.Tasks;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
 import net.dv8tion.jda.api.Permission;
+import net.dv8tion.jda.api.components.actionrow.ActionRow;
+import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.attribute.IPostContainer;
@@ -23,7 +25,6 @@ import net.dv8tion.jda.api.interactions.commands.OptionType;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.components.selections.StringSelectInteraction;
-import net.dv8tion.jda.api.interactions.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.requests.restaction.ChannelAction;
 import net.dv8tion.jda.api.utils.SplitUtil;
 import net.dv8tion.jda.api.utils.messages.MessageCreateData;
@@ -97,11 +98,12 @@ public class CountingCommand extends CommandHandler {
 
     private void handleOpenSubcommand(@NotNull InteractionHook hook) {
         hook.sendMessage("**__Select type of a new counting channel:__**")
-                .addActionRow(
+                .setComponents(ActionRow.of(
                         StringSelectMenu.create("counting-type")
                                 .addOptions(ChannelData.getSelectMenuOptions())
                                 .setRequiredRange(1, 1)
-                                .build())
+                                .build()
+                ))
                 .queue();
     }
 

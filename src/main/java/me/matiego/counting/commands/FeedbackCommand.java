@@ -5,17 +5,17 @@ import me.matiego.counting.Main;
 import me.matiego.counting.Tasks;
 import me.matiego.counting.utils.*;
 import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.components.label.Label;
+import net.dv8tion.jda.api.components.textinput.TextInput;
+import net.dv8tion.jda.api.components.textinput.TextInputStyle;
 import net.dv8tion.jda.api.entities.*;
 import net.dv8tion.jda.api.entities.channel.concrete.Category;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.interactions.InteractionHook;
 import net.dv8tion.jda.api.interactions.commands.SlashCommandInteraction;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
-import net.dv8tion.jda.api.interactions.modals.Modal;
 import net.dv8tion.jda.api.interactions.modals.ModalInteraction;
+import net.dv8tion.jda.api.modals.Modal;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -45,11 +45,11 @@ public class FeedbackCommand extends CommandHandler {
         event.replyModal(
                 Modal.create("feedback-modal", "Wyślij opinię")
                         .addComponents(
-                                ActionRow.of(TextInput.create("subject", "Tytuł", TextInputStyle.SHORT)
+                                Label.of("Tytuł", TextInput.create("subject", TextInputStyle.SHORT)
                                         .setRequired(true)
                                         .setPlaceholder("np. zgłoszenie błędu, propozycja, opinia")
                                         .build()),
-                                ActionRow.of(TextInput.create("description", "Opis", TextInputStyle.PARAGRAPH)
+                                Label.of("Opis", TextInput.create("description", TextInputStyle.PARAGRAPH)
                                         .setRequired(true)
                                         .build())
                         )
