@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.UserSnowflake;
+import net.dv8tion.jda.api.entities.channel.ChannelType;
 import net.dv8tion.jda.api.entities.channel.unions.MessageChannelUnion;
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.api.exceptions.ErrorResponseException;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 public class MessageHandler extends ListenerAdapter {
     public MessageHandler(@NotNull Main instance) {
@@ -56,10 +58,20 @@ public class MessageHandler extends ListenerAdapter {
             if (amount == 0) {
                 withRetrievedHistory(event, data, new ArrayList<>(), time);
             } else {
-                channel.getHistory().retrievePast(amount + 1).queue(
+                CompletableFuture<Void> readyToRetrieve = new CompletableFuture<>();
+                if (channel.getType() == ChannelType.GUILD_PUBLIC_THREAD) {
+                    channel.asThreadChannel().join().queue(
+                            s -> readyToRetrieve.complete(null),
+                            f -> message.delete().queue()
+                    );
+                } else {
+                    readyToRetrieve.complete(null);
+                }
+
+                readyToRetrieve.thenRun(() -> channel.getHistory().retrievePast(amount + 1).queue(
                         h -> withRetrievedHistory(event, data, h, time),
                         f -> message.delete().queue()
-                );
+                ));
             }
         });
     }
