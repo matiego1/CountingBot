@@ -11,13 +11,25 @@ public class Alphabet implements ChannelHandler {
     @Override
     public @Nullable String check(@NotNull Message message, @NotNull List<Message> history) {
         String b = message.getContentDisplay().toUpperCase();
-        if (b.length() != 1) return null;
+
         if (history.isEmpty()) return b.equals("A") ? b : null;
         String a = history.getFirst().getContentDisplay().toUpperCase();
-        if (a.length() != 1) return null;
-        int aChar = a.charAt(0);
-        if (aChar < (int) 'A' || aChar > (int) 'Z') return null;
-        if (a.equals("Z")) return b.equals("A") ? b : null;
-        return (aChar + 1 == (int) b.charAt(0)) ? b : null;
+
+        String next = getNext(a);
+        return b.equalsIgnoreCase(next) ? next : null;
+    }
+
+    private @NotNull String getNext(@NotNull String message) {
+        char[] chars = message.toCharArray();
+        for (int i = chars.length - 1; i >= 0; i--) {
+            if (chars[i] == 'Z') {
+                chars[i] = 'A';
+            } else {
+                chars[i]++;
+                return new String(chars);
+            }
+        }
+
+        return "A" + new String(chars);
     }
 }
